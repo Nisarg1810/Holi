@@ -17,6 +17,12 @@ export interface Booking {
   children?: number;
   infants?: number;
   legs?: { source: string; destination: string; date: string }[];
+  user_email?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  selected_seats?: string[];
+  passenger_manifest?: any[];
+  addons?: any[];
   price: number;
   status: "Confirmed" | "Pending" | "Cancelled" | "In Flight";
   invoiceUrl?: string;
