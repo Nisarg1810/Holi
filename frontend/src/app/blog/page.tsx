@@ -3,11 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Clock, User, Calendar, BookOpen, Compass, Helicopter } from "lucide-react";
+import { ArrowLeft, Clock, User, Calendar, BookOpen, Compass, Helicopter, ArrowRight, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Article {
   id: string;
+  category: string;
   title: string;
   desc: string;
   date: string;
@@ -20,6 +21,7 @@ interface Article {
 const ARTICLES: Article[] = [
   {
     id: "kedarnath-2026",
+    category: "Pilgrimage Guide",
     title: "Kedarnath Helicopter Booking 2026 Guide",
     desc: "Understand official slot booking calendars, DGCA guidelines, baggage constraints, and flight schedules for the 2026 pilgrimage season.",
     date: "July 12, 2026",
@@ -35,6 +37,7 @@ const ARTICLES: Article[] = [
   },
   {
     id: "chardham-cost",
+    category: "Cost & Budget",
     title: "Char Dham Yatra Cost Breakdown",
     desc: "A detailed pricing and budget breakdown comparing VIP private helicopter charters with group flight shuttles and premium hotel stops.",
     date: "June 28, 2026",
@@ -50,6 +53,7 @@ const ARTICLES: Article[] = [
   },
   {
     id: "vaishnodevi-time",
+    category: "Travel Tips",
     title: "Best Time to Visit Vaishno Devi by Helicopter",
     desc: "Understand peak seasons, weather coordinates, monsoon delay schedules, and how to book express Darshan passes in Katra.",
     date: "May 15, 2026",
@@ -67,149 +71,195 @@ const ARTICLES: Article[] = [
 
 export default function BlogPage() {
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>("All");
+
+  const categories = ["All", "Pilgrimage Guide", "Cost & Budget", "Travel Tips"];
+
+  const filteredArticles = activeCategory === "All"
+    ? ARTICLES
+    : ARTICLES.filter((a) => a.category === activeCategory);
 
   const activeArticle = ARTICLES.find((a) => a.id === selectedArticleId);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col gap-12 relative min-h-screen text-white bg-[#020B1E]">
+    <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
       
-      {/* Title block */}
-      <div className="border-b border-white/5 pb-8 flex flex-col gap-2">
-        <span className="font-space text-xs uppercase tracking-widest text-[#C5A880] font-bold">
-          Chronicle & Guides
-        </span>
-        <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight uppercase">
-          Roman Travel Chronicles
-        </h1>
-        <p className="font-sans text-xs sm:text-sm text-slate-300">
-          Exclusive insights, safety manuals, and planning checklists for elite Himalayan pilgrims.
-        </p>
+      {/* MakeMyTrip Style Hero Header */}
+      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-12 pb-20 px-4 md:px-8 text-white relative shadow-lg">
+        <div className="max-w-6xl mx-auto flex flex-col items-center text-center">
+          <div className="flex items-center gap-2 px-3 py-1 bg-amber-400/10 border border-amber-400/30 rounded-full mb-3">
+            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+            <span className="font-space text-[10px] uppercase font-bold text-amber-400 tracking-widest">
+              Aviation &amp; Travel Chronicles
+            </span>
+          </div>
+          
+          <h1 className="font-space text-3xl md:text-5xl font-bold tracking-tight text-white uppercase">
+            Himalayan Expedition Guides
+          </h1>
+          <p className="text-xs md:text-sm text-slate-300 max-w-xl mt-2 font-sans">
+            Expert insights, DGCA safety manuals, slot booking timelines, and pilgrimage checklists.
+          </p>
+        </div>
       </div>
 
-      <AnimatePresence mode="wait">
-        {!selectedArticleId ? (
-          /* Articles List Grid */
-          <motion.div 
-            key="list"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.4 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
-          >
-            {ARTICLES.map((article) => (
-              <div 
-                key={article.id}
-                className="bg-[#051433] rounded-xl overflow-hidden border border-white/5 hover:border-[#C5A880]/30 transition-all duration-500 flex flex-col justify-between group h-full shadow-lg"
+      {/* Main Content Layout */}
+      <div className="max-w-6xl mx-auto px-4 md:px-8 -mt-8 relative z-20">
+        
+        <AnimatePresence mode="wait">
+          {!selectedArticleId ? (
+            /* Articles List Grid */
+            <motion.div 
+              key="list"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col gap-8"
+            >
+              {/* Category Filter Pills */}
+              <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-md flex items-center justify-center gap-2 overflow-x-auto">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setActiveCategory(cat)}
+                    className={`px-4 py-2 rounded-xl text-xs font-space font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      activeCategory === cat
+                        ? "bg-[#051433] text-white shadow-md"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              {/* Articles Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {filteredArticles.map((article) => (
+                  <div 
+                    key={article.id}
+                    className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between group h-full"
+                  >
+                    <div className="h-52 relative overflow-hidden bg-slate-100 border-b border-slate-100">
+                      <Image
+                        src={article.image}
+                        alt={article.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 30vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute top-3 left-3 bg-[#051433] text-amber-400 font-space text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md shadow">
+                        {article.category}
+                      </div>
+                    </div>
+                    
+                    <div className="p-6 flex flex-col justify-between flex-grow text-left">
+                      <div>
+                        <div className="flex items-center gap-3 text-[10px] text-slate-400 font-sans mb-2 font-semibold">
+                          <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-slate-400" /> {article.readTime}</span>
+                          <span>• {article.date}</span>
+                        </div>
+
+                        <h3 className="font-space text-base font-bold text-slate-900 mb-2 group-hover:text-[#051433] transition-colors leading-snug">
+                          {article.title}
+                        </h3>
+                        <p className="font-sans text-xs text-slate-500 leading-relaxed mb-6">
+                          {article.desc}
+                        </p>
+                      </div>
+                      
+                      <button
+                        type="button"
+                        onClick={() => setSelectedArticleId(article.id)}
+                        className="font-space text-xs text-[#051433] font-bold uppercase tracking-wider flex items-center gap-1.5 mt-auto transition-all group-hover:translate-x-1 cursor-pointer self-start"
+                      >
+                        <span>Read Full Guide</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          ) : (
+            /* Article Reader View */
+            <motion.article 
+              key="reader"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-3xl p-6 md:p-10 border border-slate-200 shadow-xl flex flex-col gap-6 max-w-4xl mx-auto text-slate-800"
+            >
+              {/* Back Button */}
+              <button
+                type="button"
+                onClick={() => setSelectedArticleId(null)}
+                className="flex items-center gap-2 text-xs font-space uppercase tracking-widest text-slate-700 hover:text-[#051433] font-bold transition-colors cursor-pointer self-start bg-slate-100 border border-slate-200 px-4 py-2 rounded-xl"
               >
-                <div className="h-56 relative overflow-hidden bg-secondary">
-                  <Image
-                    src={article.image}
-                    alt={article.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 30vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#020B1E] via-transparent to-transparent z-10" />
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back to Expedition Guides</span>
+              </button>
+
+              {/* Feature Image */}
+              <div className="h-[250px] sm:h-[380px] relative rounded-2xl overflow-hidden border border-slate-200 shadow-md">
+                <Image 
+                  src={activeArticle!.image} 
+                  alt={activeArticle!.title} 
+                  fill
+                  priority
+                  className="object-cover"
+                />
+              </div>
+
+              {/* Article Header */}
+              <div className="flex flex-col gap-3 border-b border-slate-100 pb-4">
+                <span className="font-space text-xs font-bold text-[#051433] uppercase tracking-wider">
+                  {activeArticle!.category}
+                </span>
+                <h2 className="font-space text-2xl sm:text-3.5xl font-bold text-slate-900 leading-tight">
+                  {activeArticle!.title}
+                </h2>
+                <div className="flex flex-wrap items-center gap-6 text-xs text-slate-500 font-sans font-medium">
+                  <span className="flex items-center gap-1.5 text-slate-900 font-bold"><User className="h-4 w-4 text-[#051433]" /> {activeArticle!.author}</span>
+                  <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-slate-400" /> {activeArticle!.date}</span>
+                  <span className="flex items-center gap-1.5"><Clock className="h-4 w-4 text-slate-400" /> {activeArticle!.readTime}</span>
+                </div>
+              </div>
+
+              {/* Article Content */}
+              <div className="flex flex-col gap-5 text-slate-700 font-sans text-sm sm:text-base leading-relaxed text-left">
+                {activeArticle!.content.map((paragraph, idx) => (
+                  <p key={idx}>{paragraph}</p>
+                ))}
+              </div>
+
+              {/* Ready to Book CTA Card */}
+              <div className="bg-[#051433] rounded-2xl p-6 md:p-8 border border-[#051433] text-white flex flex-col sm:flex-row items-center justify-between gap-6 mt-6 shadow-xl">
+                <div className="text-left flex items-start gap-4">
+                  <div className="h-10 w-10 bg-amber-400/20 border border-amber-400/40 rounded-xl flex items-center justify-center text-amber-400 shrink-0 mt-1">
+                    <Helicopter className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-space text-sm uppercase tracking-wider font-bold text-white">Ready for your pilgrimage?</h4>
+                    <p className="font-sans text-xs text-slate-300 mt-1">Reserve your exclusive private charter and luxury flight corridor now.</p>
+                  </div>
                 </div>
                 
-                <div className="p-6 flex flex-col justify-between flex-grow">
-                  <div>
-                    <div className="flex items-center gap-4 text-[9px] text-[#C5A880] uppercase font-space tracking-wider mb-3">
-                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {article.readTime}</span>
-                      <span>{article.date}</span>
-                    </div>
-                    <h3 className="font-serif text-lg font-bold text-white mb-3 group-hover:text-gold transition-colors leading-snug">
-                      {article.title}
-                    </h3>
-                    <p className="font-sans text-xs text-slate-300 leading-relaxed mb-6">
-                      {article.desc}
-                    </p>
-                  </div>
-                  
-                  <button
-                    onClick={() => setSelectedArticleId(article.id)}
-                    className="font-space text-[10px] text-[#C5A880] hover:text-white uppercase tracking-widest font-bold flex items-center gap-1.5 mt-auto transition-colors cursor-pointer text-left self-start"
-                  >
-                    <span>Read Article</span>
-                    <BookOpen className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+                <Link
+                  href="/booking"
+                  className="px-6 py-3 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl transition-all shrink-0 text-center w-full sm:w-auto shadow-md"
+                >
+                  Book Flight Now
+                </Link>
               </div>
-            ))}
-          </motion.div>
-        ) : (
-          /* Article Reader View */
-          <motion.article 
-            key="reader"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.4 }}
-            className="flex flex-col gap-8 max-w-4xl mx-auto"
-          >
-            {/* Back Button */}
-            <button
-              onClick={() => setSelectedArticleId(null)}
-              className="flex items-center gap-2 text-xs font-space uppercase tracking-widest text-[#C5A880] hover:text-white transition-colors cursor-pointer self-start border border-[#C5A880]/20 px-4 py-2 rounded bg-[#051433]/50"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Chronicles</span>
-            </button>
+            </motion.article>
+          )}
+        </AnimatePresence>
 
-            {/* Feature Image */}
-            <div className="h-[250px] sm:h-[400px] relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-              <Image 
-                src={activeArticle!.image} 
-                alt={activeArticle!.title} 
-                fill
-                priority
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#020B1E] via-[#020B1E]/30 to-transparent" />
-            </div>
-
-            {/* Article Header */}
-            <div className="flex flex-col gap-4">
-              <h2 className="font-serif text-2xl sm:text-3.5xl font-bold text-white leading-tight">
-                {activeArticle!.title}
-              </h2>
-              <div className="flex flex-wrap items-center gap-6 text-xs text-slate-400 font-sans border-b border-white/5 pb-4">
-                <span className="flex items-center gap-1.5 text-[#C5A880]"><User className="h-4 w-4" /> {activeArticle!.author}</span>
-                <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {activeArticle!.date}</span>
-                <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {activeArticle!.readTime}</span>
-              </div>
-            </div>
-
-            {/* Article Content */}
-            <div className="flex flex-col gap-6 text-slate-200 font-sans text-sm sm:text-base leading-relaxed text-left">
-              {activeArticle!.content.map((paragraph, idx) => (
-                <p key={idx}>{paragraph}</p>
-              ))}
-            </div>
-
-            {/* Ready to Book CTA Card */}
-            <div className="bg-[#051433] rounded-xl p-6 md:p-8 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6 mt-8 shadow-xl">
-              <div className="text-left flex items-start gap-4">
-                <div className="h-10 w-10 bg-gold/10 border border-gold/30 rounded-full flex items-center justify-center text-gold shrink-0 mt-1">
-                  <Helicopter className="h-5 w-5" />
-                </div>
-                <div>
-                  <h4 className="font-space text-sm uppercase tracking-wider font-bold text-white">Ready for your pilgrimage?</h4>
-                  <p className="font-sans text-xs text-slate-300 mt-1">Reserve your exclusive private charter and luxury flight corridor now.</p>
-                </div>
-              </div>
-              
-              <Link
-                href="/booking"
-                className="px-6 py-3 bg-gold hover:bg-[#E3C69D] text-black font-space text-xs font-bold uppercase tracking-widest rounded border border-gold transition-all duration-300 shrink-0 text-center w-full sm:w-auto"
-              >
-                Book Now
-              </Link>
-            </div>
-          </motion.article>
-        )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 }
