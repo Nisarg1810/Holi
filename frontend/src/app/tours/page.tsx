@@ -48,9 +48,39 @@ function ToursListingContent() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-20 text-center text-xs font-luxury text-grey-text">
-        <RefreshCw className="h-6 w-6 text-gold animate-spin mx-auto mb-2" />
-        Syncing VIP flight itineraries...
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="border-b border-white/5 pb-6 mb-12">
+          <div className="h-8 w-64 bg-white/5 rounded animate-pulse mb-2" />
+          <div className="h-4 w-96 bg-white/5 rounded animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-xl overflow-hidden grid grid-cols-1 sm:grid-cols-12 bg-white/2 border border-white/5 h-64 animate-pulse">
+              <div className="sm:col-span-5 h-full bg-white/5" />
+              <div className="sm:col-span-7 p-6 flex flex-col justify-between">
+                <div className="flex flex-col gap-3">
+                  <div className="flex justify-between items-center">
+                    <div className="h-4 w-12 bg-white/5 rounded" />
+                    <div className="h-5 w-16 bg-white/5 rounded" />
+                  </div>
+                  <div className="h-6 w-40 bg-white/5 rounded" />
+                  <div className="h-3 w-48 bg-white/5 rounded" />
+                </div>
+                <div className="flex flex-col gap-2 my-2">
+                  <div className="h-3.5 w-full bg-white/5 rounded" />
+                  <div className="h-3.5 w-5/6 bg-white/5 rounded" />
+                </div>
+                <div className="flex justify-between items-end border-t border-white/5 pt-4 mt-2">
+                  <div className="flex flex-col gap-1">
+                    <div className="h-2 w-8 bg-white/5 rounded" />
+                    <div className="h-5 w-20 bg-white/5 rounded" />
+                  </div>
+                  <div className="h-8 w-24 bg-white/5 rounded" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

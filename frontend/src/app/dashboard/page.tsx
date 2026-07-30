@@ -46,6 +46,7 @@ export default function DashboardPage() {
     isLoggedIn, user, bookings, tickets, notifications,
     logout, fetchBookings, fetchTickets, addTicket,
     addReplyToTicket, updateProfile, markNotificationsAsRead,
+    cancelBooking,
   } = useAuthStore();
 
   const [activeTab, setActiveTab] = useState<Tab>("overview");
@@ -306,46 +307,90 @@ export default function DashboardPage() {
                 ) : (
                   <div className="flex flex-col gap-3">
                     {bookings.map((booking: any) => (
-                      <div key={booking.id} className="border border-white/5 rounded-xl p-5 bg-white/2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-white/10 transition-colors">
-                        <div className="flex gap-4 items-start">
-                          <div className="h-10 w-10 rounded-xl bg-gold/8 border border-gold/15 flex items-center justify-center shrink-0">
-                            <Plane className="h-4.5 w-4.5 text-gold" />
-                          </div>
-                          <div className="flex flex-col gap-1 font-luxury text-xs text-grey-text">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-space font-bold text-white text-sm">{booking.name}</span>
-                              <span className="text-[9px] uppercase tracking-wider bg-gold/5 border border-gold/15 text-gold px-1.5 py-0.5 rounded font-mono">
-                                {booking.id}
-                              </span>
-                              <span className="text-[9px] uppercase bg-teal/5 border border-teal/15 text-teal px-1.5 py-0.5 rounded font-space font-bold">
-                                Confirmed
-                              </span>
+                      <div key={booking.id} className="border border-white/5 rounded-xl p-5 bg-white/2 hover:border-white/10 transition-colors flex flex-col gap-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
+                          <div className="flex gap-4 items-start">
+                            <div className="h-10 w-10 rounded-xl bg-gold/8 border border-gold/15 flex items-center justify-center shrink-0">
+                              <Plane className="h-4.5 w-4.5 text-gold" />
                             </div>
-                            <p className="text-grey-text">{booking.details}</p>
-                            <div className="flex flex-wrap gap-3 mt-0.5">
-                              <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {booking.date}</span>
-                              {booking.passengers && <span className="flex items-center gap-1"><User className="h-3 w-3" /> {booking.passengers} guest{booking.passengers > 1 ? "s" : ""}</span>}
-                              {booking.type && <span className="flex items-center gap-1"><Globe className="h-3 w-3" /> {booking.type}</span>}
+                            <div className="flex flex-col gap-1 font-luxury text-xs text-grey-text">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-space font-bold text-white text-sm">{booking.name}</span>
+                                <span className="text-[9px] uppercase tracking-wider bg-gold/5 border border-gold/15 text-gold px-1.5 py-0.5 rounded font-mono">
+                                  {booking.id}
+                                </span>
+                                <span className={`text-[9px] uppercase border px-1.5 py-0.5 rounded font-space font-bold ${
+                                  booking.status === 'Cancelled' 
+                                    ? 'bg-red-500/10 border-red-500/20 text-red-500' 
+                                    : 'bg-teal/5 border-teal/15 text-teal'
+                                }`}>
+                                  {booking.status || 'Confirmed'}
+                                </span>
+                              </div>
+                              <p className="text-grey-text">{booking.details}</p>
+                              <div className="flex flex-wrap gap-3 mt-0.5">
+                                <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {booking.date}</span>
+                                {booking.passengers && <span className="flex items-center gap-1"><User className="h-3 w-3" /> {booking.passengers} guest{booking.passengers > 1 ? "s" : ""}</span>}
+                                {booking.type && <span className="flex items-center gap-1"><Globe className="h-3 w-3" /> {booking.type}</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex sm:flex-col items-start sm:items-end justify-between w-full sm:w-auto border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0 gap-3">
+                            <div>
+                              <span className="text-[8px] uppercase text-grey-text block">Final Cost</span>
+                              <span className="font-space font-bold text-gold text-base">₹{Number(booking.price).toLocaleString("en-IN")}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <button onClick={() => router.push(`/success?id=${booking.id}`)}
+                                className="px-3 py-1.5 border border-white/10 hover:border-gold rounded-lg font-space text-[9px] font-bold uppercase tracking-wider text-grey-text hover:text-gold bg-white/3 transition-all cursor-pointer">
+                                Invoice
+                              </button>
+                              <button onClick={() => setActiveTab("tickets")}
+                                className="px-3 py-1.5 border border-white/10 hover:border-teal/50 rounded-lg font-space text-[9px] font-bold uppercase tracking-wider text-grey-text hover:text-teal bg-white/3 transition-all cursor-pointer">
+                                Support
+                              </button>
+                              {booking.status !== 'Cancelled' && (
+                                <button onClick={() => cancelBooking(booking.id)}
+                                  className="px-3 py-1.5 border border-red-500/20 hover:border-red-500/60 rounded-lg font-space text-[9px] font-bold uppercase tracking-wider text-red-400 hover:text-red-500 bg-white/3 hover:bg-red-500/10 transition-all cursor-pointer">
+                                  Cancel
+                                </button>
+                              )}
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex sm:flex-col items-start sm:items-end justify-between w-full sm:w-auto border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0 gap-3">
-                          <div>
-                            <span className="text-[8px] uppercase text-grey-text block">Final Cost</span>
-                            <span className="font-space font-bold text-gold text-base">₹{Number(booking.price).toLocaleString("en-IN")}</span>
+                        {/* Refund Processing Timeline */}
+                        {booking.status === 'Cancelled' && (
+                          <div className="border-t border-white/5 pt-4 flex flex-col gap-3">
+                            <div className="flex items-center justify-between text-[9px] font-space uppercase tracking-widest text-grey-text">
+                              <span className="font-bold text-slate-400">Refund Processing Pipeline</span>
+                              <span className="text-red-400 font-bold">Processing</span>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 text-[8px] font-space uppercase tracking-wider">
+                              {/* Step 1 */}
+                              <div className="flex items-center gap-2 p-2 rounded bg-red-500/5 border border-red-500/10">
+                                <div className="h-5 w-5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center font-bold text-[9px]">✓</div>
+                                <span className="text-white">Cancelled</span>
+                              </div>
+                              {/* Step 2 */}
+                              <div className="flex items-center gap-2 p-2 rounded bg-red-500/5 border border-red-500/10">
+                                <div className="h-5 w-5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center font-bold text-[9px]">✓</div>
+                                <span className="text-white">Corridor Released</span>
+                              </div>
+                              {/* Step 3 */}
+                              <div className="flex items-center gap-2 p-2 rounded bg-gold/5 border border-gold/10">
+                                <div className="h-5 w-5 rounded-full bg-gold/20 text-gold border border-gold/30 flex items-center justify-center font-bold text-[9px] animate-pulse">/</div>
+                                <span className="text-gold">Processing</span>
+                              </div>
+                              {/* Step 4 */}
+                              <div className="flex items-center gap-2 p-2 rounded bg-white/1 border border-white/5 opacity-40">
+                                <div className="h-5 w-5 rounded-full bg-white/5 text-slate-400 border border-white/10 flex items-center justify-center text-[9px]">4</div>
+                                <span className="text-slate-400">Credited</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <button onClick={() => router.push(`/success?id=${booking.id}`)}
-                              className="px-3 py-1.5 border border-white/10 hover:border-gold rounded-lg font-space text-[9px] font-bold uppercase tracking-wider text-grey-text hover:text-gold bg-white/3 transition-all cursor-pointer">
-                              Invoice
-                            </button>
-                            <button onClick={() => setActiveTab("tickets")}
-                              className="px-3 py-1.5 border border-white/10 hover:border-teal/50 rounded-lg font-space text-[9px] font-bold uppercase tracking-wider text-grey-text hover:text-teal bg-white/3 transition-all cursor-pointer">
-                              Support
-                            </button>
-                          </div>
-                        </div>
+                        )}
                       </div>
                     ))}
                   </div>

@@ -83,9 +83,45 @@ function BoatsListingContent() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-20 text-center text-xs font-luxury text-grey-text">
-        <RefreshCw className="h-6 w-6 text-gold animate-spin mx-auto mb-2" />
-        Loading yacht fleet...
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="border-b border-white/5 pb-6 mb-12 flex justify-between items-center animate-pulse">
+          <div>
+            <div className="h-8 w-64 bg-white/5 rounded mb-2" />
+            <div className="h-4 w-96 bg-white/5 rounded" />
+          </div>
+          <div className="h-8 w-36 bg-white/5 rounded" />
+        </div>
+
+        <div className="flex flex-col gap-10">
+          {[1, 2].map((i) => (
+            <div key={i} className="glass-card rounded-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 animate-pulse">
+              <div className="lg:col-span-4 h-64 lg:h-72 bg-white/5 rounded-lg" />
+              <div className="lg:col-span-5 flex flex-col justify-between">
+                <div>
+                  <div className="h-7 w-48 bg-white/5 rounded mb-2" />
+                  <div className="h-3.5 w-24 bg-white/5 rounded mb-4" />
+                  <div className="grid grid-cols-2 gap-4 bg-white/2 rounded p-4 mb-6">
+                    <div className="h-8 bg-white/5 rounded" />
+                    <div className="h-8 bg-white/5 rounded" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="h-3 w-40 bg-white/5 rounded" />
+                    <div className="h-3 w-32 bg-white/5 rounded" />
+                  </div>
+                </div>
+                <div className="h-8 w-44 bg-white/5 rounded mt-6" />
+              </div>
+              <div className="lg:col-span-3 border-t lg:border-t-0 lg:border-l border-white/5 pt-6 lg:pt-0 lg:pl-6 flex flex-row lg:flex-col justify-between lg:justify-center items-center lg:items-end gap-6">
+                <div className="flex flex-col gap-1 items-end">
+                  <div className="h-2 w-12 bg-white/5 rounded" />
+                  <div className="h-6 w-32 bg-white/5 rounded" />
+                  <div className="h-2 w-16 bg-white/5 rounded" />
+                </div>
+                <div className="h-9 w-32 bg-white/5 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
