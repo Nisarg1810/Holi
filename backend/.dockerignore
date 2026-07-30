@@ -1,0 +1,43 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Django artifacts
+db.sqlite3
+*.sqlite3
+staticfiles/
+static/
+media/
+
+# Environment files (team uses .env.docker at root instead)
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docs (not needed in container)
+*.md
+
+# Test artifacts
+.coverage
+htmlcov/
+.pytest_cache/
