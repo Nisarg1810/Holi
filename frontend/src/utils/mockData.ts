@@ -218,6 +218,103 @@ export const TOUR_PACKAGES: TourPackage[] = [
       { author: "Karan Johar", rating: 5, text: "Unmatched luxury. The yacht chef served a Michelin-quality dinner.", date: "2026-06-20" },
     ],
   },
+  {
+    id: "p-3",
+    name: "Dwarka – Somnath – Diu",
+    tagline: "Private Ertiga Tour | ₹6,999 Per Person (Min 7 Persons Required)",
+    price: 48993,
+    duration: "3 Days / 2 Nights",
+    rating: 4.9,
+    image: "/dwarka_diu.png",
+    inclusions: [
+      "Private Suzuki Ertiga for 3 Days",
+      "2 Nights Budget 3★ / Deluxe Hotel Stay (2 Triple Sharing Rooms)",
+      "Pure Veg Breakfast & Dinner (2 of each)",
+      "Complete Sightseeing (Dwarkadhish, Somnath, Diu Beach/Fort, Bet Dwarka)",
+      "Toll, Parking & Driver Allowances included"
+    ],
+    exclusions: [
+      "Entry Tickets to Sightseeing places",
+      "Personal Expenses",
+      "Boat Charges (Bet Dwarka)"
+    ],
+    itinerary: [
+      {
+        day: 1,
+        title: "Dwarka Sightseeing",
+        desc: "Morning arrival at Dwarka. Darshan at Dwarkadhish Temple, visit Nageshwar Jyotirlinga, Gopi Talav, and relax at Shivrajpur Beach before hotel check-in and dinner.",
+        stay: "Budget 3★ / Deluxe Hotel, Dwarka",
+        transport: "Private Maruti Suzuki Ertiga"
+      },
+      {
+        day: 2,
+        title: "Bet Dwarka, Somnath & Diu Transfer",
+        desc: "After breakfast, visit Bet Dwarka. Proceed to Somnath Temple for Darshan, enjoy Madhavpur Beach, and transfer to Diu for dinner and hotel stay.",
+        stay: "Budget 3★ / Deluxe Hotel, Diu",
+        transport: "Private Maruti Suzuki Ertiga & Local Boat"
+      },
+      {
+        day: 3,
+        title: "Diu Sightseeing & Return Journey",
+        desc: "Enjoy breakfast followed by beach relaxation, a visit to the historic Diu Fort, local sightseeing, and your return journey.",
+        stay: "N/A",
+        transport: "Private Maruti Suzuki Ertiga"
+      }
+    ],
+    reviews: [
+      { author: "Rajesh Kurup", rating: 5, text: "Extremely well organized, Ertiga was comfortable and driver was very professional.", date: "2026-07-29" }
+    ]
+  },
+  {
+    id: "p-4",
+    name: "Mahakaleshwar – Ujjain – Omkareshwar",
+    tagline: "Private Ertiga Tour | ₹7,999 Per Person (Min 7 Persons Required)",
+    price: 55993,
+    duration: "3 Days / 2 Nights",
+    rating: 5.0,
+    image: "/ujjain_omkareshwar.png",
+    inclusions: [
+      "Private Suzuki Ertiga for 3 Days",
+      "2 Nights Budget 3★ / Deluxe Hotel Stay in Ujjain (2 Triple Sharing Rooms)",
+      "Pure Veg Breakfast & Dinner (2 of each)",
+      "Complete Sightseeing (Mahakaleshwar Corridor, Omkareshwar, Kal Bhairav)",
+      "Toll, Parking & Driver Allowances included",
+      "Free Wi-Fi (Subject to Availability)"
+    ],
+    exclusions: [
+      "VIP Darshan Tickets",
+      "Entry Tickets (If Applicable)",
+      "Personal Expenses",
+      "Lunch",
+      "Camera Charges"
+    ],
+    itinerary: [
+      {
+        day: 1,
+        title: "Ujjain Sightseeing",
+        desc: "Morning arrival in Ujjain, hotel check-in. Visit Mahakaleshwar Jyotirlinga, Bade Ganesh, Harsiddhi Mata Temple, Ram Ghat on the Shipra River, and explore the grand Mahakal Corridor in the evening.",
+        stay: "Budget 3★ / Deluxe Hotel, Ujjain",
+        transport: "Private Maruti Suzuki Ertiga"
+      },
+      {
+        day: 2,
+        title: "Omkareshwar Jyotirlinga Day Trip",
+        desc: "After an early breakfast, drive to Omkareshwar. Seek blessings at Omkareshwar Jyotirlinga and Mamleshwar Temple, enjoy Narmada River views, and return to Ujjain for dinner.",
+        stay: "Budget 3★ / Deluxe Hotel, Ujjain",
+        transport: "Private Maruti Suzuki Ertiga"
+      },
+      {
+        day: 3,
+        title: "Ujjain Local Sightseeing & Departure",
+        desc: "Enjoy breakfast, then visit Kal Bhairav Temple, Mangalnath Temple, Sandipani Ashram, ISKCON, do local shopping, and begin your return journey.",
+        stay: "N/A",
+        transport: "Private Maruti Suzuki Ertiga"
+      }
+    ],
+    reviews: [
+      { author: "Ananya Birla", rating: 5, text: "The Ujjain temple corridor is breathtaking at sunset. Ertiga service was fantastic.", date: "2026-07-28" }
+    ]
+  }
 ];
 
 export const HOTELS: HotelListing[] = [
