@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
+
 
 class Helicopter(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
@@ -13,9 +13,9 @@ class Helicopter(models.Model):
     safety_rating = models.CharField(max_length=10, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     image = models.CharField(max_length=255, blank=True, null=True)
-    features = ArrayField(models.CharField(max_length=200), default=list, blank=True)
+    features = models.JSONField(default=list, blank=True)
     specs = models.JSONField(default=dict)      # key-value specs
-    schedules = ArrayField(models.CharField(max_length=100), default=list, blank=True)
+    schedules = models.JSONField(default=list, blank=True)
 
     class Meta:
         db_table = 'helicopters'

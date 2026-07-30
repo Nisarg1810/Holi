@@ -1,0 +1,106 @@
+services:
+
+  # ─── PostgreSQL 16 Database ───────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: roman_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aura_dev
+      POSTGRES_USER: aura
+      POSTGRES_PASSWORD: aura_dev_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aura -d aura_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis 7 (Celery Broker) ──────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: roman_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Django Backend ───────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: roman_backend
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    environment:
+      # These override .env.docker — use Docker service names as hostnames
+      DATABASE_URL: postgresql://aura:aura_dev_pass@db:5432/aura_dev
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    volumes:
+      # Mount source code for hot reload — no rebuild needed during development
+      - ./backend:/app
+      # Named volumes prevent host mounts from wiping container-generated files
+      - backend_static:/app/static
+      - backend_media:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Auto-migrate on every start, then launch dev server
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  # ─── Next.js Frontend ─────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: roman_frontend
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    environment:
+      # NOTE: NEXT_PUBLIC_* vars are baked into the browser bundle at build time.
+      # The browser calls this URL, so it MUST be reachable from the user's
+      # machine — use localhost:8000, NOT the container name "backend".
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api
+    volumes:
+      # Hot reload — mount source directories individually
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      # Anonymous volumes prevent the host from overwriting container-installed
+      # node_modules and .next build cache with empty host directories
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+# ─── Named Volumes ────────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    name: roman_postgres_data
+  redis_data:
+    name: roman_redis_data
+  backend_static:
+    name: roman_backend_static
+  backend_media:
+    name: roman_backend_media

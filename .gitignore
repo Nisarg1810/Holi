@@ -33,8 +33,15 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files
+# .env.docker is SAFE TO COMMIT — shared team dev defaults
+# All other .env files are secret and must NOT be committed
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env.local
+
 
 # vercel
 .vercel
@@ -50,3 +57,11 @@ __pycache__/
 venv/
 backend/venv/
 backend/__pycache__/
+
+# SQLite (dev only — not used when running Docker)
+backend/db.sqlite3
+*.sqlite3
+
+# Docker local overrides
+docker-compose.override.yml
+

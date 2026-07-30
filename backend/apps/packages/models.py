@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
+
 
 class Tour(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
@@ -9,8 +9,8 @@ class Tour(models.Model):
     duration = models.CharField(max_length=100)
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=5.0)
     image = models.CharField(max_length=255, blank=True, null=True)
-    inclusions = ArrayField(models.CharField(max_length=255), default=list, blank=True)
-    exclusions = ArrayField(models.CharField(max_length=255), default=list, blank=True)
+    inclusions = models.JSONField(default=list, blank=True)
+    exclusions = models.JSONField(default=list, blank=True)
     itinerary = models.JSONField(default=list)   # list of day objects: [{"day": 1, "title": "...", "desc": "...", "stay": "...", "transport": "..."}]
 
     class Meta:
