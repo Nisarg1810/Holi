@@ -312,51 +312,63 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* 3. Interactive Seating Chart (Helicopters only) */}
+            {/* 3. Interactive Seating Chart (Helicopters only - shown after filling passenger details) */}
             {item.type === "helicopter" && (
-              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800">
-                <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2 mb-4">
-                  <Armchair className="h-4 w-4 text-[#051433]" />
-                  Interactive Cabin Seating Selection
-                </h3>
+              passengers.every((p) => p.fullName && p.fullName.trim() !== "") ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800"
+                >
+                  <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2 mb-4">
+                    <Armchair className="h-4 w-4 text-[#051433]" />
+                    Interactive Cabin Seating Selection
+                  </h3>
 
-                <div className="flex flex-col md:flex-row items-center justify-around gap-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
-                  <div className="w-52 bg-[#051433] text-white p-6 rounded-full flex flex-col items-center gap-4 relative shadow-md">
-                    <div className="h-8 w-20 border border-white/20 rounded-t-full bg-[#020B1E] flex items-center justify-center text-[9px] font-space text-slate-300 tracking-widest uppercase">
-                      COCKPIT
+                  <div className="flex flex-col md:flex-row items-center justify-around gap-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <div className="w-52 bg-[#051433] text-white p-6 rounded-full flex flex-col items-center gap-4 relative shadow-md">
+                      <div className="h-8 w-20 border border-white/20 rounded-t-full bg-[#020B1E] flex items-center justify-center text-[9px] font-space text-slate-300 tracking-widest uppercase">
+                        COCKPIT
+                      </div>
+                      <div className="grid grid-cols-2 gap-6 w-full mt-2">
+                        {HELI_SEATS.map((seatId) => {
+                          const isSelected = selectedSeats.includes(seatId);
+                          return (
+                            <button
+                              type="button"
+                              key={seatId}
+                              onClick={() => handleSeatClick(seatId)}
+                              className={`py-3 px-2 rounded-xl flex flex-col items-center gap-1 border transition-all cursor-pointer ${
+                                isSelected
+                                  ? "bg-[#F5A623] border-[#F5A623] text-black font-bold scale-105"
+                                  : "bg-[#020B1E] border-white/20 text-slate-300 hover:border-white/50"
+                              }`}
+                            >
+                              <Armchair className="h-4 w-4" />
+                              <span className="text-[9px] font-mono font-bold">{seatId}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-6 w-full mt-2">
-                      {HELI_SEATS.map((seatId) => {
-                        const isSelected = selectedSeats.includes(seatId);
-                        return (
-                          <button
-                            type="button"
-                            key={seatId}
-                            onClick={() => handleSeatClick(seatId)}
-                            className={`py-3 px-2 rounded-xl flex flex-col items-center gap-1 border transition-all cursor-pointer ${
-                              isSelected
-                                ? "bg-[#F5A623] border-[#F5A623] text-black font-bold scale-105"
-                                : "bg-[#020B1E] border-white/20 text-slate-300 hover:border-white/50"
-                            }`}
-                          >
-                            <Armchair className="h-4 w-4" />
-                            <span className="text-[9px] font-mono font-bold">{seatId}</span>
-                          </button>
-                        );
-                      })}
+
+                    <div className="flex flex-col gap-3 text-xs text-slate-600 max-w-sm">
+                      <span className="font-space uppercase font-bold text-slate-900">Seating Allocation</span>
+                      <p>Click on the cabin seating chart to assign seats for your manifest. Please allocate {item.passengers} seats.</p>
+                      <div className="flex justify-between border-t border-slate-200 pt-2 font-mono text-slate-900 font-bold">
+                        <span>Allocated Seats:</span>
+                        <span>{selectedSeats.join(", ") || "Auto-Assigning"}</span>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex flex-col gap-3 text-xs text-slate-600 max-w-sm">
-                    <span className="font-space uppercase font-bold text-slate-900">Seating Allocation</span>
-                    <p>Click on the cabin seating chart to assign seats for your manifest. Please allocate {item.passengers} seats.</p>
-                    <div className="flex justify-between border-t border-slate-200 pt-2 font-mono text-slate-900 font-bold">
-                      <span>Allocated Seats:</span>
-                      <span>{selectedSeats.join(", ") || "Auto-Assigning"}</span>
-                    </div>
-                  </div>
+                </motion.div>
+              ) : (
+                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm text-center flex flex-col items-center gap-2 text-slate-500">
+                  <Armchair className="h-6 w-6 text-slate-400" />
+                  <span className="font-space font-bold text-slate-700 text-xs uppercase">Interactive Cabin Seating Selection</span>
+                  <p className="text-xs">Please fill in passenger full name(s) above to unlock cabin seating selection.</p>
                 </div>
-              </div>
+              )
             )}
 
             {/* 4. Flight Add-ons */}
