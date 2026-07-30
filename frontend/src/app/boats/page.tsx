@@ -18,7 +18,7 @@ function BoatsListingContent() {
   const paramDate = searchParams.get("date") || new Date().toISOString().split("T")[0];
   const paramPassengers = Number(searchParams.get("passengers")) || 2;
 
-  const [boatsList, setBoatsList] = useState<BoatListing[]>(BOATS);
+  const [boatsList, setBoatsList] = useState<BoatListing[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,23 +27,20 @@ function BoatsListingContent() {
         setLoading(true);
         const res = await API.get("/boats");
         if (res.data && res.data.length > 0) {
-          const merged: BoatListing[] = res.data.map((dbBoat: any) => {
-            const mockMatch = BOATS.find((m) => m.id === dbBoat.id);
-            if (mockMatch) {
-              return { ...mockMatch, ...dbBoat, features: mockMatch.features };
-            }
-            return {
-              ...dbBoat,
-              location: dbBoat.location || "Goa, India",
-              duration: "Per Hour",
-              features: ["Private Captain & Crew", "Onboard Refreshments", "Safety Equipment"],
-              capacity: dbBoat.capacity || 6,
-            };
-          });
-          setBoatsList(merged);
+          const loaded: BoatListing[] = res.data.map((dbBoat: any) => ({
+            ...dbBoat,
+            location: dbBoat.location || "Goa, India",
+            duration: "Per Charter",
+            features: dbBoat.features && dbBoat.features.length > 0 ? dbBoat.features : ["Private Captain & Crew", "Onboard Refreshments", "Safety Equipment"],
+            capacity: dbBoat.capacity || 6,
+          }));
+          setBoatsList(loaded);
+        } else {
+          setBoatsList([]);
         }
       } catch (err) {
-        console.error("Failed to fetch boats:", err);
+        console.error("Failed to fetch live boats database:", err);
+        setBoatsList([]);
       } finally {
         setLoading(false);
       }

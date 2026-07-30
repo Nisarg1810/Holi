@@ -23,7 +23,7 @@ function ToursListingContent() {
         setTourPackages(res.data || []);
       } catch (err) {
         console.error("Failed to query live tours list:", err);
-        setTourPackages(TOUR_PACKAGES);
+        setTourPackages([]);
       } finally {
         setLoading(false);
       }

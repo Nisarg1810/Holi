@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import API from "@/utils/api";
 import SearchBox from "@/components/booking/SearchBox";
 import { 
   ShieldCheck, 
@@ -28,6 +29,21 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [dbPackages, setDbPackages] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    const fetchHomeTours = async () => {
+      try {
+        const res = await API.get("/tours");
+        if (res.data && res.data.length > 0) {
+          setDbPackages(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to query live database tours for homepage:", err);
+      }
+    };
+    fetchHomeTours();
+  }, []);
 
   const stats = [
     { value: "5000+", label: "Happy Customers", icon: Users },
@@ -642,7 +658,21 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {popularPackages.map((pkg) => (
+          {(dbPackages.length > 0
+            ? dbPackages.map((pkg: any) => ({
+                id: pkg.id,
+                name: pkg.name,
+                type: "Tour Package",
+                badge: pkg.duration || "Multi-Day",
+                badgeColor: "bg-[#C5A880] text-black",
+                price: `₹ ${Number(pkg.price).toLocaleString("en-IN")}`,
+                personLabel: "/ Person",
+                image: pkg.image || "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=600&auto=format&fit=crop",
+                route: pkg.tagline || pkg.duration,
+                cta: "View Tour"
+              }))
+            : popularPackages
+          ).map((pkg, idx) => (
             <div 
               key={pkg.id}
               className="rounded-xl overflow-hidden flex flex-col group border border-white/5 hover:border-gold/30 transition-all duration-500 bg-[#051433] shadow-lg text-white high-contrast-card"

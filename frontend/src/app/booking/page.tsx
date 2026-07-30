@@ -7,47 +7,41 @@ import BookingProgressTracker from "@/components/booking/BookingProgressTracker"
 import { HELICOPTERS, HelicopterListing } from "@/utils/mockData";
 import { useCartStore } from "@/store/useCartStore";
 import { 
-  Map, 
-  Eye, 
-  Compass, 
+  MapPin, 
   Calendar, 
   Users, 
   Star, 
   ArrowRight, 
   ShieldCheck, 
   ChevronDown,
-  Activity,
-  Coffee,
-  UserCheck,
-  Car,
   Plane,
   ArrowRightLeft,
   Plus,
   Trash2,
   Minus,
   SlidersHorizontal,
-  Gauge,
-  Shield,
-  Zap
+  Clock,
+  Sparkles,
+  Info,
+  Compass,
+  Check,
+  CheckCircle2,
+  Helicopter,
+  Award
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "@/utils/api";
 
-// Latitude, Longitude, and Relative SVG Grid Coordinates for major flight paths
-const locationCoordinates: Record<string, { lat: string; lon: string; x: number; y: number; name: string }> = {
-  "Dehradun (DED)": { name: "Dehradun", lat: "30.3165° N", lon: "78.0322° E", x: 48, y: 46 },
-  "New Delhi Hub": { name: "New Delhi", lat: "28.6139° N", lon: "77.2090° E", x: 42, y: 62 },
-  "Delhi (DEL)": { name: "New Delhi", lat: "28.6139° N", lon: "77.2090° E", x: 42, y: 62 },
-  "Srinagar Terminal": { name: "Srinagar", lat: "34.0837° N", lon: "74.7973° E", x: 30, y: 20 },
-  "Goa Beachfront Heliport": { name: "Goa Beach", lat: "15.2993° N", lon: "74.1240° E", x: 36, y: 88 },
-  "Goa Shoreline": { name: "Goa Shore", lat: "15.3200° N", lon: "74.1100° E", x: 37, y: 89 },
-  "Mumbai Heliport": { name: "Mumbai", lat: "19.0760° N", lon: "72.8777° E", x: 28, y: 78 },
-  "Mumbai (BOM)": { name: "Mumbai", lat: "19.0760° N", lon: "72.8777° E", x: 28, y: 78 },
-  "Kedarnath Sanctuary": { name: "Kedarnath", lat: "30.7346° N", lon: "79.0669° E", x: 55, y: 34 },
-  "Badrinath Valley": { name: "Badrinath", lat: "30.7433° N", lon: "79.4938° E", x: 59, y: 35 },
-  "Badrinath Shrine": { name: "Badrinath", lat: "30.7433° N", lon: "79.4938° E", x: 59, y: 35 },
-  "Vaishno Devi Shrine": { name: "Vaishno Devi", lat: "32.9801° N", lon: "74.9530° E", x: 31, y: 25 },
-  "Char Dham Circuit": { name: "Char Dham", lat: "30.7000° N", lon: "79.1000° E", x: 57, y: 37 },
+const locationCoordinates: Record<string, { lat: string; lon: string; name: string }> = {
+  "Dehradun (DED)": { name: "Dehradun", lat: "30.3165° N", lon: "78.0322° E" },
+  "New Delhi Hub": { name: "New Delhi", lat: "28.6139° N", lon: "77.2090° E" },
+  "Srinagar Terminal": { name: "Srinagar", lat: "34.0837° N", lon: "74.7973° E" },
+  "Goa Beachfront Heliport": { name: "Goa Beach", lat: "15.2993° N", lon: "74.1240° E" },
+  "Mumbai Heliport": { name: "Mumbai", lat: "19.0760° N", lon: "72.8777° E" },
+  "Kedarnath Sanctuary": { name: "Kedarnath", lat: "30.7346° N", lon: "79.0669° E" },
+  "Badrinath Valley": { name: "Badrinath", lat: "30.7433° N", lon: "79.4938° E" },
+  "Vaishno Devi Shrine": { name: "Vaishno Devi", lat: "32.9801° N", lon: "74.9530° E" },
+  "Char Dham Circuit": { name: "Char Dham", lat: "30.7000° N", lon: "79.1000° E" },
 };
 
 function BookingSearchContent() {
@@ -55,11 +49,21 @@ function BookingSearchContent() {
   const router = useRouter();
   const setItem = useCartStore((state) => state.setItem);
 
-  // Pre-load location options
-  const sourceOptions = ["Dehradun (DED)", "New Delhi Hub", "Srinagar Terminal", "Goa Beachfront Heliport", "Mumbai Heliport"];
-  const destOptions = ["Kedarnath Sanctuary", "Badrinath Valley", "Vaishno Devi Shrine", "Char Dham Circuit", "Goa Shoreline", "Mumbai Heliport"];
+  const sourceOptions = [
+    { code: "DED", name: "Dehradun", desc: "Jolly Grant Heliport" },
+    { code: "DEL", name: "New Delhi", desc: "IGI VIP Terminal Hub" },
+    { code: "SXR", name: "Srinagar", desc: "Aerodrome Terminal" },
+    { code: "GOI", name: "Goa Shore", desc: "Beachfront Heliport" },
+    { code: "BOM", name: "Mumbai", desc: "Juhu Helipad Hub" },
+  ];
 
-  // Search parameters from URL
+  const destOptions = [
+    { code: "KED", name: "Kedarnath Sanctuary", desc: "Phata / Sersi Helipad" },
+    { code: "BAD", name: "Badrinath Valley", desc: "Govindghat Terminal" },
+    { code: "VSD", name: "Vaishno Devi Shrine", desc: "Sanjichhat Helipad" },
+    { code: "CDM", name: "Char Dham Circuit", desc: "Complete 4-Shrine Corridor" },
+  ];
+
   const paramTripType = (searchParams.get("trip_type") as "One Way" | "Round Trip" | "Multi-City") || "One Way";
   const paramSource = searchParams.get("source") || "Dehradun (DED)";
   const paramDest = searchParams.get("destination") || "Kedarnath Sanctuary";
@@ -69,7 +73,6 @@ function BookingSearchContent() {
   const paramChildren = Number(searchParams.get("children")) || 0;
   const paramInfants = Number(searchParams.get("infants")) || 0;
 
-  // Local state for MakeMyTrip style search
   const [tripType, setTripType] = useState<"One Way" | "Round Trip" | "Multi-City">(paramTripType);
   const [localSource, setLocalSource] = useState(paramSource);
   const [localDest, setLocalDest] = useState(paramDest);
@@ -80,7 +83,6 @@ function BookingSearchContent() {
   const [infants, setInfants] = useState(paramInfants);
   const [showPaxDropdown, setShowPaxDropdown] = useState(false);
 
-  // Multi-City Legs state
   const [multiCityLegs, setMultiCityLegs] = useState<{ source: string; destination: string; date: string }[]>([
     { source: "Dehradun (DED)", destination: "Kedarnath Sanctuary", date: paramDate },
     { source: "Kedarnath Sanctuary", destination: "Badrinath Valley", date: paramDate },
@@ -88,31 +90,13 @@ function BookingSearchContent() {
 
   const totalPassengers = adults + children;
 
-  // Filter & Sort states tailored for Helicopter Charters
-  const [helicopters, setHelicopters] = useState<HelicopterListing[]>(HELICOPTERS);
+  const [helicopters, setHelicopters] = useState<HelicopterListing[]>([]);
   const [maxPrice, setMaxPrice] = useState(500000);
   const [sortBy, setSortBy] = useState<"price_asc" | "price_desc" | "capacity" | "speed" | "safety">("price_asc");
   const [engineFilter, setEngineFilter] = useState<"all" | "twin" | "single">("all");
   const [capacityFilter, setCapacityFilter] = useState<number>(0);
-  const [filteredHelis, setFilteredHelis] = useState<HelicopterListing[]>(HELICOPTERS);
+  const [filteredHelis, setFilteredHelis] = useState<HelicopterListing[]>([]);
 
-  // Hospitality Upgrades Selection
-  const [upgrades, setUpgrades] = useState({
-    vipLounge: false,
-    gourmetMeals: false,
-    porterDarshan: false,
-    groundTransfer: false
-  });
-
-  // Upgrade prices definitions
-  const UPGRADE_PRICES = {
-    vipLounge: 5000,     // Per passenger
-    gourmetMeals: 3500,    // Per passenger
-    porterDarshan: 12000,  // Per passenger
-    groundTransfer: 8000   // Flat rate
-  };
-
-  // Sync state if url parameters change
   useEffect(() => {
     setTripType(paramTripType);
     setLocalSource(paramSource);
@@ -124,7 +108,6 @@ function BookingSearchContent() {
     setInfants(paramInfants);
   }, [paramTripType, paramSource, paramDest, paramDate, paramReturnDate, paramAdults, paramChildren, paramInfants]);
 
-  // Fetch live fleet from API
   useEffect(() => {
     const fetchFleet = async () => {
       try {
@@ -139,16 +122,13 @@ function BookingSearchContent() {
     fetchFleet();
   }, []);
 
-  // Filter and sort listings with helicopter-specific criteria
   useEffect(() => {
     let result = helicopters.filter((h) => Number(h.price) <= maxPrice);
 
-    // Seating capacity filter
     if (capacityFilter > 0) {
       result = result.filter((h) => Number(h.capacity) >= capacityFilter);
     }
 
-    // Helicopter Engine Type filter
     if (engineFilter === "twin") {
       result = result.filter((h) => 
         h.model.toLowerCase().includes("twin") || 
@@ -169,7 +149,6 @@ function BookingSearchContent() {
       );
     }
 
-    // Helicopter Sort options
     if (sortBy === "price_asc") {
       result.sort((a, b) => Number(a.price) - Number(b.price));
     } else if (sortBy === "price_desc") {
@@ -185,43 +164,6 @@ function BookingSearchContent() {
     setFilteredHelis(result);
   }, [helicopters, maxPrice, sortBy, engineFilter, capacityFilter]);
 
-  // Calculate pricing upgrades
-  let upgradesPerPassenger = 0;
-  if (upgrades.vipLounge) upgradesPerPassenger += UPGRADE_PRICES.vipLounge;
-  if (upgrades.gourmetMeals) upgradesPerPassenger += UPGRADE_PRICES.gourmetMeals;
-  if (upgrades.porterDarshan) upgradesPerPassenger += UPGRADE_PRICES.porterDarshan;
-
-  let flatUpgrades = 0;
-  if (upgrades.groundTransfer) flatUpgrades += UPGRADE_PRICES.groundTransfer;
-
-  const totalUpgradeCost = (upgradesPerPassenger * (totalPassengers || 1)) + flatUpgrades;
-
-  // Add Multi-city leg
-  const handleAddLeg = () => {
-    if (multiCityLegs.length < 4) {
-      const lastLeg = multiCityLegs[multiCityLegs.length - 1];
-      setMultiCityLegs([
-        ...multiCityLegs,
-        { source: lastLeg.destination, destination: "Vaishno Devi Shrine", date: localDate }
-      ]);
-    }
-  };
-
-  // Remove Multi-city leg
-  const handleRemoveLeg = (index: number) => {
-    if (multiCityLegs.length > 2) {
-      setMultiCityLegs(multiCityLegs.filter((_, i) => i !== index));
-    }
-  };
-
-  // Update specific Multi-city leg
-  const handleUpdateLeg = (index: number, field: "source" | "destination" | "date", val: string) => {
-    const updated = [...multiCityLegs];
-    updated[index] = { ...updated[index], [field]: val };
-    setMultiCityLegs(updated);
-  };
-
-  // Handle Search submit
   const handleUpdateSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const query = new URLSearchParams();
@@ -240,10 +182,9 @@ function BookingSearchContent() {
     router.push(`/booking?${query.toString()}`);
   };
 
-  // Select flight and book
   const handleSelectFlight = (heli: HelicopterListing) => {
     const pax = totalPassengers || 1;
-    const finalPerPassengerPrice = Number(heli.price) + upgradesPerPassenger + Math.round(flatUpgrades / pax);
+    const finalPerPassengerPrice = Number(heli.price);
     
     let detailsStr = "";
     if (tripType === "Multi-City") {
@@ -274,138 +215,121 @@ function BookingSearchContent() {
     router.push("/checkout");
   };
 
-  // Google Maps Vector calculation
-  const srcCoord = locationCoordinates[paramSource] || { name: paramSource.split(" ")[0], lat: "30.3165° N", lon: "78.0322° E", x: 45, y: 55 };
-  const destCoord = locationCoordinates[paramDest] || { name: paramDest.split(" ")[0], lat: "30.7346° N", lon: "79.0669° E", x: 55, y: 35 };
-
-  const dx = destCoord.x - srcCoord.x;
-  const dy = destCoord.y - srcCoord.y;
-  const rawDist = Math.sqrt(dx * dx + dy * dy);
-
-  let distanceKm = Math.round(rawDist * 12.5);
-  let etaMin = Math.round(distanceKm / 4.2);
-
-  if (paramSource.includes("Dehradun") && paramDest.includes("Kedarnath")) {
-    distanceKm = 109;
-    etaMin = 28;
-  } else if (paramSource.includes("Delhi") && paramDest.includes("Kedarnath")) {
-    distanceKm = 325;
-    etaMin = 65;
-  }
-
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      <BookingProgressTracker currentStep={2} />
-      {/* Header breadcrumb summary */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/5 pb-6 mb-8 gap-4">
-        <div>
-          <h1 className="font-space text-3xl font-bold tracking-tight text-white">Helicopter Booking</h1>
-          <p className="text-xs text-slate-400 mt-1 font-sans">Search and reserve private luxury helicopter flights across India</p>
-        </div>
-        <div className="text-xs font-mono text-gold px-3 py-1.5 rounded border border-gold/20 bg-gold/5 uppercase tracking-wider">
-          Total Upgrade Cost: +₹{totalUpgradeCost.toLocaleString("en-IN")}
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
+      {/* MakeMyTrip Signature Navy Hero Banner */}
+      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-6 pb-20 px-4 md:px-8 text-white relative shadow-lg">
+        <div className="max-w-7xl mx-auto">
+          <BookingProgressTracker currentStep={2} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Settings & Configuration panel - Left */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
-          
-          {/* MakeMyTrip Style Flight Search Widget */}
-          <form onSubmit={handleUpdateSearch} className="flex flex-col gap-4 bg-[#051433] p-5 rounded-xl border border-white/10 shadow-2xl text-white">
-            <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-              <Compass className="h-5 w-5 text-gold" />
-              <h2 className="font-space text-xs uppercase tracking-wider font-bold text-white">Search Flight Charters</h2>
+          {/* MakeMyTrip Style Main Search Card */}
+          <div className="bg-white rounded-2xl shadow-2xl p-6 text-slate-800 border border-slate-200 mt-4">
+            
+            {/* Trip Type Selector Pills */}
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-5">
+              <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setTripType("One Way")}
+                  className={`px-4 py-2 text-xs font-bold font-space uppercase tracking-wider rounded-lg transition-all flex items-center gap-2 ${
+                    tripType === "One Way"
+                      ? "bg-[#051433] text-white shadow-md"
+                      : "text-slate-600 hover:text-black"
+                  }`}
+                >
+                  <Plane className="h-3.5 w-3.5" />
+                  One Way
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTripType("Round Trip")}
+                  className={`px-4 py-2 text-xs font-bold font-space uppercase tracking-wider rounded-lg transition-all flex items-center gap-2 ${
+                    tripType === "Round Trip"
+                      ? "bg-[#051433] text-white shadow-md"
+                      : "text-slate-600 hover:text-black"
+                  }`}
+                >
+                  <ArrowRightLeft className="h-3.5 w-3.5" />
+                  Round Trip
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTripType("Multi-City")}
+                  className={`px-4 py-2 text-xs font-bold font-space uppercase tracking-wider rounded-lg transition-all flex items-center gap-2 ${
+                    tripType === "Multi-City"
+                      ? "bg-[#051433] text-white shadow-md"
+                      : "text-slate-600 hover:text-black"
+                  }`}
+                >
+                  <Compass className="h-3.5 w-3.5" />
+                  Multi-City
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                <span>DGCA Authorized Operators Only</span>
+              </div>
             </div>
 
-            {/* Trip Type Pills (One Way | Round Trip | Multi-City) */}
-            <div className="flex items-center gap-1.5 bg-[#020B1E] p-1 rounded-lg border border-white/10">
-              <button
-                type="button"
-                onClick={() => setTripType("One Way")}
-                className={`flex-1 py-1.5 px-2 text-[10px] font-space font-bold uppercase tracking-wider rounded-md transition-all flex items-center justify-center gap-1 ${
-                  tripType === "One Way"
-                    ? "bg-gold text-black shadow-md"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <Plane className="h-3 w-3" />
-                One Way
-              </button>
-              <button
-                type="button"
-                onClick={() => setTripType("Round Trip")}
-                className={`flex-1 py-1.5 px-2 text-[10px] font-space font-bold uppercase tracking-wider rounded-md transition-all flex items-center justify-center gap-1 ${
-                  tripType === "Round Trip"
-                    ? "bg-gold text-black shadow-md"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <ArrowRightLeft className="h-3 w-3" />
-                Round Trip
-              </button>
-              <button
-                type="button"
-                onClick={() => setTripType("Multi-City")}
-                className={`flex-1 py-1.5 px-2 text-[10px] font-space font-bold uppercase tracking-wider rounded-md transition-all flex items-center justify-center gap-1 ${
-                  tripType === "Multi-City"
-                    ? "bg-gold text-black shadow-md"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <Compass className="h-3 w-3" />
-                Multi-City
-              </button>
-            </div>
+            {/* MakeMyTrip Flight Input Grid */}
+            <form onSubmit={handleUpdateSearch}>
+              {tripType !== "Multi-City" ? (
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                  {/* FROM Input Box */}
+                  <div className="md:col-span-3 bg-white p-3 rounded-xl border border-slate-200 hover:border-[#051433] transition-colors cursor-pointer group">
+                    <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">From</label>
+                    <select
+                      value={localSource}
+                      onChange={(e) => setLocalSource(e.target.value)}
+                      className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer"
+                    >
+                      {sourceOptions.map((opt) => (
+                        <option key={opt.code} value={`${opt.name} (${opt.code})`}>
+                          {opt.name} ({opt.code}) - {opt.desc}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-[10px] text-slate-400 block truncate mt-0.5">Primary Departure Heliport</span>
+                  </div>
 
-            {/* One Way / Round Trip Form Fields */}
-            {tripType !== "Multi-City" ? (
-              <div className="flex flex-col gap-3.5">
-                {/* Departure */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] uppercase tracking-wider text-gold font-bold">Departure From</label>
-                  <select
-                    value={localSource}
-                    onChange={(e) => setLocalSource(e.target.value)}
-                    className="w-full bg-[#020B1E] border border-white/15 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-gold cursor-pointer font-sans"
-                  >
-                    {sourceOptions.map((opt) => (
-                      <option key={opt} value={opt} className="bg-[#020B1E]">{opt}</option>
-                    ))}
-                  </select>
-                </div>
+                  {/* TO Input Box */}
+                  <div className="md:col-span-3 bg-white p-3 rounded-xl border border-slate-200 hover:border-[#051433] transition-colors cursor-pointer group">
+                    <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">To</label>
+                    <select
+                      value={localDest}
+                      onChange={(e) => setLocalDest(e.target.value)}
+                      className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer"
+                    >
+                      {destOptions.map((opt) => (
+                        <option key={opt.code} value={opt.name}>
+                          {opt.name} - {opt.desc}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-[10px] text-slate-400 block truncate mt-0.5">Arrival Sanctuary / Shrine</span>
+                  </div>
 
-                {/* Destination */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] uppercase tracking-wider text-gold font-bold">Destination To</label>
-                  <select
-                    value={localDest}
-                    onChange={(e) => setLocalDest(e.target.value)}
-                    className="w-full bg-[#020B1E] border border-white/15 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-gold cursor-pointer font-sans"
-                  >
-                    {destOptions.map((opt) => (
-                      <option key={opt} value={opt} className="bg-[#020B1E]">{opt}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Dates (Departure & Optional Return) */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Departure Date</label>
+                  {/* DEPARTURE DATE Box */}
+                  <div className="md:col-span-2 bg-white p-3 rounded-xl border border-slate-200 hover:border-[#051433] transition-colors cursor-pointer">
+                    <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">Departure</label>
                     <input
                       type="date"
                       required
                       value={localDate}
                       min={new Date().toISOString().split("T")[0]}
                       onChange={(e) => setLocalDate(e.target.value)}
-                      className="w-full bg-[#020B1E] border border-white/15 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-gold cursor-pointer font-sans"
+                      className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer"
                     />
+                    <span className="text-[10px] text-slate-400 block mt-0.5">Travel Date</span>
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className={`text-[9px] uppercase tracking-wider font-bold ${tripType === "Round Trip" ? "text-gold" : "text-slate-500"}`}>
-                      Return Date {tripType === "One Way" && "(Optional)"}
+                  {/* RETURN DATE Box */}
+                  <div className={`md:col-span-2 bg-white p-3 rounded-xl border transition-colors cursor-pointer ${
+                    tripType === "Round Trip" ? "border-slate-200 hover:border-[#051433]" : "border-slate-100 opacity-50 bg-slate-50"
+                  }`}>
+                    <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">
+                      Return {tripType === "One Way" && "(Optional)"}
                     </label>
                     <input
                       type="date"
@@ -414,550 +338,468 @@ function BookingSearchContent() {
                       value={localReturnDate}
                       min={localDate || new Date().toISOString().split("T")[0]}
                       onChange={(e) => setLocalReturnDate(e.target.value)}
-                      className={`w-full bg-[#020B1E] border rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none cursor-pointer font-sans ${
-                        tripType === "Round Trip" ? "border-gold/50 focus:border-gold" : "border-white/5 opacity-40 cursor-not-allowed"
-                      }`}
+                      className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer disabled:cursor-not-allowed"
                     />
+                    <span className="text-[10px] text-slate-400 block mt-0.5">
+                      {tripType === "Round Trip" ? "Return Flight Date" : "Tap for Round Trip"}
+                    </span>
+                  </div>
+
+                  {/* TRAVELLERS & CLASS Box */}
+                  <div className="md:col-span-2 bg-white p-3 rounded-xl border border-slate-200 hover:border-[#051433] transition-colors relative">
+                    <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">Travellers</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPaxDropdown(!showPaxDropdown)}
+                      className="w-full text-left font-bold text-slate-900 text-sm focus:outline-none flex items-center justify-between"
+                    >
+                      <span className="truncate">{totalPassengers} Pax ({adults}A, {children}C)</span>
+                      <ChevronDown className="h-4 w-4 text-slate-400" />
+                    </button>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">Executive Charter Class</span>
+
+                    {/* MMT Pax Counter Dropdown */}
+                    <AnimatePresence>
+                      {showPaxDropdown && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 5 }}
+                          className="absolute top-full right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl p-4 shadow-2xl z-50 text-slate-800"
+                        >
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div>
+                              <div className="text-xs font-bold text-slate-900">Adults</div>
+                              <div className="text-[10px] text-slate-400">12+ Years</div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <button
+                                type="button"
+                                disabled={adults <= 1}
+                                onClick={() => setAdults(adults - 1)}
+                                className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
+                              >
+                                <Minus className="h-3 w-3" />
+                              </button>
+                              <span className="text-xs font-bold w-4 text-center">{adults}</span>
+                              <button
+                                type="button"
+                                disabled={adults >= 8}
+                                onClick={() => setAdults(adults + 1)}
+                                className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                            <div>
+                              <div className="text-xs font-bold text-slate-900">Children</div>
+                              <div className="text-[10px] text-slate-400">2-12 Years</div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <button
+                                type="button"
+                                disabled={children <= 0}
+                                onClick={() => setChildren(children - 1)}
+                                className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
+                              >
+                                <Minus className="h-3 w-3" />
+                              </button>
+                              <span className="text-xs font-bold w-4 text-center">{children}</span>
+                              <button
+                                type="button"
+                                disabled={children >= 6}
+                                onClick={() => setChildren(children + 1)}
+                                className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-3">
+                            <div>
+                              <div className="text-xs font-bold text-slate-900">Infants</div>
+                              <div className="text-[10px] text-slate-400">Below 2 Years</div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <button
+                                type="button"
+                                disabled={infants <= 0}
+                                onClick={() => setInfants(infants - 1)}
+                                className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
+                              >
+                                <Minus className="h-3 w-3" />
+                              </button>
+                              <span className="text-xs font-bold w-4 text-center">{infants}</span>
+                              <button
+                                type="button"
+                                disabled={infants >= 4}
+                                onClick={() => setInfants(infants + 1)}
+                                className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => setShowPaxDropdown(false)}
+                            className="w-full py-2 bg-[#051433] text-white rounded-xl font-bold text-xs uppercase mt-3 hover:bg-[#092254] transition-colors"
+                          >
+                            Apply
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
-              </div>
-            ) : (
-              /* Multi-City Form Fields */
-              <div className="flex flex-col gap-3.5">
-                {multiCityLegs.map((leg, idx) => (
-                  <div key={idx} className="p-3 bg-[#020B1E] rounded-lg border border-white/10 flex flex-col gap-2 relative">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[9px] font-space font-bold uppercase text-gold tracking-wider">Leg {idx + 1}</span>
-                      {multiCityLegs.length > 2 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveLeg(idx)}
-                          className="text-red-400 hover:text-red-300 p-1 cursor-pointer"
+              ) : (
+                /* Multi-City Leg Inputs */
+                <div className="flex flex-col gap-3">
+                  {multiCityLegs.map((leg, idx) => (
+                    <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200 items-center">
+                      <div className="md:col-span-4 bg-white p-2.5 rounded-xl border border-slate-200">
+                        <label className="text-[9px] text-slate-400 font-bold block uppercase">Leg {idx + 1} From</label>
+                        <select
+                          value={leg.source}
+                          onChange={(e) => {
+                            const updated = [...multiCityLegs];
+                            updated[idx].source = e.target.value;
+                            setMultiCityLegs(updated);
+                          }}
+                          className="w-full bg-transparent font-bold text-xs text-slate-900"
                         >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      )}
+                          {sourceOptions.map((opt) => (
+                            <option key={opt.code} value={`${opt.name} (${opt.code})`}>{opt.name} ({opt.code})</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="md:col-span-4 bg-white p-2.5 rounded-xl border border-slate-200">
+                        <label className="text-[9px] text-slate-400 font-bold block uppercase">Leg {idx + 1} To</label>
+                        <select
+                          value={leg.destination}
+                          onChange={(e) => {
+                            const updated = [...multiCityLegs];
+                            updated[idx].destination = e.target.value;
+                            setMultiCityLegs(updated);
+                          }}
+                          className="w-full bg-transparent font-bold text-xs text-slate-900"
+                        >
+                          {destOptions.map((opt) => (
+                            <option key={opt.code} value={opt.name}>{opt.name}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="md:col-span-3 bg-white p-2.5 rounded-xl border border-slate-200">
+                        <label className="text-[9px] text-slate-400 font-bold block uppercase">Date</label>
+                        <input
+                          type="date"
+                          value={leg.date}
+                          onChange={(e) => {
+                            const updated = [...multiCityLegs];
+                            updated[idx].date = e.target.value;
+                            setMultiCityLegs(updated);
+                          }}
+                          className="w-full bg-transparent font-bold text-xs text-slate-900"
+                        />
+                      </div>
+
+                      <div className="md:col-span-1 flex justify-center">
+                        {multiCityLegs.length > 2 && (
+                          <button
+                            type="button"
+                            onClick={() => setMultiCityLegs(multiCityLegs.filter((_, i) => i !== idx))}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <select
-                        value={leg.source}
-                        onChange={(e) => handleUpdateLeg(idx, "source", e.target.value)}
-                        className="w-full bg-[#051433] border border-white/15 rounded px-2 py-1.5 text-[11px] text-white"
-                      >
-                        {sourceOptions.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
-                      <select
-                        value={leg.destination}
-                        onChange={(e) => handleUpdateLeg(idx, "destination", e.target.value)}
-                        className="w-full bg-[#051433] border border-white/15 rounded px-2 py-1.5 text-[11px] text-white"
-                      >
-                        {destOptions.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <input
-                      type="date"
-                      value={leg.date}
-                      onChange={(e) => handleUpdateLeg(idx, "date", e.target.value)}
-                      className="w-full bg-[#051433] border border-white/15 rounded px-2 py-1 text-[11px] text-white"
-                    />
-                  </div>
-                ))}
-                {multiCityLegs.length < 4 && (
+                  ))}
+                </div>
+              )}
+
+              {/* Big MakeMyTrip Search Button */}
+              <div className="flex justify-center mt-5">
+                <button
+                  type="submit"
+                  className="px-12 py-3.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] hover:to-[#C57A2D] text-black font-space font-bold text-sm uppercase tracking-widest rounded-full shadow-xl hover:shadow-2xl transition-all flex items-center gap-3 cursor-pointer transform hover:-translate-y-0.5"
+                >
+                  <Plane className="h-5 w-5" />
+                  <span>SEARCH FLIGHT CHARTERS</span>
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+
+      {/* Main Results & Filter Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 -mt-6 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+          {/* Left Column: Quick Filter Bar & Info */}
+          <div className="lg:col-span-3 flex flex-col gap-6">
+            
+            {/* Filter Card */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-md text-slate-800">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <h3 className="font-space text-xs uppercase font-bold text-slate-900 flex items-center gap-2">
+                  <SlidersHorizontal className="h-4 w-4 text-[#051433]" />
+                  Filter Aircraft
+                </h3>
+                {(engineFilter !== "all" || capacityFilter > 0 || maxPrice < 500000) && (
                   <button
-                    type="button"
-                    onClick={handleAddLeg}
-                    className="py-1.5 px-3 border border-dashed border-gold/40 hover:border-gold text-gold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-space uppercase tracking-wider"
+                    onClick={() => {
+                      setEngineFilter("all");
+                      setCapacityFilter(0);
+                      setMaxPrice(500000);
+                    }}
+                    className="text-[10px] text-blue-600 hover:underline font-bold uppercase"
                   >
-                    <Plus className="h-3.5 w-3.5" />
-                    Add Another City Leg
+                    Clear All
                   </button>
                 )}
               </div>
-            )}
 
-            {/* Travellers & Class Selector (MakeMyTrip Counter) */}
-            <div className="flex flex-col gap-1 relative">
-              <label className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Travellers & Class</label>
-              <button
-                type="button"
-                onClick={() => setShowPaxDropdown(!showPaxDropdown)}
-                className="w-full bg-[#020B1E] border border-white/15 hover:border-gold/50 rounded-lg px-3 py-2 text-xs text-white flex items-center justify-between cursor-pointer font-sans transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-gold" />
-                  <span className="font-medium">
-                    {adults} Adult{adults > 1 ? "s" : ""}, {children} Child{children !== 1 ? "ren" : ""}, {infants} Infant{infants !== 1 ? "s" : ""}
-                  </span>
+              {/* Engine Type Filter */}
+              <div className="flex flex-col gap-2 mb-5">
+                <label className="text-[11px] font-bold text-slate-700 uppercase">Engine Type</label>
+                <div className="flex flex-col gap-1.5 text-xs font-medium">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="engine"
+                      checked={engineFilter === "all"}
+                      onChange={() => setEngineFilter("all")}
+                      className="accent-[#051433]"
+                    />
+                    <span>All Engines</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="engine"
+                      checked={engineFilter === "twin"}
+                      onChange={() => setEngineFilter("twin")}
+                      className="accent-[#051433]"
+                    />
+                    <span>Twin-Engine (Mountain Rated)</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="engine"
+                      checked={engineFilter === "single"}
+                      onChange={() => setEngineFilter("single")}
+                      className="accent-[#051433]"
+                    />
+                    <span>Single Engine</span>
+                  </label>
                 </div>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-              </button>
+              </div>
 
-              {/* MakeMyTrip Style Pax Dropdown */}
-              <AnimatePresence>
-                {showPaxDropdown && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="absolute top-full left-0 right-0 mt-1 bg-[#020B1E] border border-white/20 rounded-xl p-4 shadow-2xl z-30 flex flex-col gap-3 text-white"
-                  >
-                    {/* Adults */}
-                    <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                      <div>
-                        <div className="text-xs font-bold text-white">Adults</div>
-                        <div className="text-[9px] text-slate-400">12+ Years</div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          disabled={adults <= 1}
-                          onClick={() => setAdults(adults - 1)}
-                          className="h-6 w-6 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center"
-                        >
-                          <Minus className="h-3 w-3" />
-                        </button>
-                        <span className="text-xs font-mono font-bold w-4 text-center">{adults}</span>
-                        <button
-                          type="button"
-                          disabled={adults >= 8}
-                          onClick={() => setAdults(adults + 1)}
-                          className="h-6 w-6 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center text-gold"
-                        >
-                          <Plus className="h-3 w-3" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Children */}
-                    <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                      <div>
-                        <div className="text-xs font-bold text-white">Children</div>
-                        <div className="text-[9px] text-slate-400">2-12 Years</div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          disabled={children <= 0}
-                          onClick={() => setChildren(children - 1)}
-                          className="h-6 w-6 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center"
-                        >
-                          <Minus className="h-3 w-3" />
-                        </button>
-                        <span className="text-xs font-mono font-bold w-4 text-center">{children}</span>
-                        <button
-                          type="button"
-                          disabled={children >= 6}
-                          onClick={() => setChildren(children + 1)}
-                          className="h-6 w-6 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center text-gold"
-                        >
-                          <Plus className="h-3 w-3" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Infants */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-xs font-bold text-white">Infants</div>
-                        <div className="text-[9px] text-slate-400">Below 2 Years (Lap)</div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          disabled={infants <= 0}
-                          onClick={() => setInfants(infants - 1)}
-                          className="h-6 w-6 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center"
-                        >
-                          <Minus className="h-3 w-3" />
-                        </button>
-                        <span className="text-xs font-mono font-bold w-4 text-center">{infants}</span>
-                        <button
-                          type="button"
-                          disabled={infants >= 4}
-                          onClick={() => setInfants(infants + 1)}
-                          className="h-6 w-6 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center text-gold"
-                        >
-                          <Plus className="h-3 w-3" />
-                        </button>
-                      </div>
-                    </div>
-
+              {/* Capacity Filter */}
+              <div className="flex flex-col gap-2 mb-5 border-t border-slate-100 pt-4">
+                <label className="text-[11px] font-bold text-slate-700 uppercase">Min Passenger Seats</label>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {[0, 4, 5, 6].map((cap) => (
                     <button
+                      key={cap}
                       type="button"
-                      onClick={() => setShowPaxDropdown(false)}
-                      className="w-full py-1.5 bg-gold text-black rounded font-space text-[10px] font-bold uppercase mt-1 cursor-pointer"
+                      onClick={() => setCapacityFilter(cap)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                        capacityFilter === cap
+                          ? "bg-[#051433] text-white border-[#051433]"
+                          : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                      }`}
                     >
-                      Done
+                      {cap === 0 ? "Any" : `${cap}+ Seats`}
                     </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Range Slider */}
+              <div className="flex flex-col gap-2 border-t border-slate-100 pt-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-slate-700 uppercase">Max Budget</label>
+                  <span className="text-xs font-bold text-[#051433]">₹{maxPrice.toLocaleString("en-IN")}</span>
+                </div>
+                <input
+                  type="range"
+                  min={100000}
+                  max={500000}
+                  step={20000}
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(Number(e.target.value))}
+                  className="w-full accent-[#051433]"
+                />
+              </div>
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-3 bg-gold hover:bg-gold-hover text-black font-space text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all shadow-xl cursor-pointer text-center flex items-center justify-center gap-2 mt-1"
-            >
-              <Compass className="h-4 w-4" />
-              Search Flights
-            </button>
-          </form>
-
-
-          {/* Module 3: Hospitality & VIP Upgrades */}
-          <div className="flex flex-col gap-4 bg-[#051433] p-5 rounded-xl border border-white/5 shadow-lg text-white">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-              <UserCheck className="h-4.5 w-4.5 text-gold" />
-              <h2 className="font-space text-xs uppercase tracking-wider font-bold">Hospitality Services</h2>
+            {/* MMT Guarantee Badge Card */}
+            <div className="bg-gradient-to-br from-[#051433] to-[#0D2D6C] text-white p-5 rounded-2xl shadow-md border border-slate-800 flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-amber-400" />
+                <h4 className="font-space text-xs uppercase font-bold tracking-wider">AURA Safety Assured</h4>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                100% DGCA-certified multi-engine helicopters with dual pilot command, real-time satellite radar tracking, and VIP lounge boarding.
+              </p>
             </div>
 
-            <div className="flex flex-col gap-3.5">
-              {/* Upgrade 1: VIP Lounge */}
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input 
-                  type="checkbox"
-                  checked={upgrades.vipLounge}
-                  onChange={(e) => setUpgrades({...upgrades, vipLounge: e.target.checked})}
-                  className="mt-0.5 accent-gold cursor-pointer"
-                />
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-space uppercase tracking-wider font-bold text-white group-hover:text-gold transition-colors">VIP Lounge Access</span>
-                    <span className="text-[9px] font-mono text-gold">+₹5,000/pax</span>
-                  </div>
-                  <p className="text-[9px] text-slate-400 font-sans leading-relaxed">Dedicated terminal suite with complimentary drinks and fast customs clearance.</p>
-                </div>
-              </label>
-
-              {/* Upgrade 2: Gourmet Meals */}
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input 
-                  type="checkbox"
-                  checked={upgrades.gourmetMeals}
-                  onChange={(e) => setUpgrades({...upgrades, gourmetMeals: e.target.checked})}
-                  className="mt-0.5 accent-gold cursor-pointer"
-                />
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-space uppercase tracking-wider font-bold text-white group-hover:text-gold transition-colors">Gourmet In-Flight Catering</span>
-                    <span className="text-[9px] font-mono text-gold">+₹3,500/pax</span>
-                  </div>
-                  <p className="text-[9px] text-slate-400 font-sans leading-relaxed">Artisanal organic snacks, fresh juices, and champagne for mountain transit.</p>
-                </div>
-              </label>
-
-              {/* Upgrade 3: Porter & Darshan Priority */}
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input 
-                  type="checkbox"
-                  checked={upgrades.porterDarshan}
-                  onChange={(e) => setUpgrades({...upgrades, porterDarshan: e.target.checked})}
-                  className="mt-0.5 accent-gold cursor-pointer"
-                />
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-space uppercase tracking-wider font-bold text-white group-hover:text-gold transition-colors">VIP Shrine Priority & Escort</span>
-                    <span className="text-[9px] font-mono text-gold">+₹12,000/pax</span>
-                  </div>
-                  <p className="text-[9px] text-slate-400 font-sans leading-relaxed">Direct temple queue bypass, priority Palki/Pony arrangement, and temple priest escort.</p>
-                </div>
-              </label>
-
-              {/* Upgrade 4: Ground Chauffeur */}
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input 
-                  type="checkbox"
-                  checked={upgrades.groundTransfer}
-                  onChange={(e) => setUpgrades({...upgrades, groundTransfer: e.target.checked})}
-                  className="mt-0.5 accent-gold cursor-pointer"
-                />
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-space uppercase tracking-wider font-bold text-white group-hover:text-gold transition-colors">Luxury Chauffeur Pickup</span>
-                    <span className="text-[9px] font-mono text-gold">+₹8,000 Flat</span>
-                  </div>
-                  <p className="text-[9px] text-slate-400 font-sans leading-relaxed">Mercedes-Benz V-Class / Audi terminal-to-heliport luxury road transfer.</p>
-                </div>
-              </label>
-            </div>
           </div>
 
-          {/* Module 4: Filter by Maximum Budget */}
-          <div className="flex flex-col gap-4 bg-[#051433] p-5 rounded-xl border border-white/5 shadow-lg text-white">
-            <div className="flex items-center justify-between border-b border-white/5 pb-3">
-              <span className="font-space text-xs uppercase tracking-wider font-bold">Max Charter Budget</span>
-              <span className="font-mono text-gold text-xs">₹{maxPrice.toLocaleString("en-IN")}</span>
-            </div>
-            <input 
-              type="range"
-              min={100000}
-              max={500000}
-              step={10000}
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(Number(e.target.value))}
-              className="w-full accent-gold cursor-pointer"
-            />
-            <div className="flex items-center justify-between text-[9px] text-slate-400 font-mono">
-              <span>₹1,00,000</span>
-              <span>₹5,00,000</span>
-            </div>
-          </div>
-        </div>
+          {/* Right Column: Search Results List */}
+          <div className="lg:col-span-9 flex flex-col gap-4">
 
-        {/* Available Fleet Listings & Map View - Right Column */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
-
-          {/* Aviation Specific Filter & Sort Toolbar */}
-          <div className="flex flex-col gap-3 bg-[#051433] p-4 rounded-xl border border-white/10 shadow-lg text-white">
-            {/* Top Row: Sort Options & Count */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+            {/* MakeMyTrip Sort Bar */}
+            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] uppercase font-space tracking-wider text-gold font-bold flex items-center gap-1">
-                  <SlidersHorizontal className="h-3.5 w-3.5" /> Sort Aircraft:
-                </span>
+                <span className="text-xs font-bold text-slate-500 uppercase font-space">Sort By:</span>
                 <button
                   onClick={() => setSortBy("price_asc")}
-                  className={`text-xs px-2.5 py-1 rounded transition-all cursor-pointer ${
-                    sortBy === "price_asc" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white border border-white/10"
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    sortBy === "price_asc" ? "bg-[#051433] text-white shadow-sm" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
                 >
-                  Price: Low ➔ High
-                </button>
-                <button
-                  onClick={() => setSortBy("price_desc")}
-                  className={`text-xs px-2.5 py-1 rounded transition-all cursor-pointer ${
-                    sortBy === "price_desc" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white border border-white/10"
-                  }`}
-                >
-                  Price: High ➔ Low
-                </button>
-                <button
-                  onClick={() => setSortBy("capacity")}
-                  className={`text-xs px-2.5 py-1 rounded transition-all cursor-pointer ${
-                    sortBy === "capacity" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white border border-white/10"
-                  }`}
-                >
-                  Seating Capacity
+                  Cheapest
                 </button>
                 <button
                   onClick={() => setSortBy("speed")}
-                  className={`text-xs px-2.5 py-1 rounded transition-all cursor-pointer ${
-                    sortBy === "speed" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white border border-white/10"
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    sortBy === "speed" ? "bg-[#051433] text-white shadow-sm" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
                 >
-                  Cruise Speed
+                  Fastest Flight
+                </button>
+                <button
+                  onClick={() => setSortBy("capacity")}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    sortBy === "capacity" ? "bg-[#051433] text-white shadow-sm" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  }`}
+                >
+                  Max Capacity
                 </button>
                 <button
                   onClick={() => setSortBy("safety")}
-                  className={`text-xs px-2.5 py-1 rounded transition-all cursor-pointer ${
-                    sortBy === "safety" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white border border-white/10"
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    sortBy === "safety" ? "bg-[#051433] text-white shadow-sm" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
                 >
                   Safety Rating
                 </button>
               </div>
 
-              <div className="text-xs text-slate-300 font-sans">
-                Found <span className="text-gold font-bold">{filteredHelis.length}</span> Helicopter Charters
+              <div className="text-xs text-slate-600 font-medium">
+                Found <span className="font-bold text-slate-900">{filteredHelis.length}</span> Verified Aircraft
               </div>
             </div>
 
-            {/* Bottom Row: Helicopter Aviation Specific Filters */}
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-3 flex-wrap">
-                {/* Engine Type Filter */}
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] uppercase font-space text-slate-400 font-bold">Engine:</span>
-                  <select
-                    value={engineFilter}
-                    onChange={(e) => setEngineFilter(e.target.value as any)}
-                    className="bg-[#020B1E] border border-white/15 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-gold cursor-pointer"
-                  >
-                    <option value="all">All Engine Types</option>
-                    <option value="twin">Twin-Engine (High Altitude / Max Safety)</option>
-                    <option value="single">Single Engine</option>
-                  </select>
-                </div>
-
-                {/* Min Capacity Filter */}
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] uppercase font-space text-slate-400 font-bold">Min Seats:</span>
-                  <select
-                    value={capacityFilter}
-                    onChange={(e) => setCapacityFilter(Number(e.target.value))}
-                    className="bg-[#020B1E] border border-white/15 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-gold cursor-pointer"
-                  >
-                    <option value={0}>Any Capacity</option>
-                    <option value={4}>4+ Passengers</option>
-                    <option value={5}>5+ Passengers</option>
-                    <option value={6}>6+ Passengers</option>
-                  </select>
-                </div>
-              </div>
-
-              {(engineFilter !== "all" || capacityFilter > 0 || maxPrice < 500000) && (
-                <button
-                  onClick={() => {
-                    setEngineFilter("all");
-                    setCapacityFilter(0);
-                    setMaxPrice(500000);
-                    setSortBy("price_asc");
-                  }}
-                  className="text-[10px] font-space text-gold hover:underline cursor-pointer uppercase tracking-wider font-bold"
-                >
-                  Reset Filters
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Dynamic Flight Corridor Visualizer */}
-          <div className="bg-[#020B1E] p-5 rounded-xl border border-white/10 relative overflow-hidden shadow-xl text-white">
-            <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
-              <div className="flex items-center gap-2">
-                <Activity className="h-4.5 w-4.5 text-gold animate-pulse" />
-                <span className="font-space text-xs uppercase tracking-wider font-bold text-white">Live Corridor Tracking</span>
-              </div>
-              <div className="text-[10px] font-mono text-emerald-400 flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-                Weather Operational
-              </div>
-            </div>
-
-            {/* Flight Path SVG Line */}
-            <div className="relative h-48 bg-[#051433]/80 rounded-lg border border-white/5 p-4 flex flex-col justify-between overflow-hidden">
-              <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                <line 
-                  x1={`${srcCoord.x}%`} 
-                  y1={`${srcCoord.y}%`} 
-                  x2={`${destCoord.x}%`} 
-                  y2={`${destCoord.y}%`} 
-                  stroke="#C5A880" 
-                  strokeWidth="2" 
-                  strokeDasharray="6,6"
-                  className="animate-pulse"
-                />
-                <circle cx={`${srcCoord.x}%`} cy={`${srcCoord.y}%`} r="6" fill="#C5A880" />
-                <circle cx={`${destCoord.x}%`} cy={`${destCoord.y}%`} r="6" fill="#10B981" />
-              </svg>
-
-              {/* Source Details overlay */}
-              <div className="z-10 flex flex-col items-start bg-[#020B1E]/90 p-2.5 rounded border border-white/10 max-w-[170px]">
-                <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Departure Terminal</span>
-                <span className="text-xs font-bold text-gold">{paramSource}</span>
-                <span className="text-[9px] font-mono text-slate-300 mt-0.5">{srcCoord.lat}</span>
-              </div>
-
-              {/* Mid Flight Stats */}
-              <div className="z-10 self-center bg-gold/10 border border-gold/30 px-3 py-1 rounded-full text-center backdrop-blur-md">
-                <span className="text-[10px] font-mono text-gold font-bold uppercase tracking-wider">
-                  Dist: {distanceKm} KM | Approx. Flight Time: {etaMin} Mins
-                </span>
-              </div>
-
-              {/* Destination Details overlay */}
-              <div className="z-10 flex flex-col items-end self-end bg-[#020B1E]/90 p-2.5 rounded border border-white/10 max-w-[170px] text-right">
-                <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Arrival Helipad</span>
-                <span className="text-xs font-bold text-emerald-400">{paramDest}</span>
-                <span className="text-[9px] font-mono text-slate-300 mt-0.5">{destCoord.lat}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* List of Available Helicopter Charters */}
-          <div className="flex flex-col gap-6">
+            {/* MakeMyTrip Flight Listing Cards */}
             {filteredHelis.map((heli) => {
-              const basePrice = Number(heli.price);
-              const calculatedTotalPrice = (basePrice + upgradesPerPassenger) * (totalPassengers || 1) + flatUpgrades;
-              const displayPerPassengerPrice = Math.round(calculatedTotalPrice / (totalPassengers || 1));
+              const totalPrice = Number(heli.price) * (totalPassengers || 1);
 
               return (
                 <motion.div
                   key={heli.id}
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-[#051433] rounded-2xl border border-white/10 hover:border-gold/50 transition-all duration-300 p-6 shadow-xl flex flex-col md:flex-row gap-6 text-white group"
+                  className="bg-white rounded-2xl border border-slate-200 hover:border-slate-400 transition-all shadow-md hover:shadow-xl p-5 md:p-6 flex flex-col md:flex-row gap-6 text-slate-800"
                 >
-                  {/* Aircraft Image */}
-                  <div className="md:w-5/12 relative h-56 md:h-auto rounded-xl overflow-hidden bg-black/40 border border-white/5">
+                  {/* Aircraft Image & Model Badge */}
+                  <div className="md:w-4/12 relative h-48 md:h-auto rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
                     <img 
                       src={heli.image} 
                       alt={heli.name} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute top-3 left-3 bg-[#020B1E]/80 backdrop-blur-md px-2.5 py-1 rounded text-[10px] font-mono text-gold border border-gold/20 font-bold">
+                    <div className="absolute top-2 left-2 bg-[#051433] text-white text-[10px] font-bold font-mono px-2 py-0.5 rounded-md">
                       {heli.model}
-                    </div>
-                    <div className="absolute bottom-3 right-3 bg-emerald-500/90 text-black px-2 py-0.5 rounded text-[10px] font-bold font-mono">
-                      Rating: {heli.safetyRating}
                     </div>
                   </div>
 
-                  {/* Flight Specifications & Specs Details */}
-                  <div className="md:w-7/12 flex flex-col justify-between gap-4">
+                  {/* Flight Details & Schedule Breakdown */}
+                  <div className="md:w-8/12 flex flex-col justify-between gap-4">
                     <div>
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <h3 className="font-space text-xl font-bold text-white group-hover:text-gold transition-colors">{heli.name}</h3>
-                          <p className="text-xs text-slate-400 mt-1 font-sans">{heli.tagline}</p>
+                          <h3 className="font-space text-lg font-bold text-slate-900">{heli.name}</h3>
+                          <p className="text-xs text-slate-500 mt-0.5">{heli.tagline}</p>
+                        </div>
+                        <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 px-2 py-1 rounded-lg text-xs font-bold">
+                          <Star className="h-3.5 w-3.5 fill-emerald-600 text-emerald-600" />
+                          <span>{heli.safetyRating}</span>
                         </div>
                       </div>
 
-                      {/* Specs Badge Bar */}
-                      <div className="grid grid-cols-3 gap-2 my-4 bg-[#020B1E] p-3 rounded-xl border border-white/5 text-center">
+                      {/* Flight Path Graphic Line */}
+                      <div className="flex items-center justify-between my-4 bg-slate-50 p-3 rounded-xl border border-slate-200">
                         <div className="flex flex-col">
-                          <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Max Speed</span>
-                          <span className="text-xs font-mono text-white font-bold mt-0.5">{heli.speed}</span>
+                          <span className="text-[10px] uppercase font-bold text-slate-400">Departure</span>
+                          <span className="text-xs font-bold text-slate-900">{paramSource.split(" ")[0]}</span>
                         </div>
-                        <div className="flex flex-col border-x border-white/10">
-                          <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Max Range</span>
-                          <span className="text-xs font-mono text-white font-bold mt-0.5">{heli.range}</span>
+
+                        <div className="flex flex-col items-center flex-1 px-4">
+                          <div className="text-[10px] text-slate-500 font-bold mb-1 flex items-center gap-1">
+                            <Clock className="h-3 w-3 text-slate-400" />
+                            {heli.speed.includes("240") ? "45 Mins" : "35 Mins"}
+                          </div>
+                          <div className="w-full h-[2px] bg-slate-300 relative flex items-center justify-center">
+                            <Helicopter className="h-4 w-4 text-[#051433] bg-slate-50 px-0.5 absolute" />
+                          </div>
+                          <span className="text-[9px] text-emerald-600 font-bold mt-1">Direct Flight</span>
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Capacity</span>
-                          <span className="text-xs font-mono text-gold font-bold mt-0.5">{heli.capacity} Seater</span>
+
+                        <div className="flex flex-col text-right">
+                          <span className="text-[10px] uppercase font-bold text-slate-400">Arrival</span>
+                          <span className="text-xs font-bold text-slate-900">{paramDest.split(" ")[0]}</span>
                         </div>
                       </div>
 
-                      {/* Feature Pills */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {heli.features.slice(0, 4).map((feat, i) => (
-                          <span key={i} className="text-[9px] bg-white/5 border border-white/10 px-2 py-1 rounded text-slate-300 font-sans">
-                            ✓ {feat}
-                          </span>
-                        ))}
+                      {/* Aircraft Specifications & Features */}
+                      <div className="flex flex-wrap gap-2">
+                        <span className="text-[10px] bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-medium">
+                          ⚡ {heli.speed} Cruise
+                        </span>
+                        <span className="text-[10px] bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-medium">
+                          👤 {heli.capacity} Seater
+                        </span>
+                        <span className="text-[10px] bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-medium">
+                          📍 {heli.range} Max Range
+                        </span>
                       </div>
                     </div>
 
-                    {/* Price and Book Action CTA */}
-                    <div className="flex items-center justify-between border-t border-white/5 pt-4 mt-2">
+                    {/* Pricing & MakeMyTrip CTA Button */}
+                    <div className="flex items-center justify-between border-t border-slate-100 pt-4">
                       <div>
-                        <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Total Charter Price ({totalPassengers} Pax)</div>
-                        <div className="text-2xl font-space font-bold text-gold">
-                          ₹{calculatedTotalPrice.toLocaleString("en-IN")}
-                        </div>
-                        <div className="text-[9px] font-mono text-slate-400">
-                          (₹{displayPerPassengerPrice.toLocaleString("en-IN")} / person incl. upgrades)
+                        <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Price ({totalPassengers} Pax)</span>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-xl font-bold font-space text-slate-900">
+                            ₹{totalPrice.toLocaleString("en-IN")}
+                          </span>
+                          <span className="text-xs text-slate-500">
+                            (₹{Number(heli.price).toLocaleString("en-IN")}/pax)
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <Link 
-                          href={`/booking/${heli.id}?source=${encodeURIComponent(paramSource)}&destination=${encodeURIComponent(paramDest)}`}
-                          className="px-3.5 py-2.5 rounded-lg border border-white/20 hover:border-gold text-xs font-space font-bold uppercase text-slate-200 hover:text-gold transition-colors"
-                        >
-                          View Aircraft
-                        </Link>
+                      <div className="flex items-center gap-3">
                         <button
                           onClick={() => handleSelectFlight(heli)}
-                          className="px-5 py-2.5 rounded-lg bg-gold hover:bg-gold-hover text-black font-space text-xs font-bold uppercase tracking-wider transition-all shadow-lg flex items-center gap-1.5 cursor-pointer"
+                          className="px-6 py-2.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] hover:to-[#C57A2D] text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
                         >
-                          <span>Reserve Charter</span>
+                          <span>BOOK FLIGHT</span>
                           <ArrowRight className="h-4 w-4" />
                         </button>
                       </div>
@@ -978,8 +820,8 @@ export default function BookingSearchPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#020B1E] flex items-center justify-center text-white font-space text-sm">
-          Loading Luxury Charter Search...
+        <div className="min-h-screen bg-[#F2F5F8] flex items-center justify-center text-slate-800 font-space text-sm">
+          Loading MakeMyTrip Flight Search...
         </div>
       }
     >
