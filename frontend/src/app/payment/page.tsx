@@ -328,42 +328,134 @@ export default function PaymentPage() {
             {/* Summary Invoice - Right */}
             <div className="md:col-span-5">
               <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800 flex flex-col gap-4">
-                <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3">
-                  Booking Summary
+                <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center justify-between">
+                  <span>Booking Summary</span>
+                  <span className="text-[10px] bg-[#051433] text-white px-2 py-0.5 rounded font-mono uppercase">{item.type}</span>
                 </h3>
 
-                <div className="flex flex-col gap-2.5 text-xs font-sans text-slate-600">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Reserved Service:</span>
-                    <span className="font-bold text-slate-900 text-right truncate max-w-[170px]">{item.name}</span>
+                {/* Thumbnail Image */}
+                {item.image && (
+                  <div className="h-32 relative rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Travel Date:</span>
-                    <span className="font-bold text-slate-900">{item.date}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Manifest Size:</span>
-                    <span className="font-bold text-slate-900">{item.passengers} Guest(s)</span>
-                  </div>
-                  {passengers[0]?.email && (
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Delivery Email:</span>
-                      <span className="font-bold text-slate-900 truncate max-w-[170px]">{passengers[0].email}</span>
+                )}
+
+                {/* Service Details */}
+                <div className="flex flex-col gap-2 text-xs font-sans text-slate-600">
+                  <h4 className="font-space text-sm font-bold text-slate-900">{item.name}</h4>
+                  
+                  {item.details && (
+                    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700">
+                      📍 {item.details}
                     </div>
                   )}
-                  {passengers[0]?.phone && (
+
+                  <div className="flex justify-between border-t border-slate-100 pt-2">
+                    <span className="text-slate-400 font-medium">Travel Date:</span>
+                    <span className="font-bold text-slate-900">{item.date}</span>
+                  </div>
+
+                  {item.return_date && (
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Mobile No:</span>
-                      <span className="font-bold text-slate-900">+91 {passengers[0].phone}</span>
+                      <span className="text-slate-400 font-medium">Return Date:</span>
+                      <span className="font-bold text-slate-900">{item.return_date}</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between">
+                    <span className="text-slate-400 font-medium">Passengers:</span>
+                    <span className="font-bold text-slate-900">{item.passengers} Guest(s)</span>
+                  </div>
+
+                  {/* Passenger Manifest Names */}
+                  {passengers.length > 0 && passengers[0].fullName && (
+                    <div className="flex flex-col gap-1 border-t border-slate-100 pt-2">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Passenger Roster</span>
+                      {passengers.map((p, idx) => (
+                        <div key={idx} className="flex justify-between text-[11px] text-slate-700">
+                          <span>#{idx + 1} {p.fullName}</span>
+                          <span className="text-slate-400">{p.age ? `${p.age} yrs` : ""}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Seats Allocated */}
+                  {selectedSeats.length > 0 && (
+                    <div className="flex justify-between border-t border-slate-100 pt-2">
+                      <span className="text-slate-400 font-medium">Allocated Seats:</span>
+                      <span className="font-bold text-slate-900 font-mono">{selectedSeats.join(", ")}</span>
+                    </div>
+                  )}
+
+                  {/* Add-ons List */}
+                  {selectedAddOns.length > 0 && (
+                    <div className="flex flex-col gap-1 border-t border-slate-100 pt-2">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">VIP Add-ons</span>
+                      {selectedAddOns.map((ao) => (
+                        <div key={ao.id} className="flex justify-between text-[11px] text-slate-700">
+                          <span>• {ao.name}</span>
+                          <span className="font-bold text-slate-900">+₹{ao.price.toLocaleString("en-IN")}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Delivery Contacts */}
+                  {(passengers[0]?.email || passengers[0]?.phone) && (
+                    <div className="flex flex-col gap-1 border-t border-slate-100 pt-2">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Ticket Delivery Info</span>
+                      {passengers[0]?.email && (
+                        <div className="flex justify-between text-[11px]">
+                          <span className="text-slate-400">Email:</span>
+                          <span className="font-bold text-slate-900 truncate max-w-[170px]">{passengers[0].email}</span>
+                        </div>
+                      )}
+                      {passengers[0]?.phone && (
+                        <div className="flex justify-between text-[11px]">
+                          <span className="text-slate-400">Mobile:</span>
+                          <span className="font-bold text-slate-900">+91 {passengers[0].phone}</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
 
-                <div className="border-t border-slate-100 pt-3 flex justify-between items-end">
-                  <span className="font-space text-xs font-bold uppercase text-slate-900">Total Amount Payable</span>
-                  <span className="font-space text-2xl font-bold text-slate-900">
-                    ₹{finalAmount.toLocaleString("en-IN")}
-                  </span>
+                {/* Final Price Breakdown */}
+                <div className="border-t border-slate-200 pt-3 flex flex-col gap-1.5 text-xs">
+                  <div className="flex justify-between text-slate-500">
+                    <span>Base Fare</span>
+                    <span>₹{Number(item.price).toLocaleString("en-IN")}</span>
+                  </div>
+                  {selectedAddOns.length > 0 && (
+                    <div className="flex justify-between text-slate-500">
+                      <span>Add-ons Subtotal</span>
+                      <span>+₹{selectedAddOns.reduce((acc, curr) => acc + curr.price, 0).toLocaleString("en-IN")}</span>
+                    </div>
+                  )}
+                  {insuranceEnabled && (
+                    <div className="flex justify-between text-slate-500">
+                      <span>VIP Flight Insurance</span>
+                      <span>+₹{(5000 * item.passengers).toLocaleString("en-IN")}</span>
+                    </div>
+                  )}
+                  {appliedPromo && (
+                    <div className="flex justify-between text-emerald-600 font-bold">
+                      <span>Discount ({appliedPromo.code})</span>
+                      <span>-₹{((Number(item.price) + selectedAddOns.reduce((a, c) => a + c.price, 0)) * (appliedPromo.discountPercent / 100)).toLocaleString("en-IN")}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-slate-500">
+                    <span>GST Tax (18%)</span>
+                    <span>₹{((Number(item.price) + selectedAddOns.reduce((a, c) => a + c.price, 0)) * 0.18).toLocaleString("en-IN")}</span>
+                  </div>
+                  
+                  <div className="border-t border-slate-200 pt-3 mt-1 flex justify-between items-end">
+                    <span className="font-space text-xs font-bold uppercase text-slate-900">Total Payable</span>
+                    <span className="font-space text-2xl font-bold text-slate-900">
+                      ₹{finalAmount.toLocaleString("en-IN")}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
