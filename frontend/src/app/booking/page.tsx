@@ -24,7 +24,11 @@ import {
   ArrowRightLeft,
   Plus,
   Trash2,
-  Minus
+  Minus,
+  SlidersHorizontal,
+  Gauge,
+  Shield,
+  Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "@/utils/api";
@@ -84,10 +88,12 @@ function BookingSearchContent() {
 
   const totalPassengers = adults + children;
 
-  // Filter states
+  // Filter & Sort states tailored for Helicopter Charters
   const [helicopters, setHelicopters] = useState<HelicopterListing[]>(HELICOPTERS);
-  const [maxPrice, setMaxPrice] = useState(300000);
-  const [sortBy, setSortBy] = useState<"price" | "speed" | "safety">("price");
+  const [maxPrice, setMaxPrice] = useState(500000);
+  const [sortBy, setSortBy] = useState<"price_asc" | "price_desc" | "capacity" | "speed" | "safety">("price_asc");
+  const [engineFilter, setEngineFilter] = useState<"all" | "twin" | "single">("all");
+  const [capacityFilter, setCapacityFilter] = useState<number>(0);
   const [filteredHelis, setFilteredHelis] = useState<HelicopterListing[]>(HELICOPTERS);
 
   // Hospitality Upgrades Selection
@@ -133,12 +139,43 @@ function BookingSearchContent() {
     fetchFleet();
   }, []);
 
-  // Filter and sort listings
+  // Filter and sort listings with helicopter-specific criteria
   useEffect(() => {
     let result = helicopters.filter((h) => Number(h.price) <= maxPrice);
 
-    if (sortBy === "price") {
+    // Seating capacity filter
+    if (capacityFilter > 0) {
+      result = result.filter((h) => Number(h.capacity) >= capacityFilter);
+    }
+
+    // Helicopter Engine Type filter
+    if (engineFilter === "twin") {
+      result = result.filter((h) => 
+        h.model.toLowerCase().includes("twin") || 
+        h.model.toLowerCase().includes("h145") || 
+        h.model.toLowerCase().includes("429") || 
+        h.model.toLowerCase().includes("aw109") || 
+        (h.specs && h.specs["Engine Type"] && h.specs["Engine Type"].toLowerCase().includes("dual")) ||
+        h.description.toLowerCase().includes("twin") ||
+        h.tagline.toLowerCase().includes("twin")
+      );
+    } else if (engineFilter === "single") {
+      result = result.filter((h) => 
+        !h.model.toLowerCase().includes("twin") && 
+        !h.model.toLowerCase().includes("h145") && 
+        !h.model.toLowerCase().includes("429") && 
+        !h.model.toLowerCase().includes("aw109") && 
+        !(h.specs && h.specs["Engine Type"] && h.specs["Engine Type"].toLowerCase().includes("dual"))
+      );
+    }
+
+    // Helicopter Sort options
+    if (sortBy === "price_asc") {
       result.sort((a, b) => Number(a.price) - Number(b.price));
+    } else if (sortBy === "price_desc") {
+      result.sort((a, b) => Number(b.price) - Number(a.price));
+    } else if (sortBy === "capacity") {
+      result.sort((a, b) => Number(b.capacity) - Number(a.capacity));
     } else if (sortBy === "speed") {
       result.sort((a, b) => parseFloat(b.speed) - parseFloat(a.speed));
     } else if (sortBy === "safety") {
@@ -146,7 +183,7 @@ function BookingSearchContent() {
     }
 
     setFilteredHelis(result);
-  }, [helicopters, maxPrice, sortBy]);
+  }, [helicopters, maxPrice, sortBy, engineFilter, capacityFilter]);
 
   // Calculate pricing upgrades
   let upgradesPerPassenger = 0;
@@ -674,38 +711,107 @@ function BookingSearchContent() {
         {/* Available Fleet Listings & Map View - Right Column */}
         <div className="lg:col-span-8 flex flex-col gap-6">
 
-          {/* Sort bar & interactive view mode switch */}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-[#051433] p-4 rounded-xl border border-white/5 shadow-lg text-white">
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] uppercase font-space tracking-wider text-slate-400 font-bold">Sort By:</span>
-              <button
-                onClick={() => setSortBy("price")}
-                className={`text-xs px-3 py-1.5 rounded transition-all cursor-pointer ${
-                  sortBy === "price" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white"
-                }`}
-              >
-                Price (Low ➔ High)
-              </button>
-              <button
-                onClick={() => setSortBy("speed")}
-                className={`text-xs px-3 py-1.5 rounded transition-all cursor-pointer ${
-                  sortBy === "speed" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white"
-                }`}
-              >
-                Cruise Speed
-              </button>
-              <button
-                onClick={() => setSortBy("safety")}
-                className={`text-xs px-3 py-1.5 rounded transition-all cursor-pointer ${
-                  sortBy === "safety" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white"
-                }`}
-              >
-                Safety Rating
-              </button>
+          {/* Aviation Specific Filter & Sort Toolbar */}
+          <div className="flex flex-col gap-3 bg-[#051433] p-4 rounded-xl border border-white/10 shadow-lg text-white">
+            {/* Top Row: Sort Options & Count */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] uppercase font-space tracking-wider text-gold font-bold flex items-center gap-1">
+                  <SlidersHorizontal className="h-3.5 w-3.5" /> Sort Aircraft:
+                </span>
+                <button
+                  onClick={() => setSortBy("price_asc")}
+                  className={`text-xs px-2.5 py-1 rounded transition-all cursor-pointer ${
+                    sortBy === "price_asc" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white border border-white/10"
+                  }`}
+                >
+                  Price: Low ➔ High
+                </button>
+                <button
+                  onClick={() => setSortBy("price_desc")}
+                  className={`text-xs px-2.5 py-1 rounded transition-all cursor-pointer ${
+                    sortBy === "price_desc" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white border border-white/10"
+                  }`}
+                >
+                  Price: High ➔ Low
+                </button>
+                <button
+                  onClick={() => setSortBy("capacity")}
+                  className={`text-xs px-2.5 py-1 rounded transition-all cursor-pointer ${
+                    sortBy === "capacity" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white border border-white/10"
+                  }`}
+                >
+                  Seating Capacity
+                </button>
+                <button
+                  onClick={() => setSortBy("speed")}
+                  className={`text-xs px-2.5 py-1 rounded transition-all cursor-pointer ${
+                    sortBy === "speed" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white border border-white/10"
+                  }`}
+                >
+                  Cruise Speed
+                </button>
+                <button
+                  onClick={() => setSortBy("safety")}
+                  className={`text-xs px-2.5 py-1 rounded transition-all cursor-pointer ${
+                    sortBy === "safety" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white border border-white/10"
+                  }`}
+                >
+                  Safety Rating
+                </button>
+              </div>
+
+              <div className="text-xs text-slate-300 font-sans">
+                Found <span className="text-gold font-bold">{filteredHelis.length}</span> Helicopter Charters
+              </div>
             </div>
 
-            <div className="text-xs text-slate-400 font-sans">
-              Found <span className="text-gold font-bold">{filteredHelis.length}</span> Verified Aircraft
+            {/* Bottom Row: Helicopter Aviation Specific Filters */}
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-3 flex-wrap">
+                {/* Engine Type Filter */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] uppercase font-space text-slate-400 font-bold">Engine:</span>
+                  <select
+                    value={engineFilter}
+                    onChange={(e) => setEngineFilter(e.target.value as any)}
+                    className="bg-[#020B1E] border border-white/15 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-gold cursor-pointer"
+                  >
+                    <option value="all">All Engine Types</option>
+                    <option value="twin">Twin-Engine (High Altitude / Max Safety)</option>
+                    <option value="single">Single Engine</option>
+                  </select>
+                </div>
+
+                {/* Min Capacity Filter */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] uppercase font-space text-slate-400 font-bold">Min Seats:</span>
+                  <select
+                    value={capacityFilter}
+                    onChange={(e) => setCapacityFilter(Number(e.target.value))}
+                    className="bg-[#020B1E] border border-white/15 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-gold cursor-pointer"
+                  >
+                    <option value={0}>Any Capacity</option>
+                    <option value={4}>4+ Passengers</option>
+                    <option value={5}>5+ Passengers</option>
+                    <option value={6}>6+ Passengers</option>
+                  </select>
+                </div>
+              </div>
+
+              {(engineFilter !== "all" || capacityFilter > 0 || maxPrice < 500000) && (
+                <button
+                  onClick={() => {
+                    setEngineFilter("all");
+                    setCapacityFilter(0);
+                    setMaxPrice(500000);
+                    setSortBy("price_asc");
+                  }}
+                  className="text-[10px] font-space text-gold hover:underline cursor-pointer uppercase tracking-wider font-bold"
+                >
+                  Reset Filters
+                </button>
+              )}
             </div>
           </div>
 
