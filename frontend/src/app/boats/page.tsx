@@ -3,9 +3,9 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import API from "@/utils/api";
-import { BOATS, BoatListing } from "@/utils/mockData";
+import { BoatListing } from "@/utils/mockData";
 import { useCartStore } from "@/store/useCartStore";
-import { Star, Anchor, ShieldCheck, Check, Calendar, Users, Clock, RefreshCw } from "lucide-react";
+import { Star, Anchor, ShieldCheck, Check, Calendar, Users, Clock, ArrowRight, Ship, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 
 function BoatsListingContent() {
@@ -13,8 +13,8 @@ function BoatsListingContent() {
   const router = useRouter();
   const setItem = useCartStore((state) => state.setItem);
 
-  const paramSource = searchParams.get("source") || "Harbors";
-  const paramDest = searchParams.get("destination") || "AURA Prestige 75 Yacht, Goa";
+  const paramSource = searchParams.get("source") || "Goa Harbor";
+  const paramDest = searchParams.get("destination") || "Panaji Coastline";
   const paramDate = searchParams.get("date") || new Date().toISOString().split("T")[0];
   const paramPassengers = Number(searchParams.get("passengers")) || 2;
 
@@ -50,12 +50,12 @@ function BoatsListingContent() {
 
   const [hoursSelected, setHoursSelected] = useState<{ [boatId: string]: number }>({
     "b-1": 3,
-    "b-2": 1,
+    "b-2": 2,
   });
 
   const handleBookBoat = (boat: BoatListing) => {
     const hours = hoursSelected[boat.id] || 3;
-    const finalPrice = boat.price * hours;
+    const finalPrice = Number(boat.price) * hours;
 
     setItem({
       type: "boat",
@@ -64,8 +64,8 @@ function BoatsListingContent() {
       price: finalPrice,
       date: paramDate,
       passengers: paramPassengers,
-      details: `${boat.location} (${boat.type})`,
-      duration: `${hours} ${boat.id === "b-1" ? "Hours Cruise" : "Day Stay"}`,
+      details: `${boat.location} (${boat.type || "Luxury Yacht"})`,
+      duration: `${hours} Hours Cruise`,
       image: boat.image,
     });
     router.push("/checkout");
@@ -74,223 +74,153 @@ function BoatsListingContent() {
   const updateHours = (boatId: string, val: number) => {
     setHoursSelected({
       ...hoursSelected,
-      [boatId]: Math.max(boatId === "b-1" ? 3 : 1, val),
+      [boatId]: Math.max(1, val),
     });
   };
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="border-b border-white/5 pb-6 mb-12 flex justify-between items-center animate-pulse">
-          <div>
-            <div className="h-8 w-64 bg-white/5 rounded mb-2" />
-            <div className="h-4 w-96 bg-white/5 rounded" />
+      <div className="min-h-screen bg-[#F2F5F8] py-12 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="h-8 w-64 bg-slate-300 rounded animate-pulse mb-4" />
+          <div className="flex flex-col gap-6">
+            {[1, 2].map((i) => (
+              <div key={i} className="rounded-2xl bg-white p-6 border border-slate-200 h-64 animate-pulse shadow-md" />
+            ))}
           </div>
-          <div className="h-8 w-36 bg-white/5 rounded" />
-        </div>
-
-        <div className="flex flex-col gap-10">
-          {[1, 2].map((i) => (
-            <div key={i} className="glass-card rounded-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 animate-pulse">
-              <div className="lg:col-span-4 h-64 lg:h-72 bg-white/5 rounded-lg" />
-              <div className="lg:col-span-5 flex flex-col justify-between">
-                <div>
-                  <div className="h-7 w-48 bg-white/5 rounded mb-2" />
-                  <div className="h-3.5 w-24 bg-white/5 rounded mb-4" />
-                  <div className="grid grid-cols-2 gap-4 bg-white/2 rounded p-4 mb-6">
-                    <div className="h-8 bg-white/5 rounded" />
-                    <div className="h-8 bg-white/5 rounded" />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <div className="h-3 w-40 bg-white/5 rounded" />
-                    <div className="h-3 w-32 bg-white/5 rounded" />
-                  </div>
-                </div>
-                <div className="h-8 w-44 bg-white/5 rounded mt-6" />
-              </div>
-              <div className="lg:col-span-3 border-t lg:border-t-0 lg:border-l border-white/5 pt-6 lg:pt-0 lg:pl-6 flex flex-row lg:flex-col justify-between lg:justify-center items-center lg:items-end gap-6">
-                <div className="flex flex-col gap-1 items-end">
-                  <div className="h-2 w-12 bg-white/5 rounded" />
-                  <div className="h-6 w-32 bg-white/5 rounded" />
-                  <div className="h-2 w-16 bg-white/5 rounded" />
-                </div>
-                <div className="h-9 w-32 bg-white/5 rounded" />
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      {/* Title */}
-      <div className="border-b border-white/5 pb-6 mb-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="font-space text-3xl font-bold tracking-tight">Luxury Yacht & Boat Services</h1>
-          <p className="font-luxury text-sm text-grey-text mt-1">
-            Private cruises, shoreline catamarans, and premium houseboats.
-          </p>
-        </div>
-        <div className="flex items-center gap-4 text-xs font-mono text-grey-text bg-white/2 px-4 py-2 border border-white/5 rounded">
-          <Anchor className="h-3.5 w-3.5 text-gold" />
-          <span>Coastal Departures Log</span>
+    <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
+      {/* MakeMyTrip Style Navy Hero Header */}
+      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-8 pb-16 px-4 md:px-8 text-white relative shadow-lg">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/10 pb-6 mb-6 gap-4">
+            <div>
+              <h1 className="font-space text-3xl font-bold tracking-tight text-white">Yacht & Boat Charters</h1>
+              <p className="text-xs text-slate-300 mt-1 font-sans">
+                Luxury catamarans, speedboats, and private river cruisers across Goa & Kerala
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-mono text-gold px-3.5 py-1.5 rounded-full border border-gold/30 bg-gold/10 font-bold">
+              <ShieldCheck className="h-4 w-4 text-gold" /> Certified Marine Captains
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* List */}
-      <div className="flex flex-col gap-10">
-        {boatsList.map((boat) => {
-          const count = hoursSelected[boat.id] || (boat.id === "b-1" ? 3 : 1);
-          return (
-            <div
-              key={boat.id}
-              className="glass-card rounded-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 transition-all hover:border-gold/20 duration-300"
-            >
-              {/* Photo */}
-              <div className="lg:col-span-4 h-64 lg:h-full relative rounded-lg overflow-hidden bg-secondary">
-                <img src={boat.image} alt={boat.name} className="w-full h-full object-cover" />
-                <div className="absolute top-4 left-4 bg-black/60 border border-white/10 px-3 py-1 rounded text-[10px] font-space tracking-widest text-gold uppercase">
-                  {boat.type}
-                </div>
-              </div>
+      {/* Main Listing Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 -mt-8 relative z-20">
+        <div className="flex flex-col gap-6">
+          {boatsList.map((boat) => {
+            const hours = hoursSelected[boat.id] || 3;
+            const totalPrice = Number(boat.price) * hours;
+            const features = Array.isArray(boat.features) && boat.features.length > 0
+              ? boat.features
+              : ["Private Captain & Crew", "Onboard Refreshments", "Safety Equipment"];
 
-              {/* Specs */}
-              <div className="lg:col-span-5 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-space text-2xl font-bold text-white mb-2">{boat.name}</h3>
-                  <span className="font-luxury text-xs text-grey-text block mb-4">{boat.location}</span>
-
-                  <div className="grid grid-cols-2 gap-4 border border-white/5 bg-white/2 rounded p-4 mb-6">
-                    <div>
-                      <span className="text-[9px] uppercase tracking-wider text-grey-text block">Max Capacity</span>
-                      <span className="font-space text-xs font-bold text-white">{boat.capacity} Guests</span>
-                    </div>
-                    <div>
-                      <span className="text-[9px] uppercase tracking-wider text-grey-text block">Billing Type</span>
-                      <span className="font-space text-xs font-bold text-teal">{boat.duration}</span>
-                    </div>
+            return (
+              <motion.div
+                key={boat.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl border border-slate-200 hover:border-slate-400 transition-all shadow-md hover:shadow-xl p-6 flex flex-col lg:flex-row gap-6 text-slate-800"
+              >
+                {/* Yacht Image */}
+                <div className="lg:w-4/12 relative h-56 lg:h-auto rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+                  <img
+                    src={boat.image}
+                    alt={boat.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute top-3 left-3 bg-[#051433] text-white px-2.5 py-1 rounded text-[10px] font-bold font-mono">
+                    {boat.type || "Luxury Yacht"}
                   </div>
+                </div>
 
-                  {/* Amenities */}
-                  <div className="flex flex-col gap-1.5">
-                    {boat.features.map((feature, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs text-white font-luxury">
-                        <Check className="h-3.5 w-3.5 text-gold shrink-0" />
-                        <span className="text-grey-text">{feature}</span>
+                {/* Details Column */}
+                <div className="lg:w-8/12 flex flex-col justify-between gap-4">
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="font-space text-xl font-bold text-slate-900">{boat.name}</h3>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-sans mt-0.5">
+                          <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                          <span>{boat.location || "Goa Harbor, India"}</span>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Inclusions & Exclusions */}
-                  <div className="grid grid-cols-2 gap-4 mt-4 border-t border-white/5 pt-4">
-                    <div>
-                      <span className="text-[10px] font-space text-teal font-bold uppercase tracking-wider block mb-1">✓ Inclusions</span>
-                      <ul className="text-[10px] flex flex-col gap-1 text-slate-400">
-                        <li>• Certified Captain & Crew</li>
-                        <li>• Soft Beverages & Ice</li>
-                        <li>• Safety Vests & Marine GPS</li>
-                      </ul>
+                      <div className="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-emerald-200">
+                        <Star className="h-3.5 w-3.5 fill-emerald-600 text-emerald-600" />
+                        <span>4.9/5.0</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-[10px] font-space text-red-400 font-bold uppercase tracking-wider block mb-1">✗ Exclusions</span>
-                      <ul className="text-[10px] flex flex-col gap-1 text-slate-400">
-                        <li>• Jetski Attachments</li>
-                        <li>• Catering Surcharges</li>
-                        <li>• Crew Gratuities / Tips</li>
-                      </ul>
+
+                    <p className="text-xs text-slate-600 font-sans mt-3 leading-relaxed">
+                      {boat.description}
+                    </p>
+
+                    {/* Features Tags */}
+                    <div className="flex flex-wrap gap-2 my-4">
+                      <span className="text-xs bg-slate-100 text-slate-700 px-3 py-1 rounded-lg font-medium">
+                        👥 Capacity: {boat.capacity || "8 Guests"}
+                      </span>
+                      {features.map((feat: string, i: number) => (
+                        <span key={i} className="text-xs bg-slate-100 text-slate-700 px-3 py-1 rounded-lg font-medium">
+                          ✓ {feat}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Duration Selector */}
+                    <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200 w-fit">
+                      <span className="text-xs font-bold text-slate-700 uppercase">Cruise Duration:</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => updateHours(boat.id, hours - 1)}
+                          className="h-7 w-7 rounded-lg bg-white border border-slate-300 font-bold flex items-center justify-center hover:bg-slate-100"
+                        >
+                          -
+                        </button>
+                        <span className="text-xs font-bold text-slate-900 w-16 text-center">{hours} Hours</span>
+                        <button
+                          onClick={() => updateHours(boat.id, hours + 1)}
+                          className="h-7 w-7 rounded-lg bg-white border border-slate-300 font-bold flex items-center justify-center hover:bg-slate-100"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Duration Configurator */}
-                <div className="flex items-center gap-4 mt-6">
-                  <span className="text-xs font-space uppercase text-grey-text">
-                    {boat.id === "b-1" ? "Select Cruise Hours" : "Select Booking Days"}
-                  </span>
-                  <div className="flex items-center gap-2 border border-white/10 rounded overflow-hidden">
+                  {/* Pricing & MakeMyTrip CTA */}
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-2">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Charter Cost ({hours} Hours)</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-bold font-space text-slate-900">
+                          ₹{totalPrice.toLocaleString("en-IN")}
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          (₹{Number(boat.price).toLocaleString("en-IN")}/hr)
+                        </span>
+                      </div>
+                    </div>
+
                     <button
-                      onClick={() => updateHours(boat.id, count - 1)}
-                      className="px-3 py-1 bg-white/5 text-white hover:bg-white/10 text-xs font-bold cursor-pointer"
+                      onClick={() => handleBookBoat(boat)}
+                      className="px-6 py-3 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] hover:to-[#C57A2D] text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
                     >
-                      -
-                    </button>
-                    <span className="px-3 text-xs font-mono font-bold text-white">{count}</span>
-                    <button
-                      onClick={() => updateHours(boat.id, count + 1)}
-                      className="px-3 py-1 bg-white/5 text-white hover:bg-white/10 text-xs font-bold cursor-pointer"
-                    >
-                      +
+                      <span>RESERVE YACHT</span>
+                      <ArrowRight className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
-              </div>
-
-              {/* Pricing & Booking */}
-              <div className="lg:col-span-3 border-t lg:border-t-0 lg:border-l border-white/5 pt-6 lg:pt-0 lg:pl-6 flex flex-row lg:flex-col justify-between lg:justify-center items-center lg:items-end gap-6">
-                <div className="text-left lg:text-right">
-                  <span className="text-[9px] uppercase tracking-wider text-grey-text">Charter Subtotal</span>
-                  <div className="font-space text-2xl font-bold text-gold">
-                    ₹{(boat.price * count).toLocaleString("en-IN")}
-                  </div>
-                  <span className="text-[9px] text-grey-text block">
-                    (₹{boat.price.toLocaleString("en-IN")} base unit)
-                  </span>
-                </div>
-
-                <div className="flex flex-col gap-2 w-full sm:w-auto lg:w-full">
-                  <div className="flex items-center gap-1.5 text-[10px] font-luxury text-grey-text bg-white/2 p-2 rounded border border-white/5">
-                    <ShieldCheck className="h-3.5 w-3.5 text-teal shrink-0" />
-                    <span>Includes Yacht Captain & Butler Crew</span>
-                  </div>
-                  <button
-                    onClick={() => handleBookBoat(boat)}
-                    className="w-full py-3 bg-gold hover:bg-gold/90 text-black rounded font-space font-bold text-xs uppercase tracking-widest transition-all glow-gold border border-gold cursor-pointer"
-                  >
-                    Reserve Yacht
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ── YACHT & BOAT FAQ SECTION ───────────────────────────────────────── */}
-      <div className="mt-20 border-t border-white/5 pt-16 text-left max-w-4xl mx-auto">
-        <div className="flex flex-col gap-2 mb-10 text-center">
-          <span className="font-space text-xs uppercase tracking-widest text-gold font-bold">Harbor Support Desk</span>
-          <h2 className="font-serif text-2xl md:text-3xl font-bold text-white">Yacht Charter FAQs</h2>
-          <div className="h-[1px] w-12 bg-gold mx-auto mt-2" />
-        </div>
-
-        <div className="flex flex-col gap-4 text-xs font-sans text-slate-300">
-          {[
-            {
-              q: "Is fuel cost included in the listed hourly rate?",
-              a: "Yes. For our motor yachts (Prestige 75 Yacht), the listed hourly rate includes standard fuel consumption within a 15-mile coastal corridor. Heavy cruising speeds or specialized offshore destinations may incur additional surcharges."
-            },
-            {
-              q: "How does weather impact my yacht booking?",
-              a: "Marine operations depend strictly on wind speed and wave height coordinates. If the harbor master flags weather warnings or restricts sailings, we provide free priority rescheduling or a 100% refund."
-            },
-            {
-              q: "Can we bring our own food and alcohol onboard?",
-              a: "Yes. You are welcome to bring your own gourmet catering and beverages. Our onboard butler will be pleased to chill, prepare, and serve them for you. Corkage fees do not apply."
-            },
-            {
-              q: "What is the maximum passenger limit for day cruises?",
-              a: "For day cruises, the AURA Prestige 75 Yacht accommodates a maximum of 12 passengers plus 4 crew members. Houseboat stays in Kerala accommodate a maximum of 6 overnight guests."
-            }
-          ].map((item, idx) => (
-            <div key={idx} className="bg-white/2 border border-white/10 rounded-lg p-5">
-              <h4 className="font-space text-sm font-bold text-white mb-2 flex items-center gap-2">
-                <span className="text-gold">Q.</span> {item.q}
-              </h4>
-              <p className="leading-relaxed text-slate-300 pl-4">{item.a}</p>
-            </div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -299,15 +229,7 @@ function BoatsListingContent() {
 
 export default function BoatsListingPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="max-w-7xl mx-auto px-6 py-20 text-center">
-          <span className="font-space text-gold text-sm tracking-wider animate-pulse">
-            Configuring Yacht Charters...
-          </span>
-        </div>
-      }
-    >
+    <Suspense fallback={<div className="min-h-screen bg-[#F2F5F8] flex items-center justify-center">Loading Boats...</div>}>
       <BoatsListingContent />
     </Suspense>
   );

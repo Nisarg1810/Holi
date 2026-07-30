@@ -4,26 +4,31 @@ import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import API from "@/utils/api";
-import { TOUR_PACKAGES, TourPackage } from "@/utils/mockData";
-import { useCartStore } from "@/store/useCartStore";
-import { Check, Star, RefreshCw, Compass, ArrowRight, ShieldCheck } from "lucide-react";
+import { TourPackage } from "@/utils/mockData";
+import { Check, Star, RefreshCw, Compass, ArrowRight, ShieldCheck, MapPin, Calendar, SlidersHorizontal, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 function ToursListingContent() {
   const [tourPackages, setTourPackages] = useState<any[]>([]);
+  const [filteredTours, setFilteredTours] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedForCompare, setSelectedForCompare] = useState<TourPackage[]>([]);
   const [compareTrayOpen, setCompareTrayOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [durationFilter, setDurationFilter] = useState("all");
 
   useEffect(() => {
     const fetchTours = async () => {
       try {
         setLoading(true);
         const res = await API.get("/tours");
-        setTourPackages(res.data || []);
+        const data = res.data || [];
+        setTourPackages(data);
+        setFilteredTours(data);
       } catch (err) {
         console.error("Failed to query live tours list:", err);
         setTourPackages([]);
+        setFilteredTours([]);
       } finally {
         setLoading(false);
       }
@@ -31,13 +36,26 @@ function ToursListingContent() {
     fetchTours();
   }, []);
 
+  useEffect(() => {
+    let result = [...tourPackages];
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (t) => t.name?.toLowerCase().includes(q) || t.tagline?.toLowerCase().includes(q)
+      );
+    }
+    if (durationFilter !== "all") {
+      result = result.filter((t) => t.duration?.toLowerCase().includes(durationFilter));
+    }
+    setFilteredTours(result);
+  }, [searchQuery, durationFilter, tourPackages]);
+
   const toggleCompare = (pkg: TourPackage) => {
     const isSelected = selectedForCompare.find((p) => p.id === pkg.id);
     if (isSelected) {
       setSelectedForCompare(selectedForCompare.filter((p) => p.id !== pkg.id));
     } else {
       if (selectedForCompare.length >= 2) {
-        // Limit to 2 for comparisons side-by-side
         setSelectedForCompare([selectedForCompare[1], pkg]);
       } else {
         setSelectedForCompare([...selectedForCompare, pkg]);
@@ -48,136 +66,168 @@ function ToursListingContent() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="border-b border-white/5 pb-6 mb-12">
-          <div className="h-8 w-64 bg-white/5 rounded animate-pulse mb-2" />
-          <div className="h-4 w-96 bg-white/5 rounded animate-pulse" />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="rounded-xl overflow-hidden grid grid-cols-1 sm:grid-cols-12 bg-white/2 border border-white/5 h-64 animate-pulse">
-              <div className="sm:col-span-5 h-full bg-white/5" />
-              <div className="sm:col-span-7 p-6 flex flex-col justify-between">
-                <div className="flex flex-col gap-3">
-                  <div className="flex justify-between items-center">
-                    <div className="h-4 w-12 bg-white/5 rounded" />
-                    <div className="h-5 w-16 bg-white/5 rounded" />
-                  </div>
-                  <div className="h-6 w-40 bg-white/5 rounded" />
-                  <div className="h-3 w-48 bg-white/5 rounded" />
-                </div>
-                <div className="flex flex-col gap-2 my-2">
-                  <div className="h-3.5 w-full bg-white/5 rounded" />
-                  <div className="h-3.5 w-5/6 bg-white/5 rounded" />
-                </div>
-                <div className="flex justify-between items-end border-t border-white/5 pt-4 mt-2">
-                  <div className="flex flex-col gap-1">
-                    <div className="h-2 w-8 bg-white/5 rounded" />
-                    <div className="h-5 w-20 bg-white/5 rounded" />
-                  </div>
-                  <div className="h-8 w-24 bg-white/5 rounded" />
-                </div>
-              </div>
-            </div>
-          ))}
+      <div className="min-h-screen bg-[#F2F5F8] py-12 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="h-8 w-64 bg-slate-300 rounded animate-pulse mb-4" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-2xl bg-white p-6 border border-slate-200 h-64 animate-pulse shadow-md" />
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      {/* Title */}
-      <div className="border-b border-white/5 pb-6 mb-12">
-        <h1 className="font-space text-3xl font-bold tracking-tight">Luxury Tour Packages</h1>
-        <p className="font-luxury text-sm text-grey-text mt-1">
-          Handcrafted retreats combining executive helicopter transits, top-tier villas, and custom yachts.
-        </p>
+    <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
+      {/* MakeMyTrip Style Navy Hero Header */}
+      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-8 pb-16 px-4 md:px-8 text-white relative shadow-lg">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/10 pb-6 mb-6 gap-4">
+            <div>
+              <h1 className="font-space text-3xl font-bold tracking-tight text-white">Tour Packages</h1>
+              <p className="text-xs text-slate-300 mt-1 font-sans">
+                Curated pilgrimages & holiday retreats combining VIP helicopter flights, hotels, and road transfers
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-mono text-gold px-3.5 py-1.5 rounded-full border border-gold/30 bg-gold/10 font-bold">
+              <ShieldCheck className="h-4 w-4 text-gold" /> All Packages Verified
+            </div>
+          </div>
+
+          {/* MakeMyTrip Search & Filter Bar */}
+          <div className="bg-white rounded-2xl p-4 shadow-2xl text-slate-800 border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+            <div className="md:col-span-6 bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center gap-2">
+              <Search className="h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search by package name or destination (e.g. Kedarnath, Goa, Dwarka)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent text-xs font-bold text-slate-900 focus:outline-none placeholder-slate-400 font-sans"
+              />
+            </div>
+
+            <div className="md:col-span-4 bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-slate-400" />
+              <select
+                value={durationFilter}
+                onChange={(e) => setDurationFilter(e.target.value)}
+                className="w-full bg-transparent text-xs font-bold text-slate-900 focus:outline-none cursor-pointer"
+              >
+                <option value="all">All Durations</option>
+                <option value="3 days">3 Days / 2 Nights</option>
+                <option value="4 days">4 Days / 3 Nights</option>
+                <option value="5 days">5 Days / 4 Nights</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setDurationFilter("all");
+                }}
+                className="w-full py-2.5 bg-[#051433] hover:bg-[#092254] text-white font-space font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer"
+              >
+                Reset Filters
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
-        {tourPackages.map((pkg) => {
-          const isComparing = selectedForCompare.some((p) => p.id === pkg.id);
-          const ratingStr = pkg.rating ? String(pkg.rating) : "5.0";
-          const inclusionsList = Array.isArray(pkg.inclusions) && pkg.inclusions.length > 0 
-            ? pkg.inclusions 
-            : ["VIP Priority Access", "Bespoke high-altitude catering"];
-          return (
-            <div
-              key={pkg.id}
-              className="rounded-xl overflow-hidden grid grid-cols-1 sm:grid-cols-12 group transition-all duration-300 hover:border-gold/30 high-contrast-card"
-            >
-              <div className="sm:col-span-5 h-64 sm:h-full relative overflow-hidden bg-secondary">
-                <Image
-                  src={pkg.image}
-                  alt={pkg.name}
-                  fill
-                  sizes="(max-width: 640px) 100vw, 30vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute top-4 left-4 bg-black/60 border border-white/10 px-3 py-1 rounded text-[10px] font-space tracking-widest text-gold uppercase text-gold-explicit z-10">
-                  {pkg.duration}
-                </div>
-              </div>
+      {/* Main Listing Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 -mt-6 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+          {filteredTours.map((pkg) => {
+            const isComparing = selectedForCompare.some((p) => p.id === pkg.id);
+            const ratingStr = pkg.rating ? String(pkg.rating) : "5.0";
+            const inclusionsList = Array.isArray(pkg.inclusions) && pkg.inclusions.length > 0 
+              ? pkg.inclusions 
+              : ["VIP Priority Access", "Bespoke high-altitude catering"];
 
-              <div className="sm:col-span-7 p-6 flex flex-col justify-between">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-gold text-xs text-gold-explicit">
-                      <Star className="h-3.5 w-3.5 fill-gold" />
-                      <span className="font-bold text-gold-explicit">{ratingStr}</span>
-                    </div>
-                    {/* Compare toggle */}
-                    <button
-                      onClick={() => toggleCompare(pkg)}
-                      className={`flex items-center gap-1 text-[10px] font-space uppercase tracking-widest px-2 py-1 rounded border transition-colors ${
-                        isComparing
-                          ? "bg-gold text-black border-gold font-bold"
-                          : "bg-white/5 border-white/10 text-grey-text hover:text-white hover:border-gold/30 text-slate-light"
-                      }`}
-                    >
-                      <RefreshCw className="h-3 w-3" />
-                      {isComparing ? "Comparing" : "Compare"}
-                    </button>
+            return (
+              <motion.div
+                key={pkg.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl border border-slate-200 hover:border-slate-400 transition-all shadow-md hover:shadow-xl overflow-hidden grid grid-cols-1 sm:grid-cols-12 group text-slate-800"
+              >
+                {/* Package Image & Duration Badge */}
+                <div className="sm:col-span-5 h-64 sm:h-auto relative overflow-hidden bg-slate-100 border-r border-slate-200">
+                  <img
+                    src={pkg.image}
+                    alt={pkg.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute top-3 left-3 bg-[#051433] text-white px-3 py-1 rounded-md text-[10px] font-space font-bold tracking-wider uppercase z-10">
+                    {pkg.duration}
                   </div>
-                  <h3 style={{ color: '#ffffff' }} className="font-space text-lg font-bold text-white group-hover:text-gold transition-colors mt-1">
-                    {pkg.name}
-                  </h3>
-                  <p style={{ color: '#cbd5e1' }} className="font-luxury text-xs text-grey-text text-slate-light line-clamp-2">
-                    {pkg.tagline || (pkg as any).description || ""}
-                  </p>
                 </div>
 
-                {/* Highlights */}
-                <div className="flex flex-col gap-1.5 my-4">
-                  {inclusionsList.slice(0, 3).map((inc: string, i: number) => (
-                    <div key={i} className="flex items-center gap-2 text-xs text-white">
-                      <Check className="h-3 w-3 text-teal shrink-0" />
-                      <span style={{ color: '#cbd5e1' }} className="font-luxury text-grey-text text-slate-light line-clamp-1">{inc}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between border-t border-white/5 pt-4 mt-2">
+                {/* Package Content & Details */}
+                <div className="sm:col-span-7 p-6 flex flex-col justify-between">
                   <div>
-                    <span style={{ color: '#94a3b8' }} className="text-[9px] uppercase tracking-wider text-grey-text text-slate-muted">Total Rate</span>
-                    <div style={{ color: '#C5A880' }} className="font-space text-base font-bold text-gold text-gold-explicit">
-                      ₹{pkg.price.toLocaleString("en-IN")}
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-xs font-bold border border-emerald-200">
+                        <Star className="h-3.5 w-3.5 fill-emerald-600 text-emerald-600" />
+                        <span>{ratingStr}</span>
+                      </div>
+                      <button
+                        onClick={() => toggleCompare(pkg)}
+                        className={`flex items-center gap-1 text-[10px] font-space uppercase tracking-wider px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
+                          isComparing
+                            ? "bg-[#051433] text-white border-[#051433] font-bold"
+                            : "bg-slate-50 border-slate-200 text-slate-600 hover:text-black hover:bg-slate-100"
+                        }`}
+                      >
+                        <RefreshCw className="h-3 w-3" />
+                        {isComparing ? "Comparing" : "Compare"}
+                      </button>
+                    </div>
+
+                    <h3 className="font-space text-lg font-bold text-slate-900 group-hover:text-[#051433] transition-colors">
+                      {pkg.name}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-sans mt-1 line-clamp-2">
+                      {pkg.tagline || (pkg as any).description || ""}
+                    </p>
+
+                    {/* Inclusions Highlights */}
+                    <div className="flex flex-col gap-1.5 my-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      {inclusionsList.slice(0, 3).map((inc: string, i: number) => (
+                        <div key={i} className="flex items-center gap-2 text-xs text-slate-700">
+                          <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                          <span className="font-sans line-clamp-1">{inc}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <Link
-                    href={`/tours/${pkg.id}`}
-                    style={{ color: '#C5A880', borderColor: '#C5A880' }}
-                    className="px-4 py-2 border border-gold hover:bg-gold hover:text-black font-space text-[10px] font-bold uppercase tracking-widest text-gold rounded transition-all cursor-pointer btn-explicit"
-                  >
-                    Details & Book
-                  </Link>
+
+                  {/* Pricing & MakeMyTrip CTA */}
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-2">
+                    <div>
+                      <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400 block">Package Price</span>
+                      <div className="font-space text-xl font-bold text-slate-900">
+                        ₹{Number(pkg.price).toLocaleString("en-IN")}
+                      </div>
+                    </div>
+                    <Link
+                      href={`/tours/${pkg.id}`}
+                      className="px-5 py-2.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] hover:to-[#C57A2D] text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <span>VIEW DETAILS</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Compare Tray Panel */}
@@ -187,172 +237,51 @@ function ToursListingContent() {
             initial={{ y: 200, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 200, opacity: 0 }}
-            className="fixed bottom-0 left-0 right-0 z-30 bg-[#0B1220]/95 backdrop-blur-md border-t border-white/10 p-6 shadow-2xl"
+            className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 p-6 shadow-2xl text-slate-800"
           >
-            <div className="max-w-4xl mx-auto flex flex-col gap-6">
-              {/* Tray Header */}
-              <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                <span className="font-space text-sm tracking-wider font-bold text-gold uppercase flex items-center gap-2">
-                  <RefreshCw className="h-4 w-4 text-teal animate-spin" />
-                  Retreat Packages Comparison Chart
+            <div className="max-w-4xl mx-auto flex flex-col gap-4">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <span className="font-space text-sm tracking-wider font-bold text-slate-900 uppercase flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4 text-[#051433]" />
+                  Package Comparison Chart
                 </span>
                 <button
                   onClick={() => setCompareTrayOpen(false)}
-                  className="text-xs text-grey-text hover:text-white"
+                  className="text-xs text-slate-500 hover:text-black font-bold uppercase"
                 >
-                  Hide Chart
+                  Close
                 </button>
               </div>
 
-              {/* Side-by-side detail list */}
-              <div className="grid grid-cols-3 gap-6 font-luxury text-xs text-grey-text">
-                {/* Titles */}
-                <div className="flex flex-col gap-4 border-r border-white/5 pr-4 justify-center">
-                  <span className="font-space font-semibold uppercase text-[10px] text-white">Spec Index</span>
-                  <div className="font-medium">Total Duration</div>
-                  <div className="font-medium">Package Cost</div>
-                  <div className="font-medium">VIP Inclusions</div>
+              <div className="grid grid-cols-3 gap-6 text-xs text-slate-700 font-sans">
+                <div className="flex flex-col gap-3 font-bold border-r border-slate-100 pr-4">
+                  <span>Duration</span>
+                  <span>Price</span>
+                  <span>Inclusions</span>
                 </div>
 
-                {/* Package 1 */}
-                <div className="flex flex-col gap-4">
-                  <span className="font-space font-bold text-white text-[11px] text-gold truncate">
-                    {selectedForCompare[0].name}
-                  </span>
-                  <div className="text-white font-mono">{selectedForCompare[0].duration}</div>
-                  <div className="text-gold font-mono font-bold">
-                    ₹{selectedForCompare[0].price.toLocaleString("en-IN")}
+                {selectedForCompare.map((pkg, idx) => (
+                  <div key={idx} className="flex flex-col gap-3">
+                    <span className="font-bold text-slate-900 truncate">{pkg.name}</span>
+                    <span className="text-slate-600">{pkg.duration}</span>
+                    <span className="font-bold text-emerald-700">₹{Number(pkg.price).toLocaleString("en-IN")}</span>
+                    <span className="text-slate-500 line-clamp-2">
+                      {Array.isArray(pkg.inclusions) ? pkg.inclusions.join(", ") : "VIP inclusions"}
+                    </span>
                   </div>
-                  <div className="flex flex-col gap-1 text-[10px]">
-                    {selectedForCompare[0].inclusions.slice(0, 3).map((inc, i) => (
-                      <span key={i} className="truncate">• {inc}</span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Package 2 */}
-                <div className="flex flex-col gap-4">
-                  {selectedForCompare[1] ? (
-                    <>
-                      <span className="font-space font-bold text-white text-[11px] text-gold truncate">
-                        {selectedForCompare[1].name}
-                      </span>
-                      <div className="text-white font-mono">{selectedForCompare[1].duration}</div>
-                      <div className="text-gold font-mono font-bold">
-                        ₹{selectedForCompare[1].price.toLocaleString("en-IN")}
-                      </div>
-                      <div className="flex flex-col gap-1 text-[10px]">
-                        {selectedForCompare[1].inclusions.slice(0, 3).map((inc, i) => (
-                          <span key={i} className="truncate">• {inc}</span>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full border border-dashed border-white/10 rounded p-4 text-center">
-                      <span className="text-[10px]">Add another package to compare values</span>
-                    </div>
-                  )}
-                </div>
+                ))}
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* ── STATIC COMPARISON TABLE ────────────────────────────────────────── */}
-      <div className="mt-20 border-t border-white/5 pt-16 text-left max-w-5xl mx-auto">
-        <div className="flex flex-col gap-2 mb-10 text-center">
-          <span className="font-space text-xs uppercase tracking-widest text-[#C5A880] font-bold">Package Index</span>
-          <h2 className="font-serif text-2xl md:text-3xl font-bold text-white">Compare Our Helicopter Retreats</h2>
-          <div className="h-[1px] w-12 bg-gold mx-auto mt-2" />
-        </div>
-
-        <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#051433]/30 shadow-2xl">
-          <table className="w-full text-xs font-luxury border-collapse text-grey-text">
-            <thead>
-              <tr className="border-b border-white/10 bg-white/5 font-space text-[10px] uppercase tracking-wider text-gold">
-                <th className="p-4 text-left font-bold">Package Name</th>
-                <th className="p-4 text-center font-bold">Duration</th>
-                <th className="p-4 text-center font-bold">Starting Price</th>
-                <th className="p-4 text-left font-bold">Key Inclusions</th>
-                <th className="p-4 text-center font-bold">Safety Mandate</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5 text-slate-300">
-              <tr className="hover:bg-white/2 transition-colors">
-                <td className="p-4 font-space text-[11px] font-bold text-white uppercase tracking-wider">Himalayan Sacred Peaks</td>
-                <td className="p-4 text-center font-mono text-white">3 Days / 2 Nights</td>
-                <td className="p-4 text-center text-gold font-bold font-mono">₹4,99,000</td>
-                <td className="p-4 leading-relaxed">
-                  Airbus H145 helicopter, VIP Priority Darshan at Badrinath & Kedarnath, 5-Star mountain lodges, private guides & historians.
-                </td>
-                <td className="p-4 text-center text-teal">DGCA Approved / Dual Pilot</td>
-              </tr>
-              <tr className="hover:bg-white/2 transition-colors">
-                <td className="p-4 font-space text-[11px] font-bold text-white uppercase tracking-wider">Goan Yacht & Sky Odyssey</td>
-                <td className="p-4 text-center font-mono text-white">2 Days / 1 Night</td>
-                <td className="p-4 text-center text-gold font-bold font-mono">₹3,50,000</td>
-                <td className="p-4 leading-relaxed">
-                  Bell 429 helicopter shoreline tour, 6-Hour luxury yacht cruise with private chef, Taj Exotica beachfront villa stay.
-                </td>
-                <td className="p-4 text-center text-teal">DGCA Approved / Dual Pilot</td>
-              </tr>
-              <tr className="hover:bg-white/2 transition-colors">
-                <td className="p-4 font-space text-[11px] font-bold text-white uppercase tracking-wider">Vaishno Devi Charter</td>
-                <td className="p-4 text-center font-mono text-white">2 Days / 1 Night</td>
-                <td className="p-4 text-center text-gold font-bold font-mono">₹2,80,000</td>
-                <td className="p-4 leading-relaxed">
-                  AW109 regional VIP shuttle, priority Sanjichhat helipad access, wheel-chair staging concierge, Sarovar hotel stay.
-                </td>
-                <td className="p-4 text-center text-teal">DGCA Approved / Dual Pilot</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Product JSON-LD structured schema for package listings */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "ItemList",
-            "itemListElement": tourPackages.map((pkg, idx) => ({
-              "@type": "ListItem",
-              "position": idx + 1,
-              "item": {
-                "@type": "Product",
-                "name": pkg.name,
-                "description": pkg.tagline || "",
-                "image": pkg.image,
-                "offers": {
-                  "@type": "Offer",
-                  "priceCurrency": "INR",
-                  "price": String(pkg.price),
-                  "availability": "https://schema.org/InStock",
-                  "priceValidUntil": "2027-12-31"
-                }
-              }
-            }))
-          })
-        }}
-      />
     </div>
   );
 }
 
 export default function ToursListingPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="max-w-7xl mx-auto px-6 py-20 text-center">
-          <span className="font-space text-gold text-sm tracking-wider animate-pulse">
-            Configuring Luxury Expedition Retreats...
-          </span>
-        </div>
-      }
-    >
+    <Suspense fallback={<div className="min-h-screen bg-[#F2F5F8] flex items-center justify-center">Loading Tours...</div>}>
       <ToursListingContent />
     </Suspense>
   );

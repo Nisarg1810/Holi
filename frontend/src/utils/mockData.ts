@@ -51,6 +51,7 @@ export interface BoatListing {
   duration: string;
   image: string;
   type: string;
+  description?: string;
   features: string[];
   reviews: { author: string; rating: number; text: string; date: string }[];
 }
