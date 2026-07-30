@@ -26,6 +26,8 @@ export interface Passenger {
   age: number;
   gender: string;
   idProof: string;
+  email?: string;
+  phone?: string;
 }
 
 export interface AddOn {

@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import BookingProgressTracker from "@/components/booking/BookingProgressTracker";
 import { useCartStore, Passenger, AddOn } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
-import { User, ShieldCheck, Ticket, Trash2, CheckCircle2, ChevronRight, Armchair, Award } from "lucide-react";
+import { User, ShieldCheck, Ticket, Trash2, CheckCircle2, ChevronRight, Armchair, Award, Mail, Phone, Lock, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function CheckoutPage() {
@@ -26,10 +26,18 @@ export default function CheckoutPage() {
     removePromo,
   } = useCartStore();
 
+  const [emailId, setEmailId] = useState("");
+  const [mobileNo, setMobileNo] = useState("");
   const [promoInput, setPromoInput] = useState("");
   const [promoError, setPromoError] = useState("");
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (user) {
+      if (user.email && !emailId) setEmailId(user.email);
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (user && passengers.length > 0 && passengers[0].fullName === "") {
       const updated = [...passengers];
       updated[0] = {
@@ -37,7 +45,7 @@ export default function CheckoutPage() {
         fullName: user.name || "",
         age: 30,
         gender: "Male",
-        idProof: "AADHAAR-PENDING"
+        idProof: "AADHAAR-VERIFIED"
       };
       setPassengers(updated);
     }
@@ -56,7 +64,6 @@ export default function CheckoutPage() {
       setSelectedSeats(selectedSeats.filter((s) => s !== seatId));
     } else {
       if (selectedSeats.length >= item.passengers) {
-        // Replace first selected seat
         setSelectedSeats([...selectedSeats.slice(1), seatId]);
       } else {
         setSelectedSeats([...selectedSeats, seatId]);
@@ -86,14 +93,13 @@ export default function CheckoutPage() {
       applyPromo("CHARDHAM2026", 0);
       setPromoError("");
     } else {
-      setPromoError("Invalid elite coupon code.");
+      setPromoError("Invalid coupon code.");
     }
   };
 
-  // Pricing calculations
   const calculateTotal = () => {
-    if (!item) return 0;
-    const base = item.price;
+    if (!item) return { subtotal: 0, discount: 0, taxes: 0, total: 0 };
+    const base = Number(item.price);
     const addOnsCost = selectedAddOns.reduce((acc, curr) => acc + curr.price, 0);
     const insuranceCost = insuranceEnabled ? 5000 * item.passengers : 0;
     const subtotal = base + addOnsCost + insuranceCost;
@@ -107,7 +113,7 @@ export default function CheckoutPage() {
       }
     }
     
-    const taxes = (subtotal - discount) * 0.18; // 18% GST
+    const taxes = (subtotal - discount) * 0.18;
     return {
       subtotal,
       discount,
@@ -118,19 +124,30 @@ export default function CheckoutPage() {
 
   const priceSummary = calculateTotal();
 
-  const handleProceedToPayment = () => {
+  const handleProceedToPayment = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!item) return;
 
-    // Auto-fill empty fields with guest placeholders to avoid blocking validation
+    if (!emailId || !emailId.includes("@")) {
+      alert("Please enter a valid email address for receiving your ticket & confirmation.");
+      return;
+    }
+    if (!mobileNo || mobileNo.length < 10) {
+      alert("Please enter a valid 10-digit mobile number for WhatsApp & SMS updates.");
+      return;
+    }
+
+    // Save contact info to passenger #1
     const sanitized = passengers.map((p, idx) => ({
       fullName: p.fullName.trim() !== "" ? p.fullName : (idx === 0 && user?.name ? user.name : `VIP Guest #${idx + 1}`),
       age: Number(p.age) > 0 ? Number(p.age) : 30,
       gender: p.gender || "Male",
-      idProof: p.idProof.trim() !== "" ? p.idProof : "AADHAAR-VERIFIED"
+      idProof: p.idProof.trim() !== "" ? p.idProof : "AADHAAR-VERIFIED",
+      email: idx === 0 ? emailId : p.email,
+      phone: idx === 0 ? mobileNo : p.phone,
     }));
     setPassengers(sanitized);
 
-    // Auto-assign seating configuration if not manually clicked
     if (item.type === "helicopter" && selectedSeats.length < item.passengers) {
       const seatsNeeded = item.passengers - selectedSeats.length;
       const vacant = HELI_SEATS.filter((s) => !selectedSeats.includes(s));
@@ -143,12 +160,12 @@ export default function CheckoutPage() {
 
   if (!item) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-20 text-center flex flex-col gap-4 items-center min-h-[60vh] justify-center">
+      <div className="max-w-7xl mx-auto px-6 py-20 text-center flex flex-col gap-4 items-center min-h-[60vh] justify-center bg-[#F2F5F8] text-slate-800">
         <h2 className="font-space text-2xl font-bold">Your booking stack is empty.</h2>
-        <p className="font-luxury text-sm text-grey-text">Explore our helicopter charter routes to begin.</p>
+        <p className="text-sm text-slate-500">Explore our helicopter charter routes or hotels to begin.</p>
         <button
           onClick={() => router.push("/booking")}
-          className="px-6 py-3 bg-gold hover:bg-gold/90 text-black font-space text-xs font-bold uppercase tracking-widest rounded transition-all"
+          className="px-6 py-3 bg-[#051433] hover:bg-[#092254] text-white font-space text-xs font-bold uppercase tracking-widest rounded-xl transition-all shadow-md"
         >
           View Helicopter Fleet
         </button>
@@ -156,323 +173,346 @@ export default function CheckoutPage() {
     );
   }
 
-  // Seat Configuration Lists (Helicopter layout)
   const HELI_SEATS = ["1A", "1B", "2A", "2B", "3A", "3B"];
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      <BookingProgressTracker currentStep={3} />
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        {/* Left Columns: Forms, Seat maps, addons */}
-        <div className="lg:col-span-8 flex flex-col gap-8">
-        <div>
-          <h1 className="font-space text-3xl font-bold tracking-tight">Luxury Flight Checkout</h1>
-          <p className="font-luxury text-sm text-grey-text mt-1">
-            Complete details and personalize your travel amenities.
+    <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
+      
+      {/* MakeMyTrip Style Hero Header */}
+      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-6 pb-16 px-4 md:px-8 text-white relative shadow-lg">
+        <div className="max-w-7xl mx-auto">
+          <BookingProgressTracker currentStep={3} />
+          <h1 className="font-space text-3xl font-bold tracking-tight text-white mt-4">Review Booking &amp; Passenger Details</h1>
+          <p className="text-xs text-slate-300 mt-1 font-sans">
+            Enter contact information for ticket delivery and passenger manifest for flight boarding pass
           </p>
-        </div>
-
-        {/* 1. Passenger Details Forms */}
-        <div className="glass-card rounded-xl p-6 border border-white/8 flex flex-col gap-6">
-          <h3 className="font-space text-sm uppercase tracking-wider font-bold border-b border-white/5 pb-3 flex items-center gap-2">
-            <User className="h-4.5 w-4.5 text-gold" />
-            Passenger Manifest ({item.passengers} Guest{item.passengers > 1 ? "s" : ""})
-          </h3>
-
-          <div className="flex flex-col gap-6">
-            {passengers.map((p, idx) => (
-              <div key={idx} className="border border-white/5 rounded-lg p-5 bg-white/2 flex flex-col gap-4">
-                <span className="font-space text-xs uppercase tracking-widest text-gold font-bold">
-                  Passenger #{idx + 1}
-                </span>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-space text-grey-text uppercase">Full Name</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="As on Government ID"
-                      value={p.fullName}
-                      onChange={(e) => handlePassengerChange(idx, "fullName", e.target.value)}
-                      className="w-full bg-[#05070D] border border-white/10 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-gold/50 font-luxury"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-space text-grey-text uppercase">Age / Gender</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="number"
-                        placeholder="Age"
-                        required
-                        value={p.age || ""}
-                        onChange={(e) => handlePassengerChange(idx, "age", Number(e.target.value))}
-                        className="w-full bg-[#05070D] border border-white/10 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-gold/50 font-luxury"
-                      />
-                      <select
-                        value={p.gender}
-                        onChange={(e) => handlePassengerChange(idx, "gender", e.target.value)}
-                        className="w-full bg-[#05070D] border border-white/10 rounded px-2 py-2 text-xs text-white focus:outline-none focus:border-gold/50 cursor-pointer font-luxury"
-                      >
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-space text-grey-text uppercase">Passport / Aadhar No.</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="ID Proof Number"
-                      value={p.idProof}
-                      onChange={(e) => handlePassengerChange(idx, "idProof", e.target.value)}
-                      className="w-full bg-[#05070D] border border-white/10 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-gold/50 font-luxury"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 2. Interactive Seating Chart (Helicopters only) */}
-        {item.type === "helicopter" && (
-          <div className="glass-card rounded-xl p-6 border border-white/8">
-            <h3 className="font-space text-sm uppercase tracking-wider font-bold border-b border-white/5 pb-3 flex items-center gap-2 mb-6">
-              <Armchair className="h-4.5 w-4.5 text-teal" />
-              Interactive Helicopter Seating Chart
-            </h3>
-
-            <div className="flex flex-col md:flex-row items-center justify-around gap-8">
-              {/* Graphic cabin map layout */}
-              <div className="w-56 bg-secondary/80 border border-white/5 p-8 rounded-full flex flex-col items-center gap-6 relative shadow-inner">
-                {/* Nose cockpit label */}
-                <div className="h-10 w-24 border border-teal/20 rounded-t-full bg-[#05070D] flex items-center justify-center text-[9px] font-space text-teal tracking-widest uppercase">
-                  COCKPIT
-                </div>
-
-                {/* Grid layout seats */}
-                <div className="grid grid-cols-2 gap-8 w-full mt-4">
-                  {HELI_SEATS.map((seatId) => {
-                    const isSelected = selectedSeats.includes(seatId);
-                    return (
-                      <button
-                        key={seatId}
-                        onClick={() => handleSeatClick(seatId)}
-                        className={`py-3.5 px-3 rounded flex flex-col items-center gap-1 border transition-all cursor-pointer ${
-                          isSelected
-                            ? "bg-gold border-gold text-black font-bold scale-105"
-                            : "bg-[#05070D] border-white/10 text-grey-text hover:text-white hover:border-gold/40"
-                        }`}
-                      >
-                        <Armchair className="h-4.5 w-4.5" />
-                        <span className="text-[9px] font-mono">{seatId}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="text-center font-luxury text-[9px] text-grey-text uppercase tracking-widest mt-6">
-                  VIP Cabin Seating
-                </div>
-              </div>
-
-              {/* Seating status */}
-              <div className="flex flex-col gap-4 font-luxury text-xs text-grey-text max-w-sm">
-                <span className="font-space text-[10px] uppercase tracking-widest text-gold font-bold">
-                  Cabin Seating Summary
-                </span>
-                <p>
-                  Click on the cabin seating chart to assign seats for your manifest. You have configured {item.passengers} passengers, please allocate {item.passengers} seats.
-                </p>
-                <div className="flex flex-col gap-2 mt-2 font-mono">
-                  <div className="flex justify-between border-b border-white/5 pb-1">
-                    <span>Allocated Seats:</span>
-                    <span className="text-white font-bold">{selectedSeats.join(", ") || "None Selected"}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 3. Luxury Add-ons */}
-        <div className="glass-card rounded-xl p-6 border border-white/8 flex flex-col gap-6">
-          <h3 className="font-space text-sm uppercase tracking-wider font-bold border-b border-white/5 pb-3">
-            Luxury Flight Add-ons
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {addOnOptions.map((addon) => {
-              const isSelected = selectedAddOns.some((a) => a.id === addon.id);
-              return (
-                <button
-                  key={addon.id}
-                  onClick={() => toggleAddOn(addon)}
-                  className={`text-left p-5 rounded-lg border flex flex-col justify-between min-h-40 transition-all cursor-pointer ${
-                    isSelected
-                      ? "bg-gold/5 border-gold text-gold scale-102 glow-gold"
-                      : "bg-[#05070D] border-white/10 text-grey-text hover:text-white hover:border-gold/30"
-                  }`}
-                >
-                  <div>
-                    <h4 className="font-space text-sm font-bold text-white mb-1">{addon.name}</h4>
-                    <p className="font-luxury text-[10px] text-grey-text leading-relaxed">
-                      {addon.description}
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-between w-full border-t border-white/5 pt-4 mt-2">
-                    <span className="font-mono text-xs font-bold text-gold">
-                      +₹{addon.price.toLocaleString("en-IN")}
-                    </span>
-                    <span className="text-[9px] uppercase tracking-widest font-bold">
-                      {isSelected ? "Remove Addon" : "Select Addon"}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
         </div>
       </div>
 
-      {/* Right Column: Pricing details summary */}
-      <div className="lg:col-span-4 lg:sticky lg:top-28 flex flex-col gap-6">
-        <div className="glass-card rounded-xl p-6 border border-white/10 shadow-xl flex flex-col gap-6">
-          <h3 className="font-space text-sm uppercase tracking-wider font-bold border-b border-white/5 pb-3">
-            Booking Summary
-          </h3>
+      {/* Main Content Grid */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 -mt-8 relative z-20">
+        <form onSubmit={handleProceedToPayment} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Column: Forms */}
+          <div className="lg:col-span-8 flex flex-col gap-6">
 
-          <div className="flex flex-col gap-4 font-luxury text-xs">
-            <div className="h-16 relative rounded overflow-hidden bg-secondary">
-              {item.image && <img src={item.image} alt={item.name} className="w-full h-full object-cover" />}
-            </div>
+            {/* 1. Contact Details Card (Mobile No & Email ID) */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800 flex flex-col gap-4">
+              <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <Mail className="h-4 w-4 text-[#051433]" />
+                Contact &amp; Ticket Delivery Details
+              </h3>
+              <p className="text-xs text-slate-500 font-sans">
+                Your flight ticket, booking confirmation, and PDF boarding pass will be sent to this email &amp; mobile number via WhatsApp &amp; SMS.
+              </p>
 
-            <div className="flex flex-col gap-1.5 mt-2">
-              <span className="text-[10px] font-space text-gold uppercase tracking-widest font-bold">
-                {item.type} Service
-              </span>
-              <h4 className="font-space text-sm font-bold text-white leading-snug">{item.name}</h4>
-              <p className="text-grey-text">{item.details}</p>
-              <span className="text-[10px] text-grey-text font-mono mt-0.5">Date: {item.date}</span>
-            </div>
-
-            <div className="h-[1px] bg-white/5" />
-
-            {/* Flight Insurance */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4.5 w-4.5 text-teal" />
-                <div>
-                  <span className="text-white font-medium block">VIP Flight Insurance</span>
-                  <span className="text-[9px] text-grey-text block">₹5,000 / Passenger</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-slate-700 uppercase flex items-center gap-1">
+                    <Mail className="h-3.5 w-3.5 text-slate-400" />
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="e.g. name@example.com"
+                    value={emailId}
+                    onChange={(e) => setEmailId(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#051433]"
+                  />
                 </div>
-              </div>
-              <input
-                type="checkbox"
-                checked={insuranceEnabled}
-                onChange={(e) => setInsuranceEnabled(e.target.checked)}
-                className="accent-gold h-4 w-4 bg-[#05070D] border-white/10 rounded cursor-pointer"
-              />
-            </div>
 
-            <div className="h-[1px] bg-white/5" />
-
-            {/* Coupon Code applying */}
-            <form onSubmit={handleApplyPromo} className="flex flex-col gap-2">
-              <span className="text-[10px] font-space uppercase text-grey-text">Apply Elite Coupon</span>
-              <div className="flex relative">
-                <input
-                  type="text"
-                  placeholder="e.g. AURA10"
-                  value={promoInput}
-                  onChange={(e) => setPromoInput(e.target.value)}
-                  className="w-full bg-[#05070D] border border-white/10 rounded-l px-3 py-2 text-xs focus:outline-none focus:border-gold/50 uppercase text-white font-mono"
-                />
-                <button
-                  type="submit"
-                  className="bg-white/5 border border-l-0 border-white/10 hover:border-gold px-4 text-xs font-space font-bold uppercase rounded-r transition-colors text-white"
-                >
-                  Apply
-                </button>
-              </div>
-              {appliedPromo && (
-                <div className="flex justify-between items-center text-[10px] text-teal mt-1">
-                  <span>Coupon {appliedPromo.code} applied ({appliedPromo.code === "CHARDHAM2026" ? "₹15,000 Off" : `${appliedPromo.discountPercent}% Off`})</span>
-                  <button onClick={removePromo} className="text-red-400 hover:underline">
-                    Remove
-                  </button>
-                </div>
-              )}
-              {promoError && <span className="text-[10px] text-red-400">{promoError}</span>}
-            </form>
-
-            <div className="h-[1px] bg-white/5" />
-
-            {/* Price Calculations breakdown */}
-            {priceSummary && (
-              <div className="flex flex-col gap-2">
-                <div className="flex justify-between text-grey-text">
-                  <span>Base Rate</span>
-                  <span>₹{item.price.toLocaleString("en-IN")}</span>
-                </div>
-                {selectedAddOns.length > 0 && (
-                  <div className="flex justify-between text-grey-text">
-                    <span>VIP Add-ons</span>
-                    <span>
-                      +₹{selectedAddOns.reduce((acc, curr) => acc + curr.price, 0).toLocaleString("en-IN")}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-slate-700 uppercase flex items-center gap-1">
+                    <Phone className="h-3.5 w-3.5 text-slate-400" />
+                    Mobile Number <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex items-center">
+                    <span className="bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl px-3 py-2.5 text-xs text-slate-600 font-bold">
+                      +91
                     </span>
+                    <input
+                      type="tel"
+                      required
+                      maxLength={10}
+                      placeholder="10-digit mobile number"
+                      value={mobileNo}
+                      onChange={(e) => setMobileNo(e.target.value.replace(/\D/g, ""))}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-r-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#051433]"
+                    />
                   </div>
-                )}
-                {insuranceEnabled && (
-                  <div className="flex justify-between text-grey-text">
-                    <span>VIP Flight Insurance</span>
-                    <span>+₹{(5000 * item.passengers).toLocaleString("en-IN")}</span>
-                  </div>
-                )}
-                {appliedPromo && (
-                  <div className="flex justify-between text-teal">
-                    <span>Elite Discount</span>
-                    <span>-₹{priceSummary.discount.toLocaleString("en-IN")}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-grey-text">
-                  <span>GST Aviation Tax (18%)</span>
-                  <span>₹{priceSummary.taxes.toLocaleString("en-IN")}</span>
                 </div>
-                <div className="flex justify-between items-end border-t border-white/5 pt-3 mt-1">
-                  <span className="font-space text-xs uppercase font-bold text-white">Final Total</span>
-                  <span className="font-space text-lg font-bold text-gold">
-                    ₹{priceSummary.total.toLocaleString("en-IN")}
-                  </span>
+              </div>
+            </div>
+
+            {/* 2. Passenger Manifest Forms */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800 flex flex-col gap-4">
+              <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <User className="h-4 w-4 text-[#051433]" />
+                Passenger Manifest ({item.passengers} Guest{item.passengers > 1 ? "s" : ""})
+              </h3>
+
+              <div className="flex flex-col gap-4">
+                {passengers.map((p, idx) => (
+                  <div key={idx} className="border border-slate-200 rounded-xl p-4 bg-slate-50 flex flex-col gap-3">
+                    <span className="font-space text-xs font-bold uppercase text-[#051433]">
+                      Passenger #{idx + 1}
+                    </span>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-bold text-slate-400">Full Name</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="As on Govt ID"
+                          value={p.fullName}
+                          onChange={(e) => handlePassengerChange(idx, "fullName", e.target.value)}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#051433]"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-bold text-slate-400">Age / Gender</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            type="number"
+                            placeholder="Age"
+                            required
+                            value={p.age || ""}
+                            onChange={(e) => handlePassengerChange(idx, "age", Number(e.target.value))}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none"
+                          />
+                          <select
+                            value={p.gender}
+                            onChange={(e) => handlePassengerChange(idx, "gender", e.target.value)}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-xs font-bold text-slate-900 focus:outline-none cursor-pointer"
+                          >
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-bold text-slate-400">Government ID / Aadhaar / Passport</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="ID Proof Number"
+                          value={p.idProof}
+                          onChange={(e) => handlePassengerChange(idx, "idProof", e.target.value)}
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#051433]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Interactive Seating Chart (Helicopters only) */}
+            {item.type === "helicopter" && (
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800">
+                <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2 mb-4">
+                  <Armchair className="h-4 w-4 text-[#051433]" />
+                  Interactive Cabin Seating Selection
+                </h3>
+
+                <div className="flex flex-col md:flex-row items-center justify-around gap-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
+                  <div className="w-52 bg-[#051433] text-white p-6 rounded-full flex flex-col items-center gap-4 relative shadow-md">
+                    <div className="h-8 w-20 border border-white/20 rounded-t-full bg-[#020B1E] flex items-center justify-center text-[9px] font-space text-slate-300 tracking-widest uppercase">
+                      COCKPIT
+                    </div>
+                    <div className="grid grid-cols-2 gap-6 w-full mt-2">
+                      {HELI_SEATS.map((seatId) => {
+                        const isSelected = selectedSeats.includes(seatId);
+                        return (
+                          <button
+                            type="button"
+                            key={seatId}
+                            onClick={() => handleSeatClick(seatId)}
+                            className={`py-3 px-2 rounded-xl flex flex-col items-center gap-1 border transition-all cursor-pointer ${
+                              isSelected
+                                ? "bg-[#F5A623] border-[#F5A623] text-black font-bold scale-105"
+                                : "bg-[#020B1E] border-white/20 text-slate-300 hover:border-white/50"
+                            }`}
+                          >
+                            <Armchair className="h-4 w-4" />
+                            <span className="text-[9px] font-mono font-bold">{seatId}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3 text-xs text-slate-600 max-w-sm">
+                    <span className="font-space uppercase font-bold text-slate-900">Seating Allocation</span>
+                    <p>Click on the cabin seating chart to assign seats for your manifest. Please allocate {item.passengers} seats.</p>
+                    <div className="flex justify-between border-t border-slate-200 pt-2 font-mono text-slate-900 font-bold">
+                      <span>Allocated Seats:</span>
+                      <span>{selectedSeats.join(", ") || "Auto-Assigning"}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
-            <button
-              onClick={handleProceedToPayment}
-              className="w-full py-3.5 bg-gold hover:bg-gold/90 text-black rounded font-space font-bold text-xs uppercase tracking-widest glow-gold border border-gold cursor-pointer transition-all flex items-center justify-center gap-2"
-            >
-              Configure Payment
-              <ChevronRight className="h-4 w-4" />
-            </button>
+            {/* 4. Flight Add-ons */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800">
+              <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3 mb-4">
+                Luxury Flight Add-ons
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {addOnOptions.map((addon) => {
+                  const isSelected = selectedAddOns.some((a) => a.id === addon.id);
+                  return (
+                    <button
+                      key={addon.id}
+                      type="button"
+                      onClick={() => toggleAddOn(addon)}
+                      className={`text-left p-4 rounded-xl border flex flex-col justify-between min-h-36 transition-all cursor-pointer ${
+                        isSelected
+                          ? "bg-slate-50 border-[#051433] text-slate-900 ring-2 ring-[#051433]/20"
+                          : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                      }`}
+                    >
+                      <div>
+                        <h4 className="font-space text-xs font-bold text-slate-900 mb-1">{addon.name}</h4>
+                        <p className="text-[10px] text-slate-500 leading-snug">{addon.description}</p>
+                      </div>
+                      <div className="flex items-center justify-between w-full border-t border-slate-100 pt-3 mt-2">
+                        <span className="font-mono text-xs font-bold text-slate-900">+₹{addon.price.toLocaleString("en-IN")}</span>
+                        <span className="text-[9px] uppercase font-bold text-slate-500">{isSelected ? "Remove" : "Select"}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
           </div>
 
-          {/* Roman Elite Club Loyalty Banner */}
-          <div className="bg-[#051433]/70 border border-gold/20 p-4 rounded-lg flex items-center gap-3">
-            <Award className="h-5 w-5 text-gold shrink-0 animate-pulse" />
-            <div className="text-left">
-              <span className="text-[#C5A880] font-space text-[9px] uppercase font-bold tracking-widest block">Roman Elite Club</span>
-              <span className="text-[10px] text-slate-300 font-sans block mt-0.5">
-                Complete this booking to earn <strong className="text-white">1,500 Elite Tier Points</strong> for premium cabin upgrades!
-              </span>
+          {/* Right Column: Pricing details summary */}
+          <div className="lg:col-span-4 lg:sticky lg:top-28 flex flex-col gap-6">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800 flex flex-col gap-4">
+              <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3">
+                Booking Summary
+              </h3>
+
+              <div className="flex flex-col gap-3 text-xs">
+                {item.image && (
+                  <div className="h-28 relative rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  </div>
+                )}
+
+                <div>
+                  <span className="text-[10px] font-space text-slate-400 uppercase font-bold block">{item.type} Service</span>
+                  <h4 className="font-space text-sm font-bold text-slate-900">{item.name}</h4>
+                  <p className="text-slate-500 mt-0.5">{item.details}</p>
+                  <span className="text-[10px] text-slate-400 font-mono block mt-1">Travel Date: {item.date}</span>
+                </div>
+
+                <div className="border-t border-slate-100 pt-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                    <span className="text-xs font-bold text-slate-700">VIP Flight Insurance</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={insuranceEnabled}
+                    onChange={(e) => setInsuranceEnabled(e.target.checked)}
+                    className="accent-[#051433] h-4 w-4 cursor-pointer"
+                  />
+                </div>
+
+                {/* Promo Code Form */}
+                <div className="border-t border-slate-100 pt-3 flex flex-col gap-1.5">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Apply Promo Code</span>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. AURA10"
+                      value={promoInput}
+                      onChange={(e) => setPromoInput(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold uppercase text-slate-900 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyPromo}
+                      className="px-3 py-1.5 bg-[#051433] text-white text-xs font-bold uppercase rounded-lg hover:bg-[#092254]"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                  {appliedPromo && (
+                    <div className="flex justify-between text-[10px] text-emerald-600 font-bold mt-1">
+                      <span>Applied: {appliedPromo.code}</span>
+                      <button type="button" onClick={removePromo} className="text-red-500 hover:underline">Remove</button>
+                    </div>
+                  )}
+                  {promoError && <span className="text-[10px] text-red-500 font-bold">{promoError}</span>}
+                </div>
+
+                {/* Final Price Breakdown */}
+                {priceSummary && (
+                  <div className="border-t border-slate-100 pt-3 flex flex-col gap-2">
+                    <div className="flex justify-between text-slate-500">
+                      <span>Base Rate</span>
+                      <span>₹{Number(item.price).toLocaleString("en-IN")}</span>
+                    </div>
+                    {selectedAddOns.length > 0 && (
+                      <div className="flex justify-between text-slate-500">
+                        <span>VIP Add-ons</span>
+                        <span>+₹{selectedAddOns.reduce((acc, curr) => acc + curr.price, 0).toLocaleString("en-IN")}</span>
+                      </div>
+                    )}
+                    {insuranceEnabled && (
+                      <div className="flex justify-between text-slate-500">
+                        <span>Flight Insurance</span>
+                        <span>+₹{(5000 * item.passengers).toLocaleString("en-IN")}</span>
+                      </div>
+                    )}
+                    {appliedPromo && (
+                      <div className="flex justify-between text-emerald-600 font-bold">
+                        <span>Promo Discount</span>
+                        <span>-₹{priceSummary.discount.toLocaleString("en-IN")}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-slate-500">
+                      <span>GST Aviation Tax (18%)</span>
+                      <span>₹{priceSummary.taxes.toLocaleString("en-IN")}</span>
+                    </div>
+                    <div className="flex justify-between items-end border-t border-slate-100 pt-3 mt-1">
+                      <span className="font-space text-xs font-bold uppercase text-slate-900">Total Price</span>
+                      <span className="font-space text-2xl font-bold text-slate-900">
+                        ₹{priceSummary.total.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full py-3.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] hover:to-[#C57A2D] text-black font-space font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
+                >
+                  <span>PROCEED TO PAYMENT</span>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
             </div>
+
+            {/* Lock / Security Note */}
+            <div className="bg-slate-100 border border-slate-200 p-4 rounded-xl flex items-center gap-3 text-slate-600 text-xs font-sans">
+              <Lock className="h-4 w-4 text-emerald-600 shrink-0" />
+              <span>256-bit SSL Encrypted Secure Payment Gateway</span>
+            </div>
+
           </div>
-        </div>
-        </div>
+
+        </form>
       </div>
     </div>
   );
