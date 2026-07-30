@@ -31,7 +31,7 @@ export default function SearchBox() {
     } else if (activeTab === "hotel") {
       router.push(`/hotels${query}`);
     } else if (activeTab === "charter") {
-      router.push(`/charter`);
+      router.push(`/charter${query}`);
     } else {
       router.push(`/boats${query}`);
     }
@@ -51,8 +51,8 @@ export default function SearchBox() {
       destinations: ["Kedarnath Sanctuary", "Badrinath Valley", "Srinagar Terminal", "Goa Shoreline", "Mumbai Heliport"],
     },
     charter: {
-      sources: ["All Locations"],
-      destinations: ["All Locations"],
+      sources: ["New Delhi Hub (DEL)", "Dehradun Terminal (DED)", "Mumbai Corporate Helipad", "Goa Beachfront Heliport", "Srinagar Terminal (SXR)"],
+      destinations: ["Kedarnath Sanctuary", "Badrinath Valley", "Srinagar Terminal (SXR)", "Mumbai Corporate Helipad", "Goa Beachfront Heliport"],
     },
     package: {
       sources: ["All Locations", "Dehradun (DED)", "Goa Harbor"],
@@ -88,10 +88,6 @@ export default function SearchBox() {
               key={tab.id}
               type="button"
               onClick={() => {
-                if (tab.id === "charter") {
-                  router.push("/charter");
-                  return;
-                }
                 setActiveTab(tab.id);
                 setSource(locations[tab.id].sources[0]);
                 setDestination(locations[tab.id].destinations[0]);
