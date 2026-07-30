@@ -29,7 +29,7 @@ const loadRazorpay = () => {
 
 export default function PaymentPage() {
   const router = useRouter();
-  const { item, selectedAddOns, insuranceEnabled, appliedPromo, clearCart } = useCartStore();
+  const { item, passengers, selectedSeats, selectedAddOns, insuranceEnabled, appliedPromo, clearCart } = useCartStore();
   const { addBooking, user } = useAuthStore();
 
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "razorpay" | "phonepe">("stripe");
@@ -67,11 +67,22 @@ export default function PaymentPage() {
       await API.post("/bookings", {
         id: bookingId,
         user_email: userEmail,
+        contact_email: passengers[0]?.email || userEmail,
+        contact_phone: passengers[0]?.phone || "",
         type: item.type,
         name: item.name,
         details: item.details,
         date: item.date,
+        return_date: item.return_date || "",
+        trip_type: item.trip_type || "One Way",
         passengers: item.passengers,
+        adults: item.adults || 1,
+        children: item.children || 0,
+        infants: item.infants || 0,
+        legs: item.legs || [],
+        selected_seats: selectedSeats,
+        passenger_manifest: passengers,
+        addons: selectedAddOns,
         price: finalAmount,
       });
 

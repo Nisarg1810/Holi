@@ -16,6 +16,8 @@ class Booking(models.Model):
 
     id = models.CharField(max_length=50, primary_key=True)
     user_email = models.CharField(max_length=100)
+    contact_email = models.CharField(max_length=100, blank=True, null=True)
+    contact_phone = models.CharField(max_length=20, blank=True, null=True)
     type = models.CharField(max_length=50) # 'helicopter', 'package', 'hotel', 'boat'
     name = models.CharField(max_length=100)
     details = models.TextField(blank=True, null=True)
@@ -27,6 +29,9 @@ class Booking(models.Model):
     children = models.IntegerField(default=0)
     infants = models.IntegerField(default=0)
     legs = models.JSONField(default=list, blank=True)
+    selected_seats = models.JSONField(default=list, blank=True)
+    passenger_manifest = models.JSONField(default=list, blank=True)
+    addons = models.JSONField(default=list, blank=True)
     price = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Confirmed')
     created_at = models.DateTimeField(auto_now_add=True)
