@@ -10,7 +10,13 @@ export interface Booking {
   name: string;
   details: string;
   date: string;
+  return_date?: string;
+  trip_type?: "One Way" | "Round Trip" | "Multi-City";
   passengers: number;
+  adults?: number;
+  children?: number;
+  infants?: number;
+  legs?: { source: string; destination: string; date: string }[];
   price: number;
   status: "Confirmed" | "Pending" | "Cancelled" | "In Flight";
   invoiceUrl?: string;

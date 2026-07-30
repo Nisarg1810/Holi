@@ -9,7 +9,13 @@ export interface CartItem {
   name: string;
   price: number;
   date: string;
+  return_date?: string;
+  trip_type?: "One Way" | "Round Trip" | "Multi-City";
   passengers: number;
+  adults?: number;
+  children?: number;
+  infants?: number;
+  legs?: { source: string; destination: string; date: string }[];
   details: string;
   duration?: string;
   image?: string;

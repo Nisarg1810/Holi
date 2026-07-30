@@ -19,7 +19,12 @@ import {
   Activity,
   Coffee,
   UserCheck,
-  Car
+  Car,
+  Plane,
+  ArrowRightLeft,
+  Plus,
+  Trash2,
+  Minus
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "@/utils/api";
@@ -46,17 +51,38 @@ function BookingSearchContent() {
   const router = useRouter();
   const setItem = useCartStore((state) => state.setItem);
 
+  // Pre-load location options
+  const sourceOptions = ["Dehradun (DED)", "New Delhi Hub", "Srinagar Terminal", "Goa Beachfront Heliport", "Mumbai Heliport"];
+  const destOptions = ["Kedarnath Sanctuary", "Badrinath Valley", "Vaishno Devi Shrine", "Char Dham Circuit", "Goa Shoreline", "Mumbai Heliport"];
+
   // Search parameters from URL
+  const paramTripType = (searchParams.get("trip_type") as "One Way" | "Round Trip" | "Multi-City") || "One Way";
   const paramSource = searchParams.get("source") || "Dehradun (DED)";
   const paramDest = searchParams.get("destination") || "Kedarnath Sanctuary";
   const paramDate = searchParams.get("date") || new Date().toISOString().split("T")[0];
-  const paramPassengers = Number(searchParams.get("passengers")) || 2;
+  const paramReturnDate = searchParams.get("return_date") || "";
+  const paramAdults = Number(searchParams.get("adults")) || 2;
+  const paramChildren = Number(searchParams.get("children")) || 0;
+  const paramInfants = Number(searchParams.get("infants")) || 0;
 
-  // Local state for Modify Search
+  // Local state for MakeMyTrip style search
+  const [tripType, setTripType] = useState<"One Way" | "Round Trip" | "Multi-City">(paramTripType);
   const [localSource, setLocalSource] = useState(paramSource);
   const [localDest, setLocalDest] = useState(paramDest);
   const [localDate, setLocalDate] = useState(paramDate);
-  const [localPassengers, setLocalPassengers] = useState(paramPassengers);
+  const [localReturnDate, setLocalReturnDate] = useState(paramReturnDate);
+  const [adults, setAdults] = useState(paramAdults);
+  const [children, setChildren] = useState(paramChildren);
+  const [infants, setInfants] = useState(paramInfants);
+  const [showPaxDropdown, setShowPaxDropdown] = useState(false);
+
+  // Multi-City Legs state
+  const [multiCityLegs, setMultiCityLegs] = useState<{ source: string; destination: string; date: string }[]>([
+    { source: "Dehradun (DED)", destination: "Kedarnath Sanctuary", date: paramDate },
+    { source: "Kedarnath Sanctuary", destination: "Badrinath Valley", date: paramDate },
+  ]);
+
+  const totalPassengers = adults + children;
 
   // Filter states
   const [helicopters, setHelicopters] = useState<HelicopterListing[]>(HELICOPTERS);
@@ -82,11 +108,15 @@ function BookingSearchContent() {
 
   // Sync state if url parameters change
   useEffect(() => {
+    setTripType(paramTripType);
     setLocalSource(paramSource);
     setLocalDest(paramDest);
     setLocalDate(paramDate);
-    setLocalPassengers(paramPassengers);
-  }, [paramSource, paramDest, paramDate, paramPassengers]);
+    setLocalReturnDate(paramReturnDate);
+    setAdults(paramAdults);
+    setChildren(paramChildren);
+    setInfants(paramInfants);
+  }, [paramTripType, paramSource, paramDest, paramDate, paramReturnDate, paramAdults, paramChildren, paramInfants]);
 
   // Fetch live fleet from API
   useEffect(() => {
@@ -127,29 +157,80 @@ function BookingSearchContent() {
   let flatUpgrades = 0;
   if (upgrades.groundTransfer) flatUpgrades += UPGRADE_PRICES.groundTransfer;
 
-  const totalUpgradeCost = (upgradesPerPassenger * paramPassengers) + flatUpgrades;
+  const totalUpgradeCost = (upgradesPerPassenger * (totalPassengers || 1)) + flatUpgrades;
 
-  // Handle Modify Search submit
+  // Add Multi-city leg
+  const handleAddLeg = () => {
+    if (multiCityLegs.length < 4) {
+      const lastLeg = multiCityLegs[multiCityLegs.length - 1];
+      setMultiCityLegs([
+        ...multiCityLegs,
+        { source: lastLeg.destination, destination: "Vaishno Devi Shrine", date: localDate }
+      ]);
+    }
+  };
+
+  // Remove Multi-city leg
+  const handleRemoveLeg = (index: number) => {
+    if (multiCityLegs.length > 2) {
+      setMultiCityLegs(multiCityLegs.filter((_, i) => i !== index));
+    }
+  };
+
+  // Update specific Multi-city leg
+  const handleUpdateLeg = (index: number, field: "source" | "destination" | "date", val: string) => {
+    const updated = [...multiCityLegs];
+    updated[index] = { ...updated[index], [field]: val };
+    setMultiCityLegs(updated);
+  };
+
+  // Handle Search submit
   const handleUpdateSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push(
-      `/booking?source=${encodeURIComponent(localSource)}&destination=${encodeURIComponent(localDest)}&date=${localDate}&passengers=${localPassengers}`
-    );
+    const query = new URLSearchParams();
+    query.set("trip_type", tripType);
+    query.set("source", localSource);
+    query.set("destination", localDest);
+    query.set("date", localDate);
+    if (tripType === "Round Trip" && localReturnDate) {
+      query.set("return_date", localReturnDate);
+    }
+    query.set("adults", adults.toString());
+    query.set("children", children.toString());
+    query.set("infants", infants.toString());
+    query.set("passengers", totalPassengers.toString());
+    
+    router.push(`/booking?${query.toString()}`);
   };
 
   // Select flight and book
   const handleSelectFlight = (heli: HelicopterListing) => {
-    // Add dynamic upgrade prices per passenger to pass custom checkout item calculations
-    const finalPerPassengerPrice = Number(heli.price) + upgradesPerPassenger + Math.round(flatUpgrades / paramPassengers);
+    const pax = totalPassengers || 1;
+    const finalPerPassengerPrice = Number(heli.price) + upgradesPerPassenger + Math.round(flatUpgrades / pax);
     
+    let detailsStr = "";
+    if (tripType === "Multi-City") {
+      detailsStr = multiCityLegs.map(l => `${l.source} ➔ ${l.destination}`).join(" | ");
+    } else if (tripType === "Round Trip") {
+      detailsStr = `${localSource} ⇄ ${localDest} (Return: ${localReturnDate || "Flexible"})`;
+    } else {
+      detailsStr = `${localSource} ➔ ${localDest}`;
+    }
+
     setItem({
       type: "helicopter",
       id: heli.id,
-      name: `${heli.name} Flight`,
+      name: `${heli.name} Flight (${tripType})`,
       price: finalPerPassengerPrice,
-      date: paramDate,
-      passengers: paramPassengers,
-      details: `${paramSource} ➔ ${paramDest}`,
+      date: localDate,
+      return_date: localReturnDate,
+      trip_type: tripType,
+      passengers: pax,
+      adults,
+      children,
+      infants,
+      legs: tripType === "Multi-City" ? multiCityLegs : undefined,
+      details: detailsStr,
       duration: heli.speed.includes("240") ? "45 Mins" : "35 Mins",
       image: heli.image,
     });
@@ -167,7 +248,6 @@ function BookingSearchContent() {
   let distanceKm = Math.round(rawDist * 12.5);
   let etaMin = Math.round(distanceKm / 4.2);
 
-  // Set specific values for known routes
   if (paramSource.includes("Dehradun") && paramDest.includes("Kedarnath")) {
     distanceKm = 109;
     etaMin = 28;
@@ -176,17 +256,14 @@ function BookingSearchContent() {
     etaMin = 65;
   }
 
-  // Pre-load location options
-  const sourceOptions = ["Dehradun (DED)", "New Delhi Hub", "Srinagar Terminal", "Goa Beachfront Heliport", "Mumbai Heliport"];
-  const destOptions = ["Kedarnath Sanctuary", "Badrinath Valley", "Vaishno Devi Shrine", "Char Dham Circuit", "Goa Shoreline", "Mumbai Heliport"];
-
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
       <BookingProgressTracker currentStep={2} />
       {/* Header breadcrumb summary */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/5 pb-6 mb-8 gap-4">
         <div>
-          <h1 className="font-space text-3xl font-bold tracking-tight">Available Air Charters</h1>
+          <h1 className="font-space text-3xl font-bold tracking-tight text-white">Helicopter Booking</h1>
+          <p className="text-xs text-slate-400 mt-1 font-sans">Search and reserve private luxury helicopter flights across India</p>
         </div>
         <div className="text-xs font-mono text-gold px-3 py-1.5 rounded border border-gold/20 bg-gold/5 uppercase tracking-wider">
           Total Upgrade Cost: +₹{totalUpgradeCost.toLocaleString("en-IN")}
@@ -197,75 +274,299 @@ function BookingSearchContent() {
         {/* Settings & Configuration panel - Left */}
         <div className="lg:col-span-4 flex flex-col gap-6">
           
-          {/* Module 1: Configure Charter Search */}
-          <form onSubmit={handleUpdateSearch} className="flex flex-col gap-4 bg-[#051433] p-5 rounded-xl border border-white/5 shadow-lg text-white">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-              <Compass className="h-4.5 w-4.5 text-gold" />
-              <h2 className="font-space text-xs uppercase tracking-wider font-bold">Modify Flight Request</h2>
+          {/* MakeMyTrip Style Flight Search Widget */}
+          <form onSubmit={handleUpdateSearch} className="flex flex-col gap-4 bg-[#051433] p-5 rounded-xl border border-white/10 shadow-2xl text-white">
+            <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+              <Compass className="h-5 w-5 text-gold" />
+              <h2 className="font-space text-xs uppercase tracking-wider font-bold text-white">Search Flight Charters</h2>
             </div>
 
-            {/* Departure */}
-            <div className="flex flex-col gap-1">
-              <label className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Departure From</label>
-              <select
-                value={localSource}
-                onChange={(e) => setLocalSource(e.target.value)}
-                className="w-full bg-[#020B1E] border border-white/15 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-gold/50 cursor-pointer font-sans"
+            {/* Trip Type Pills (One Way | Round Trip | Multi-City) */}
+            <div className="flex items-center gap-1.5 bg-[#020B1E] p-1 rounded-lg border border-white/10">
+              <button
+                type="button"
+                onClick={() => setTripType("One Way")}
+                className={`flex-1 py-1.5 px-2 text-[10px] font-space font-bold uppercase tracking-wider rounded-md transition-all flex items-center justify-center gap-1 ${
+                  tripType === "One Way"
+                    ? "bg-gold text-black shadow-md"
+                    : "text-slate-400 hover:text-white"
+                }`}
               >
-                {sourceOptions.map((opt) => (
-                  <option key={opt} value={opt} className="bg-[#020B1E]">{opt}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Destination */}
-            <div className="flex flex-col gap-1">
-              <label className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Destination To</label>
-              <select
-                value={localDest}
-                onChange={(e) => setLocalDest(e.target.value)}
-                className="w-full bg-[#020B1E] border border-white/15 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-gold/50 cursor-pointer font-sans"
+                <Plane className="h-3 w-3" />
+                One Way
+              </button>
+              <button
+                type="button"
+                onClick={() => setTripType("Round Trip")}
+                className={`flex-1 py-1.5 px-2 text-[10px] font-space font-bold uppercase tracking-wider rounded-md transition-all flex items-center justify-center gap-1 ${
+                  tripType === "Round Trip"
+                    ? "bg-gold text-black shadow-md"
+                    : "text-slate-400 hover:text-white"
+                }`}
               >
-                {destOptions.map((opt) => (
-                  <option key={opt} value={opt} className="bg-[#020B1E]">{opt}</option>
-                ))}
-              </select>
+                <ArrowRightLeft className="h-3 w-3" />
+                Round Trip
+              </button>
+              <button
+                type="button"
+                onClick={() => setTripType("Multi-City")}
+                className={`flex-1 py-1.5 px-2 text-[10px] font-space font-bold uppercase tracking-wider rounded-md transition-all flex items-center justify-center gap-1 ${
+                  tripType === "Multi-City"
+                    ? "bg-gold text-black shadow-md"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <Compass className="h-3 w-3" />
+                Multi-City
+              </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {/* Date */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Date</label>
-                <input
-                  type="date"
-                  required
-                  value={localDate}
-                  min={new Date().toISOString().split("T")[0]}
-                  onChange={(e) => setLocalDate(e.target.value)}
-                  className="w-full bg-[#020B1E] border border-white/15 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-gold/50 cursor-pointer font-sans"
-                />
-              </div>
+            {/* One Way / Round Trip Form Fields */}
+            {tripType !== "Multi-City" ? (
+              <div className="flex flex-col gap-3.5">
+                {/* Departure */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] uppercase tracking-wider text-gold font-bold">Departure From</label>
+                  <select
+                    value={localSource}
+                    onChange={(e) => setLocalSource(e.target.value)}
+                    className="w-full bg-[#020B1E] border border-white/15 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-gold cursor-pointer font-sans"
+                  >
+                    {sourceOptions.map((opt) => (
+                      <option key={opt} value={opt} className="bg-[#020B1E]">{opt}</option>
+                    ))}
+                  </select>
+                </div>
 
-              {/* Passengers */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Passengers</label>
-                <select
-                  value={localPassengers}
-                  onChange={(e) => setLocalPassengers(Number(e.target.value))}
-                  className="w-full bg-[#020B1E] border border-white/15 rounded px-2 py-2 text-xs text-white focus:outline-none focus:border-gold/50 cursor-pointer font-sans"
-                >
-                  {[1, 2, 3, 4, 5, 6, 8].map((num) => (
-                    <option key={num} value={num} className="bg-[#020B1E]">{num} Pax</option>
-                  ))}
-                </select>
+                {/* Destination */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] uppercase tracking-wider text-gold font-bold">Destination To</label>
+                  <select
+                    value={localDest}
+                    onChange={(e) => setLocalDest(e.target.value)}
+                    className="w-full bg-[#020B1E] border border-white/15 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-gold cursor-pointer font-sans"
+                  >
+                    {destOptions.map((opt) => (
+                      <option key={opt} value={opt} className="bg-[#020B1E]">{opt}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Dates (Departure & Optional Return) */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Departure Date</label>
+                    <input
+                      type="date"
+                      required
+                      value={localDate}
+                      min={new Date().toISOString().split("T")[0]}
+                      onChange={(e) => setLocalDate(e.target.value)}
+                      className="w-full bg-[#020B1E] border border-white/15 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-gold cursor-pointer font-sans"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className={`text-[9px] uppercase tracking-wider font-bold ${tripType === "Round Trip" ? "text-gold" : "text-slate-500"}`}>
+                      Return Date {tripType === "One Way" && "(Optional)"}
+                    </label>
+                    <input
+                      type="date"
+                      disabled={tripType === "One Way"}
+                      required={tripType === "Round Trip"}
+                      value={localReturnDate}
+                      min={localDate || new Date().toISOString().split("T")[0]}
+                      onChange={(e) => setLocalReturnDate(e.target.value)}
+                      className={`w-full bg-[#020B1E] border rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none cursor-pointer font-sans ${
+                        tripType === "Round Trip" ? "border-gold/50 focus:border-gold" : "border-white/5 opacity-40 cursor-not-allowed"
+                      }`}
+                    />
+                  </div>
+                </div>
               </div>
+            ) : (
+              /* Multi-City Form Fields */
+              <div className="flex flex-col gap-3.5">
+                {multiCityLegs.map((leg, idx) => (
+                  <div key={idx} className="p-3 bg-[#020B1E] rounded-lg border border-white/10 flex flex-col gap-2 relative">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-space font-bold uppercase text-gold tracking-wider">Leg {idx + 1}</span>
+                      {multiCityLegs.length > 2 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveLeg(idx)}
+                          className="text-red-400 hover:text-red-300 p-1 cursor-pointer"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <select
+                        value={leg.source}
+                        onChange={(e) => handleUpdateLeg(idx, "source", e.target.value)}
+                        className="w-full bg-[#051433] border border-white/15 rounded px-2 py-1.5 text-[11px] text-white"
+                      >
+                        {sourceOptions.map((opt) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={leg.destination}
+                        onChange={(e) => handleUpdateLeg(idx, "destination", e.target.value)}
+                        className="w-full bg-[#051433] border border-white/15 rounded px-2 py-1.5 text-[11px] text-white"
+                      >
+                        {destOptions.map((opt) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <input
+                      type="date"
+                      value={leg.date}
+                      onChange={(e) => handleUpdateLeg(idx, "date", e.target.value)}
+                      className="w-full bg-[#051433] border border-white/15 rounded px-2 py-1 text-[11px] text-white"
+                    />
+                  </div>
+                ))}
+                {multiCityLegs.length < 4 && (
+                  <button
+                    type="button"
+                    onClick={handleAddLeg}
+                    className="py-1.5 px-3 border border-dashed border-gold/40 hover:border-gold text-gold text-xs rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-space uppercase tracking-wider"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Add Another City Leg
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Travellers & Class Selector (MakeMyTrip Counter) */}
+            <div className="flex flex-col gap-1 relative">
+              <label className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Travellers & Class</label>
+              <button
+                type="button"
+                onClick={() => setShowPaxDropdown(!showPaxDropdown)}
+                className="w-full bg-[#020B1E] border border-white/15 hover:border-gold/50 rounded-lg px-3 py-2 text-xs text-white flex items-center justify-between cursor-pointer font-sans transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-gold" />
+                  <span className="font-medium">
+                    {adults} Adult{adults > 1 ? "s" : ""}, {children} Child{children !== 1 ? "ren" : ""}, {infants} Infant{infants !== 1 ? "s" : ""}
+                  </span>
+                </div>
+                <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+              </button>
+
+              {/* MakeMyTrip Style Pax Dropdown */}
+              <AnimatePresence>
+                {showPaxDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    className="absolute top-full left-0 right-0 mt-1 bg-[#020B1E] border border-white/20 rounded-xl p-4 shadow-2xl z-30 flex flex-col gap-3 text-white"
+                  >
+                    {/* Adults */}
+                    <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                      <div>
+                        <div className="text-xs font-bold text-white">Adults</div>
+                        <div className="text-[9px] text-slate-400">12+ Years</div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          disabled={adults <= 1}
+                          onClick={() => setAdults(adults - 1)}
+                          className="h-6 w-6 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </button>
+                        <span className="text-xs font-mono font-bold w-4 text-center">{adults}</span>
+                        <button
+                          type="button"
+                          disabled={adults >= 8}
+                          onClick={() => setAdults(adults + 1)}
+                          className="h-6 w-6 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center text-gold"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Children */}
+                    <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                      <div>
+                        <div className="text-xs font-bold text-white">Children</div>
+                        <div className="text-[9px] text-slate-400">2-12 Years</div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          disabled={children <= 0}
+                          onClick={() => setChildren(children - 1)}
+                          className="h-6 w-6 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </button>
+                        <span className="text-xs font-mono font-bold w-4 text-center">{children}</span>
+                        <button
+                          type="button"
+                          disabled={children >= 6}
+                          onClick={() => setChildren(children + 1)}
+                          className="h-6 w-6 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center text-gold"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Infants */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-bold text-white">Infants</div>
+                        <div className="text-[9px] text-slate-400">Below 2 Years (Lap)</div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          disabled={infants <= 0}
+                          onClick={() => setInfants(infants - 1)}
+                          className="h-6 w-6 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </button>
+                        <span className="text-xs font-mono font-bold w-4 text-center">{infants}</span>
+                        <button
+                          type="button"
+                          disabled={infants >= 4}
+                          onClick={() => setInfants(infants + 1)}
+                          className="h-6 w-6 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center text-gold"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPaxDropdown(false)}
+                      className="w-full py-1.5 bg-gold text-black rounded font-space text-[10px] font-bold uppercase mt-1 cursor-pointer"
+                    >
+                      Done
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <button
               type="submit"
-              className="w-full py-2.5 bg-gold hover:bg-gold-hover text-black font-space text-[10px] font-bold uppercase tracking-wider rounded transition-colors shadow-lg cursor-pointer text-center"
+              className="w-full py-3 bg-gold hover:bg-gold-hover text-black font-space text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all shadow-xl cursor-pointer text-center flex items-center justify-center gap-2 mt-1"
             >
-              Search flights
+              <Compass className="h-4 w-4" />
+              Search Flights
             </button>
           </form>
 
@@ -305,14 +606,14 @@ function BookingSearchContent() {
                 />
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-space uppercase tracking-wider font-bold text-white group-hover:text-gold transition-colors">Gourmet In-Flight Meals</span>
+                    <span className="text-[10px] font-space uppercase tracking-wider font-bold text-white group-hover:text-gold transition-colors">Gourmet In-Flight Catering</span>
                     <span className="text-[9px] font-mono text-gold">+₹3,500/pax</span>
                   </div>
-                  <p className="text-[9px] text-slate-400 font-sans leading-relaxed">Curated hot gourmet dining boxes and high altitude beverages.</p>
+                  <p className="text-[9px] text-slate-400 font-sans leading-relaxed">Artisanal organic snacks, fresh juices, and champagne for mountain transit.</p>
                 </div>
               </label>
 
-              {/* Upgrade 3: Porter Darshan */}
+              {/* Upgrade 3: Porter & Darshan Priority */}
               <label className="flex items-start gap-3 cursor-pointer group">
                 <input 
                   type="checkbox"
@@ -322,14 +623,14 @@ function BookingSearchContent() {
                 />
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-space uppercase tracking-wider font-bold text-white group-hover:text-gold transition-colors">VIP Priority Darshan Pass</span>
+                    <span className="text-[10px] font-space uppercase tracking-wider font-bold text-white group-hover:text-gold transition-colors">VIP Shrine Priority & Escort</span>
                     <span className="text-[9px] font-mono text-gold">+₹12,000/pax</span>
                   </div>
-                  <p className="text-[9px] text-slate-400 font-sans leading-relaxed">Fast-track direct entry slots at holy shrines with dedicated porters.</p>
+                  <p className="text-[9px] text-slate-400 font-sans leading-relaxed">Direct temple queue bypass, priority Palki/Pony arrangement, and temple priest escort.</p>
                 </div>
               </label>
 
-              {/* Upgrade 4: Ground Transfer */}
+              {/* Upgrade 4: Ground Chauffeur */}
               <label className="flex items-start gap-3 cursor-pointer group">
                 <input 
                   type="checkbox"
@@ -339,208 +640,226 @@ function BookingSearchContent() {
                 />
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-space uppercase tracking-wider font-bold text-white group-hover:text-gold transition-colors">Luxury Ground Transfer</span>
-                    <span className="text-[9px] font-mono text-gold">+₹8,000 flat</span>
+                    <span className="text-[10px] font-space uppercase tracking-wider font-bold text-white group-hover:text-gold transition-colors">Luxury Chauffeur Pickup</span>
+                    <span className="text-[9px] font-mono text-gold">+₹8,000 Flat</span>
                   </div>
-                  <p className="text-[9px] text-slate-400 font-sans leading-relaxed">Private luxury sedan pickup directly from terminal gates to hotel stay.</p>
+                  <p className="text-[9px] text-slate-400 font-sans leading-relaxed">Mercedes-Benz V-Class / Audi terminal-to-heliport luxury road transfer.</p>
                 </div>
               </label>
             </div>
           </div>
+
+          {/* Module 4: Filter by Maximum Budget */}
+          <div className="flex flex-col gap-4 bg-[#051433] p-5 rounded-xl border border-white/5 shadow-lg text-white">
+            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <span className="font-space text-xs uppercase tracking-wider font-bold">Max Charter Budget</span>
+              <span className="font-mono text-gold text-xs">₹{maxPrice.toLocaleString("en-IN")}</span>
+            </div>
+            <input 
+              type="range"
+              min={100000}
+              max={500000}
+              step={10000}
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(Number(e.target.value))}
+              className="w-full accent-gold cursor-pointer"
+            />
+            <div className="flex items-center justify-between text-[9px] text-slate-400 font-mono">
+              <span>₹1,00,000</span>
+              <span>₹5,00,000</span>
+            </div>
+          </div>
         </div>
 
-        {/* Listings grid & Flight route - Right */}
-        <div className="lg:col-span-8 flex flex-col gap-8">
-          {/* Flight list */}
-          <div className="flex flex-col gap-6">
-            {filteredHelis.length === 0 ? (
-              <div className="bg-[#051433] rounded-xl p-12 text-center flex flex-col gap-4 border border-white/5">
-                <span className="font-space text-slate-300">No charters found in this price ceiling.</span>
-                <button
-                  onClick={() => setMaxPrice(300000)}
-                  className="px-4 py-2 bg-gold text-black rounded font-space font-semibold text-xs tracking-wider uppercase mx-auto cursor-pointer"
-                >
-                  Reset Price Filter
-                </button>
-              </div>
-            ) : (
-              filteredHelis.map((heli) => {
-                const basePrice = heli.price * paramPassengers;
-                const totalPriceWithAddOns = basePrice + totalUpgradeCost;
-                
-                return (
-                  <div
-                    key={heli.id}
-                    className="bg-[#051433] rounded-xl p-5 md:p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center border border-white/5 transition-all hover:border-gold/20 duration-300 shadow-md"
-                  >
-                    {/* Photo */}
-                    <div className="md:col-span-3 h-36 relative rounded overflow-hidden bg-secondary border border-white/5">
-                      <img src={heli.image} alt={heli.name} className="w-full h-full object-cover" />
-                    </div>
+        {/* Available Fleet Listings & Map View - Right Column */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
 
-                    {/* Flight Info */}
-                    <div className="md:col-span-5 flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-space tracking-widest text-gold uppercase px-2 py-0.5 bg-gold/5 border border-gold/10 rounded">
-                          {heli.model}
-                        </span>
-                        <div className="flex items-center gap-1 text-gold text-xs">
-                          <Star className="h-3 w-3 fill-gold" />
-                          <span className="font-mono">{(heli.safetyRating || (heli as any).safety_rating || "5.0/5.0").split("/")[0]}</span>
+          {/* Sort bar & interactive view mode switch */}
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-[#051433] p-4 rounded-xl border border-white/5 shadow-lg text-white">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] uppercase font-space tracking-wider text-slate-400 font-bold">Sort By:</span>
+              <button
+                onClick={() => setSortBy("price")}
+                className={`text-xs px-3 py-1.5 rounded transition-all cursor-pointer ${
+                  sortBy === "price" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white"
+                }`}
+              >
+                Price (Low ➔ High)
+              </button>
+              <button
+                onClick={() => setSortBy("speed")}
+                className={`text-xs px-3 py-1.5 rounded transition-all cursor-pointer ${
+                  sortBy === "speed" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white"
+                }`}
+              >
+                Cruise Speed
+              </button>
+              <button
+                onClick={() => setSortBy("safety")}
+                className={`text-xs px-3 py-1.5 rounded transition-all cursor-pointer ${
+                  sortBy === "safety" ? "bg-gold text-black font-bold" : "bg-[#020B1E] text-slate-300 hover:text-white"
+                }`}
+              >
+                Safety Rating
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-400 font-sans">
+              Found <span className="text-gold font-bold">{filteredHelis.length}</span> Verified Aircraft
+            </div>
+          </div>
+
+          {/* Dynamic Flight Corridor Visualizer */}
+          <div className="bg-[#020B1E] p-5 rounded-xl border border-white/10 relative overflow-hidden shadow-xl text-white">
+            <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
+              <div className="flex items-center gap-2">
+                <Activity className="h-4.5 w-4.5 text-gold animate-pulse" />
+                <span className="font-space text-xs uppercase tracking-wider font-bold text-white">Live Corridor Tracking</span>
+              </div>
+              <div className="text-[10px] font-mono text-emerald-400 flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping inline-block" />
+                Weather Operational
+              </div>
+            </div>
+
+            {/* Flight Path SVG Line */}
+            <div className="relative h-48 bg-[#051433]/80 rounded-lg border border-white/5 p-4 flex flex-col justify-between overflow-hidden">
+              <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                <line 
+                  x1={`${srcCoord.x}%`} 
+                  y1={`${srcCoord.y}%`} 
+                  x2={`${destCoord.x}%`} 
+                  y2={`${destCoord.y}%`} 
+                  stroke="#C5A880" 
+                  strokeWidth="2" 
+                  strokeDasharray="6,6"
+                  className="animate-pulse"
+                />
+                <circle cx={`${srcCoord.x}%`} cy={`${srcCoord.y}%`} r="6" fill="#C5A880" />
+                <circle cx={`${destCoord.x}%`} cy={`${destCoord.y}%`} r="6" fill="#10B981" />
+              </svg>
+
+              {/* Source Details overlay */}
+              <div className="z-10 flex flex-col items-start bg-[#020B1E]/90 p-2.5 rounded border border-white/10 max-w-[170px]">
+                <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Departure Terminal</span>
+                <span className="text-xs font-bold text-gold">{paramSource}</span>
+                <span className="text-[9px] font-mono text-slate-300 mt-0.5">{srcCoord.lat}</span>
+              </div>
+
+              {/* Mid Flight Stats */}
+              <div className="z-10 self-center bg-gold/10 border border-gold/30 px-3 py-1 rounded-full text-center backdrop-blur-md">
+                <span className="text-[10px] font-mono text-gold font-bold uppercase tracking-wider">
+                  Dist: {distanceKm} KM | Approx. Flight Time: {etaMin} Mins
+                </span>
+              </div>
+
+              {/* Destination Details overlay */}
+              <div className="z-10 flex flex-col items-end self-end bg-[#020B1E]/90 p-2.5 rounded border border-white/10 max-w-[170px] text-right">
+                <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Arrival Helipad</span>
+                <span className="text-xs font-bold text-emerald-400">{paramDest}</span>
+                <span className="text-[9px] font-mono text-slate-300 mt-0.5">{destCoord.lat}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* List of Available Helicopter Charters */}
+          <div className="flex flex-col gap-6">
+            {filteredHelis.map((heli) => {
+              const basePrice = Number(heli.price);
+              const calculatedTotalPrice = (basePrice + upgradesPerPassenger) * (totalPassengers || 1) + flatUpgrades;
+              const displayPerPassengerPrice = Math.round(calculatedTotalPrice / (totalPassengers || 1));
+
+              return (
+                <motion.div
+                  key={heli.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-[#051433] rounded-2xl border border-white/10 hover:border-gold/50 transition-all duration-300 p-6 shadow-xl flex flex-col md:flex-row gap-6 text-white group"
+                >
+                  {/* Aircraft Image */}
+                  <div className="md:w-5/12 relative h-56 md:h-auto rounded-xl overflow-hidden bg-black/40 border border-white/5">
+                    <img 
+                      src={heli.image} 
+                      alt={heli.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-3 left-3 bg-[#020B1E]/80 backdrop-blur-md px-2.5 py-1 rounded text-[10px] font-mono text-gold border border-gold/20 font-bold">
+                      {heli.model}
+                    </div>
+                    <div className="absolute bottom-3 right-3 bg-emerald-500/90 text-black px-2 py-0.5 rounded text-[10px] font-bold font-mono">
+                      Rating: {heli.safetyRating}
+                    </div>
+                  </div>
+
+                  {/* Flight Specifications & Specs Details */}
+                  <div className="md:w-7/12 flex flex-col justify-between gap-4">
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h3 className="font-space text-xl font-bold text-white group-hover:text-gold transition-colors">{heli.name}</h3>
+                          <p className="text-xs text-slate-400 mt-1 font-sans">{heli.tagline}</p>
                         </div>
                       </div>
-                      <h3 className="font-space text-base font-bold text-white leading-none">{heli.name}</h3>
-                      <p className="font-sans text-[11px] text-slate-300 line-clamp-2 leading-relaxed">
-                        {heli.description}
-                      </p>
-                      <div className="flex items-center gap-3 text-[9px] text-slate-400 uppercase tracking-wider font-mono mt-1">
-                        <span>Speed: {heli.speed}</span>
-                        <span>•</span>
-                        <span>Limit: {heli.range}</span>
+
+                      {/* Specs Badge Bar */}
+                      <div className="grid grid-cols-3 gap-2 my-4 bg-[#020B1E] p-3 rounded-xl border border-white/5 text-center">
+                        <div className="flex flex-col">
+                          <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Max Speed</span>
+                          <span className="text-xs font-mono text-white font-bold mt-0.5">{heli.speed}</span>
+                        </div>
+                        <div className="flex flex-col border-x border-white/10">
+                          <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Max Range</span>
+                          <span className="text-xs font-mono text-white font-bold mt-0.5">{heli.range}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Capacity</span>
+                          <span className="text-xs font-mono text-gold font-bold mt-0.5">{heli.capacity} Seater</span>
+                        </div>
+                      </div>
+
+                      {/* Feature Pills */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {heli.features.slice(0, 4).map((feat, i) => (
+                          <span key={i} className="text-[9px] bg-white/5 border border-white/10 px-2 py-1 rounded text-slate-300 font-sans">
+                            ✓ {feat}
+                          </span>
+                        ))}
                       </div>
                     </div>
 
-                    {/* Actions & Pricing */}
-                    <div className="md:col-span-4 border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6 flex flex-row md:flex-col justify-between md:justify-center items-center md:items-end gap-3">
-                      <div className="text-left md:text-right">
-                        <span className="text-[8px] uppercase tracking-wider text-slate-400 block font-space">Charter Rate</span>
-                        
-                        {/* Dynamic price additions indicator */}
-                        {totalUpgradeCost > 0 ? (
-                          <div className="flex flex-col">
-                            <span className="font-mono text-[9px] text-slate-400 line-through">
-                              ₹{basePrice.toLocaleString("en-IN")}
-                            </span>
-                            <div className="font-space text-lg font-bold text-gold">
-                              ₹{totalPriceWithAddOns.toLocaleString("en-IN")}
-                            </div>
-                            <span className="text-[8px] text-slate-300 block">
-                              (incl. upgrades for {paramPassengers} Pax)
-                            </span>
-                          </div>
-                        ) : (
-                          <div>
-                            <div className="font-space text-lg font-bold text-gold">
-                              ₹{basePrice.toLocaleString("en-IN")}
-                            </div>
-                            <span className="text-[8px] text-slate-300 block">
-                              (for {paramPassengers} passengers)
-                            </span>
-                          </div>
-                        )}
+                    {/* Price and Book Action CTA */}
+                    <div className="flex items-center justify-between border-t border-white/5 pt-4 mt-2">
+                      <div>
+                        <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Total Charter Price ({totalPassengers} Pax)</div>
+                        <div className="text-2xl font-space font-bold text-gold">
+                          ₹{calculatedTotalPrice.toLocaleString("en-IN")}
+                        </div>
+                        <div className="text-[9px] font-mono text-slate-400">
+                          (₹{displayPerPassengerPrice.toLocaleString("en-IN")} / person incl. upgrades)
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-2 w-full md:w-auto">
-                        <Link
-                          href={`/booking/${heli.id}?date=${paramDate}&passengers=${paramPassengers}&source=${paramSource}&destination=${paramDest}`}
-                          className="p-2 border border-white/10 hover:border-gold/30 rounded text-slate-400 hover:text-gold bg-white/5 flex items-center justify-center transition-all"
-                          title="View Detailed Specs"
+                      <div className="flex items-center gap-2">
+                        <Link 
+                          href={`/booking/${heli.id}?source=${encodeURIComponent(paramSource)}&destination=${encodeURIComponent(paramDest)}`}
+                          className="px-3.5 py-2.5 rounded-lg border border-white/20 hover:border-gold text-xs font-space font-bold uppercase text-slate-200 hover:text-gold transition-colors"
                         >
-                          <Eye className="h-4 w-4" />
+                          View Aircraft
                         </Link>
                         <button
                           onClick={() => handleSelectFlight(heli)}
-                          className="flex-grow md:flex-grow-0 px-4 py-2 bg-gold hover:bg-gold-hover text-black rounded font-space font-bold text-[10px] uppercase tracking-widest transition-all glow-gold border border-gold cursor-pointer"
+                          className="px-5 py-2.5 rounded-lg bg-gold hover:bg-gold-hover text-black font-space text-xs font-bold uppercase tracking-wider transition-all shadow-lg flex items-center gap-1.5 cursor-pointer"
                         >
-                          Book Flight
+                          <span>Reserve Charter</span>
+                          <ArrowRight className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
                   </div>
-                );
-              })
-            )}
-          </div>
-
-          {/* Dynamic Flight Vector Map widget */}
-          <div className="bg-[#051433] rounded-xl p-5 border border-white/5 flex flex-col gap-4 shadow-lg text-white relative">
-            <div className="flex items-center justify-between border-b border-white/5 pb-3">
-              <div className="flex items-center gap-2">
-                <Map className="h-4.5 w-4.5 text-gold" />
-                <h3 className="font-space text-xs uppercase tracking-wider font-bold">Planned Flight Path Vector</h3>
-              </div>
-              <span className="font-mono text-[9px] text-teal animate-pulse">IFR corridor active</span>
-            </div>
-
-            {/* Map screen box */}
-            <div className="h-56 bg-[#020B1E]/95 rounded border border-white/10 relative overflow-hidden">
-              {/* Radar Grid overlay pattern */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(197,168,128,0.03)_0%,transparent_70%)] pointer-events-none" />
-              
-              {/* SVG Flight Corridor */}
-              <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full pointer-events-none">
-                {/* Horizontal & Vertical center radar lines */}
-                <line x1="50" y1="0" x2="50" y2="100" stroke="rgba(197,168,128,0.04)" strokeWidth="0.3" />
-                <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(197,168,128,0.04)" strokeWidth="0.3" />
-                <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(197,168,128,0.03)" strokeWidth="0.3" />
-                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(197,168,128,0.03)" strokeWidth="0.3" />
-
-                {/* Curved flight path vector */}
-                <path
-                  id="flightVectorPath"
-                  d={`M ${srcCoord.x} ${srcCoord.y} Q ${(srcCoord.x + destCoord.x) / 2} ${(srcCoord.y + destCoord.y) / 2 - 12} ${destCoord.x} ${destCoord.y}`}
-                  fill="none"
-                  stroke="#C5A880"
-                  strokeWidth="0.6"
-                  strokeDasharray="2 1.5"
-                />
-
-                {/* Pulsing beacon traversing the SVG path in real-time */}
-                <circle r="1" fill="#C5A880">
-                  <animateMotion dur="3.5s" repeatCount="indefinite">
-                    <mpath href="#flightVectorPath" />
-                  </animateMotion>
-                </circle>
-
-                {/* Departure Location Pin */}
-                <circle cx={srcCoord.x} cy={srcCoord.y} r="1.5" fill="#C5A880" />
-                <circle cx={srcCoord.x} cy={srcCoord.y} r="4.5" fill="none" stroke="#C5A880" strokeWidth="0.25" className="animate-ping" style={{ transformOrigin: `${srcCoord.x}px ${srcCoord.y}px` }} />
-
-                {/* Arrival Location Pin */}
-                <circle cx={destCoord.x} cy={destCoord.y} r="1.5" fill="#2DD4BF" />
-                <circle cx={destCoord.x} cy={destCoord.y} r="4.5" fill="none" stroke="#2DD4BF" strokeWidth="0.25" className="animate-ping" style={{ transformOrigin: `${destCoord.x}px ${destCoord.y}px` }} />
-              </svg>
-
-              {/* Geographic Labels overlays */}
-              <div 
-                className="absolute font-mono text-[8px] bg-slate-950/90 px-1.5 py-0.5 rounded border border-gold/20 text-gold whitespace-nowrap shadow-lg"
-                style={{ left: `${srcCoord.x}%`, top: `${srcCoord.y - 6}%`, transform: 'translateX(-50%)' }}
-              >
-                🛫 {srcCoord.name} ({srcCoord.lat.split(" ")[0]})
-              </div>
-
-              <div 
-                className="absolute font-mono text-[8px] bg-slate-950/90 px-1.5 py-0.5 rounded border border-teal/20 text-teal whitespace-nowrap shadow-lg"
-                style={{ left: `${destCoord.x}%`, top: `${destCoord.y - 6}%`, transform: 'translateX(-50%)' }}
-              >
-                🛬 {destCoord.name} ({destCoord.lat.split(" ")[0]})
-              </div>
-
-              {/* Telemetry info row bottom */}
-              <div className="absolute bottom-3 left-3 right-3 flex justify-between text-[8px] font-mono uppercase tracking-widest text-slate-400 bg-slate-900/60 p-2 rounded backdrop-blur-sm border border-white/5">
-                <span>Dist: {distanceKm} Km</span>
-                <span>Altitude: FL125 (12,500ft)</span>
-                <span>Est. Duration: {etaMin} Mins</span>
-              </div>
-
-              <div className="absolute top-3 right-3 font-mono text-[7px] text-slate-500 uppercase tracking-widest">
-                Corridor: {srcCoord.name.substring(0,3)}-{destCoord.name.substring(0,3)}
-              </div>
-            </div>
-            
-            {/* Quick Route coordinates log details */}
-            <div className="grid grid-cols-2 gap-4 text-[10px] font-mono text-slate-300 bg-slate-950/40 p-3 rounded border border-white/5 mt-1">
-              <div>
-                <span className="text-gold block font-semibold text-[9px] uppercase tracking-wider mb-0.5">Origin Telemetry</span>
-                <span>Lat: {srcCoord.lat}</span>
-                <span className="block">Lon: {srcCoord.lon}</span>
-              </div>
-              <div>
-                <span className="text-teal block font-semibold text-[9px] uppercase tracking-wider mb-0.5">Dest. Telemetry</span>
-                <span>Lat: {destCoord.lat}</span>
-                <span className="block">Lon: {destCoord.lon}</span>
-              </div>
-            </div>
+                </motion.div>
+              );
+            })}
           </div>
 
         </div>
@@ -553,13 +872,8 @@ export default function BookingSearchPage() {
   return (
     <Suspense
       fallback={
-        <div className="max-w-7xl mx-auto px-6 py-20 text-center flex flex-col gap-4 items-center justify-center min-h-[50vh]">
-          <span className="font-space text-gold text-sm uppercase tracking-widest animate-pulse">
-            Configuring Luxury Avionics Charter Flight Options...
-          </span>
-          <div className="h-1 w-24 bg-gold/20 rounded overflow-hidden">
-            <div className="h-full bg-gold animate-infinite-loading w-1/2" />
-          </div>
+        <div className="min-h-screen bg-[#020B1E] flex items-center justify-center text-white font-space text-sm">
+          Loading Luxury Charter Search...
         </div>
       }
     >
