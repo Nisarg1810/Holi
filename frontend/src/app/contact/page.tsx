@@ -61,9 +61,7 @@ export default function ContactPage() {
   };
 
   const offices = [
-    { city: "New Delhi Airport Terminal", address: "VIP Terminal 3, Indira Gandhi International Airport, New Delhi 110037", phone: "+91 70418 61886" },
-    { city: "Dehradun Helipad Office", address: "Sahastradhara Helipad Main hangar, Dehradun, Uttarakhand 248001", phone: "+91 84889 94892" },
-    { city: "Goa Marine Office", address: "Harbor View Concourse, Panaji, Goa 403001", phone: "+91 83479 31011" },
+    { city: "Corporate Head Office", address: "SHOP NO. 10, RUPAN VILLAGE, RUPAN VILLAGE ROAD, SURAT 394160", phone: "+91 70418 61886" },
   ];
 
   const faqs = [
@@ -107,8 +105,8 @@ export default function ContactPage() {
           <div className="p-3 bg-[#051433] border border-white/5 rounded-lg flex items-center gap-3">
             <Phone className="h-4 w-4 text-gold shrink-0 text-gold-explicit" />
             <div>
-              <span className="text-[8px] uppercase tracking-wider text-slate-400 block leading-none">24/7 Helplines</span>
-              <span style={{ color: '#ffffff' }} className="font-semibold text-white">70418 61886 | 84889 94892</span>
+              <span className="text-[8px] uppercase tracking-wider text-slate-400 block leading-none">24/7 Helpline</span>
+              <span style={{ color: '#ffffff' }} className="font-semibold text-white">+91 70418 61886</span>
             </div>
           </div>
           <div className="p-3 bg-[#051433] border border-white/5 rounded-lg flex items-center gap-3">
@@ -316,7 +314,7 @@ export default function ContactPage() {
               <div>
                 <span className="text-red-400 font-bold block mb-0.5 uppercase tracking-wider font-space text-[10px]">24/7 Heli-Rescue Emergency</span>
                 For instant weather reports or search and rescue coordinates: <br />
-                <span className="font-bold text-white text-white-explicit block mt-1">Call +91 70418 61886 | 84889 94892</span>
+                <span className="font-bold text-white text-white-explicit block mt-1">Call +91 70418 61886</span>
               </div>
             </div>
 

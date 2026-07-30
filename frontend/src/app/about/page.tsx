@@ -103,44 +103,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── FOUNDERS & TEAM ────────────────────────────────────────────────── */}
-      <section className="flex flex-col gap-8">
-        <div className="text-center">
-          <span className="font-space text-xs uppercase tracking-widest text-gold font-bold">Leadership</span>
-          <h2 className="font-serif text-2xl md:text-3xl font-bold text-white mt-2">Executive Officers</h2>
-          <div className="h-[1px] w-12 bg-gold mx-auto mt-2" />
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {[
-            {
-              name: "Capt. Roman Singh",
-              role: "Founder & Chief Pilot",
-              desc: "Former IAF wing commander with over 20 years and 6,000+ flight hours of high-altitude search and rescue experience in the Himalayas.",
-              photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop"
-            },
-            {
-              name: "Vishant Patel",
-              role: "Co-Founder & Director of Fleet Operations",
-              desc: "Aeronautical logistics specialist managing maintenance protocols, DGCA licensing audits, and elite concierge routing operations.",
-              photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=300&auto=format&fit=crop"
-            }
-          ].map((member, i) => (
-            <div key={i} className="rounded-xl border border-white/5 bg-[#051433] p-6 flex flex-col sm:flex-row gap-5 items-center text-left high-contrast-card">
-              <div className="h-24 w-24 rounded-xl overflow-hidden relative shrink-0 border border-gold/25">
-                <img src={member.photo} alt={member.name} className="object-cover w-full h-full" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <div>
-                  <h4 className="font-space text-sm font-bold text-white">{member.name}</h4>
-                  <span className="font-space text-[10px] uppercase tracking-wider text-gold font-semibold">{member.role}</span>
-                </div>
-                <p className="font-sans text-[11px] text-slate-300 leading-relaxed">{member.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* ── FLEET SPECIFICATIONS ────────────────────────────────────────────── */}
       <section className="flex flex-col gap-8">
@@ -228,7 +191,7 @@ export default function AboutPage() {
           <div className="flex flex-col gap-3.5 text-xs font-sans text-slate-300 text-slate-light">
             <div className="flex items-center gap-3">
               <Phone className="h-4 w-4 text-gold shrink-0 text-gold-explicit" />
-              <span>70418 61886, 84889 94892, 83479 31011</span>
+              <span>+91 70418 61886</span>
             </div>
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-gold shrink-0 text-gold-explicit" />

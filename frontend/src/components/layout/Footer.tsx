@@ -65,8 +65,8 @@ export default function Footer() {
 
           <div className="flex flex-col gap-2 border-t border-white/5 pt-4 text-xs text-slate-400 font-sans">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-gold">Helplines:</span>
-              <span>70418 61886, 84889 94892, 83479 31011</span>
+              <span className="font-semibold text-gold">Helpline:</span>
+              <span>+91 70418 61886</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-gold">Email:</span>
