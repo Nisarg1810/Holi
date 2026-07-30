@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
-import { Plus, Trash2, ShieldCheck, Weight, Info, Calendar, Users, ChevronRight, Helicopter } from "lucide-react";
+import { Plus, Trash2, ShieldCheck, Weight, Info, Calendar, Users, ChevronRight, Helicopter, Plane, Award, MapPin, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Leg {
@@ -16,53 +16,47 @@ interface PassengerWeight {
   weight: number;
 }
 
-// Coordinates for SVG route map
 const MAP_COORDINATES: Record<string, { x: number; y: number; label: string }> = {
-  "New Delhi Hub (DEL)": { x: 190, y: 190, label: "Delhi" },
-  "Dehradun Terminal (DED)": { x: 215, y: 155, label: "Dehradun" },
+  "New Delhi Hub (DEL)": { x: 190, y: 190, label: "Delhi (DEL)" },
+  "Dehradun Terminal (DED)": { x: 215, y: 155, label: "Dehradun (DED)" },
   "Kedarnath Sanctuary": { x: 235, y: 130, label: "Kedarnath" },
   "Badrinath Valley": { x: 255, y: 135, label: "Badrinath" },
-  "Srinagar Terminal (SXR)": { x: 165, y: 80, label: "Srinagar" },
+  "Srinagar Terminal (SXR)": { x: 165, y: 80, label: "Srinagar (SXR)" },
   "Katra Staging Helipad": { x: 155, y: 105, label: "Katra" },
-  "Mumbai Corporate Helipad": { x: 120, y: 350, label: "Mumbai" },
-  "Goa Beachfront Heliport": { x: 135, y: 400, label: "Goa" }
+  "Mumbai Corporate Helipad": { x: 120, y: 350, label: "Mumbai (BOM)" },
+  "Goa Beachfront Heliport": { x: 135, y: 400, label: "Goa (GOI)" }
 };
 
 const STAGING_LOCATIONS = Object.keys(MAP_COORDINATES);
 
 const HELI_MODELS = [
-  { id: "h-1", name: "Airbus H145", capacity: 900, ratePerLeg: 220000, desc: "Twin-engine VIP cabin · Max 900 kg cargo" },
-  { id: "h-2", name: "Bell 429", capacity: 750, ratePerLeg: 180000, desc: "High-altitude power · Max 750 kg cargo" },
-  { id: "h-3", name: "Augusta AW109", capacity: 600, ratePerLeg: 150000, desc: "Executive high-speed shuttle · Max 600 kg cargo" }
+  { id: "h-1", name: "Airbus H145", capacity: 900, ratePerLeg: 220000, desc: "Twin-engine VIP cabin · Max 900 kg payload" },
+  { id: "h-2", name: "Bell 429", capacity: 750, ratePerLeg: 180000, desc: "High-altitude power · Max 750 kg payload" },
+  { id: "h-3", name: "AgustaWestland AW109", capacity: 600, ratePerLeg: 150000, desc: "Executive shuttle · Max 600 kg payload" }
 ];
 
 export default function CharterPage() {
   const router = useRouter();
   const setItem = useCartStore((state) => state.setItem);
 
-  // Flight legs state
   const [legs, setLegs] = useState<Leg[]>([
     { source: "New Delhi Hub (DEL)", destination: "Dehradun Terminal (DED)" }
   ]);
 
-  // Helicopter choice
   const [selectedHeliId, setSelectedHeliId] = useState("h-1");
   const activeHeli = HELI_MODELS.find((h) => h.id === selectedHeliId) || HELI_MODELS[0];
 
-  // Date and passengers
   const today = new Date().toISOString().split("T")[0];
   const [departureDate, setDepartureDate] = useState(today);
 
-  // Manifest and weights state
   const [passengers, setPassengers] = useState<PassengerWeight[]>([
     { name: "Primary Charterer", weight: 78 },
     { name: "Guest #2", weight: 70 }
   ]);
   const [luggageCount, setLuggageCount] = useState(2);
 
-  // Estimators
   const totalPassengerWeight = passengers.reduce((sum, p) => sum + p.weight, 0);
-  const totalLuggageWeight = luggageCount * 15; // Assume 15kg per bag
+  const totalLuggageWeight = luggageCount * 15;
   const totalPayload = totalPassengerWeight + totalLuggageWeight;
   const isOverweight = totalPayload > activeHeli.capacity;
   const safetyPercentage = Math.min(100, (totalPayload / activeHeli.capacity) * 100);
@@ -75,7 +69,6 @@ export default function CharterPage() {
   const handleAddLeg = () => {
     if (legs.length >= 4) return;
     const lastDest = legs[legs.length - 1].destination;
-    // Auto populate next source with previous destination
     const nextDest = STAGING_LOCATIONS.find((loc) => loc !== lastDest) || STAGING_LOCATIONS[0];
     setLegs([...legs, { source: lastDest, destination: nextDest }]);
   };
@@ -122,7 +115,7 @@ export default function CharterPage() {
       type: "helicopter",
       id: `bespoke-charter-${Date.now()}`,
       name: `Bespoke Charter: ${activeHeli.name}`,
-      price: subtotal, // Store base rate in cart, checkout will recalculate taxes and any add-ons
+      price: finalPrice,
       date: departureDate,
       passengers: passengers.length,
       details: `Multi-Leg Charter: ${routeStr} · Total Payload: ${totalPayload}kg / ${activeHeli.capacity}kg`,
@@ -133,394 +126,372 @@ export default function CharterPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col gap-12 text-white bg-[#020B1E] min-h-screen">
+    <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
       
-      {/* Title */}
-      <div className="border-b border-white/5 pb-8 flex flex-col gap-2">
-        <span className="font-space text-xs uppercase tracking-widest text-[#C5A880] font-bold">
-          VIP Flight Concierge
-        </span>
-        <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight uppercase">
-          Bespoke Air Charter Planner
-        </h1>
-        <p className="font-sans text-xs sm:text-sm text-slate-300">
-          Design custom flight paths, verify cabin payload safety, and book exclusive private air corridors.
-        </p>
+      {/* MakeMyTrip Style Hero Header */}
+      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-8 pb-16 px-4 md:px-8 text-white relative shadow-lg">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/10 pb-6 mb-6 gap-4">
+            <div>
+              <h1 className="font-space text-3xl font-bold tracking-tight text-white flex items-center gap-2">
+                <Plane className="h-7 w-7 text-amber-400" />
+                Bespoke Flight Charters
+              </h1>
+              <p className="text-xs text-slate-300 mt-1 font-sans">
+                Build custom multi-leg flight corridors, verify real-time payload safety, and charter VIP helicopters
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-mono text-[#F5A623] px-3.5 py-1.5 rounded-full border border-[#F5A623]/30 bg-[#F5A623]/10 font-bold">
+              <ShieldCheck className="h-4 w-4 text-[#F5A623]" /> Real-Time Payload Verification
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        
-        {/* Left column: Controls */}
-        <div className="lg:col-span-8 flex flex-col gap-8">
+      {/* Main Builder Grid */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 -mt-8 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Section 1: Route Builder */}
-          <div className="glass-card rounded-xl p-6 border border-white/10 flex flex-col gap-5 text-left">
-            <h3 className="font-space text-sm uppercase tracking-wider font-bold text-white border-b border-white/5 pb-3">
-              1. Build Custom Flight Legs
-            </h3>
+          {/* Left Column: Route, Fleet & Payload Builder */}
+          <div className="lg:col-span-8 flex flex-col gap-6">
             
-            <div className="flex flex-col gap-4">
-              {legs.map((leg, idx) => (
-                <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-white/2 p-4 rounded-lg border border-white/5">
-                  <div className="md:col-span-1 flex justify-center text-xs font-space font-bold text-[#C5A880] uppercase">
-                    Leg #{idx + 1}
-                  </div>
-                  
-                  {/* Source Dropdown */}
-                  <div className="md:col-span-4 flex flex-col gap-1">
-                    <label className="text-[9px] uppercase tracking-widest font-space text-slate-400">From</label>
-                    <select
-                      value={leg.source}
-                      onChange={(e) => handleLegChange(idx, "source", e.target.value)}
-                      className="bg-[#05070D] border border-white/10 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-gold/50 cursor-pointer font-sans"
-                    >
-                      {STAGING_LOCATIONS.map((loc) => (
-                        <option key={loc} value={loc}>{loc}</option>
-                      ))}
-                    </select>
-                  </div>
+            {/* 1. Build Flight Legs Card */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                <h3 className="font-space text-sm uppercase font-bold text-slate-900 flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-[#051433]" />
+                  1. Build Custom Flight Legs
+                </h3>
+                <span className="text-xs font-bold text-slate-500 font-mono">Max 4 Legs</span>
+              </div>
 
-                  {/* Destination Dropdown */}
-                  <div className="md:col-span-4 flex flex-col gap-1">
-                    <label className="text-[9px] uppercase tracking-widest font-space text-slate-400">To</label>
-                    <select
-                      value={leg.destination}
-                      onChange={(e) => handleLegChange(idx, "destination", e.target.value)}
-                      className="bg-[#05070D] border border-white/10 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-gold/50 cursor-pointer font-sans"
-                    >
-                      {STAGING_LOCATIONS.map((loc) => (
-                        <option key={loc} value={loc}>{loc}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Remove Button */}
-                  <div className="md:col-span-3 flex justify-end">
-                    {legs.length > 1 && (
-                      <button
-                        onClick={() => handleRemoveLeg(idx)}
-                        className="p-2 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white rounded transition-colors text-xs flex items-center gap-1.5 cursor-pointer"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        <span className="md:hidden">Remove Leg</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {legs.length < 4 && (
-              <button
-                onClick={handleAddLeg}
-                className="self-start py-2 px-4 border border-gold/30 hover:border-gold text-gold hover:text-white rounded text-xs font-space font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
-              >
-                <Plus className="h-4 w-4" />
-                Add Flight Leg
-              </button>
-            )}
-          </div>
-
-          {/* Section 2: Helicopter Fleet */}
-          <div className="glass-card rounded-xl p-6 border border-white/10 flex flex-col gap-5 text-left">
-            <h3 className="font-space text-sm uppercase tracking-wider font-bold text-white border-b border-white/5 pb-3">
-              2. Private Helicopter Model
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {HELI_MODELS.map((heli) => (
-                <button
-                  key={heli.id}
-                  onClick={() => setSelectedHeliId(heli.id)}
-                  className={`text-left p-4 rounded-xl border flex flex-col justify-between min-h-36 transition-all cursor-pointer ${
-                    selectedHeliId === heli.id
-                      ? "bg-gold/5 border-gold text-gold scale-102 shadow-lg"
-                      : "bg-[#05070D]/80 border-white/5 text-slate-300 hover:border-white/20"
-                  }`}
-                >
-                  <div className="flex flex-col gap-1">
-                    <div className="h-8 w-8 bg-gold/10 rounded-full flex items-center justify-center text-gold mb-2">
-                      <Helicopter className="h-4.5 w-4.5" />
+              <div className="flex flex-col gap-3">
+                {legs.map((leg, idx) => (
+                  <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div className="md:col-span-1 text-xs font-bold font-space text-[#051433] uppercase">
+                      Leg #{idx + 1}
                     </div>
-                    <span className="font-space font-bold text-white text-sm">{heli.name}</span>
-                    <span className="text-[10px] text-slate-400 mt-1 leading-snug">{heli.desc}</span>
-                  </div>
-                  <div className="border-t border-white/5 pt-3 mt-4 text-[10px] uppercase font-space font-bold tracking-wider text-[#C5A880]">
-                    ₹{heli.ratePerLeg.toLocaleString("en-IN")} / Leg
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
 
-          {/* Section 3: Payload Weight Logger */}
-          <div className="glass-card rounded-xl p-6 border border-white/10 flex flex-col gap-6 text-left">
-            <h3 className="font-space text-sm uppercase tracking-wider font-bold text-white border-b border-white/5 pb-3 flex items-center gap-2">
-              <Weight className="h-4.5 w-4.5 text-gold" />
-              3. Cabin Payload &amp; Cargo Logger
-            </h3>
-
-            {/* Visual Gauge */}
-            <div className="bg-[#05070D] rounded-xl p-5 border border-white/5 flex flex-col gap-3">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-space uppercase tracking-wider text-slate-400">Total Manifest Weight</span>
-                <span className={`font-mono font-bold text-sm ${isOverweight ? "text-red-400" : "text-emerald-400"}`}>
-                  {totalPayload} kg / {activeHeli.capacity} kg
-                </span>
-              </div>
-              
-              {/* Progress gauge bar */}
-              <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden border border-white/10">
-                <div
-                  className={`h-full transition-all duration-500 rounded-full ${
-                    isOverweight ? "bg-red-500" : "bg-gradient-to-r from-emerald-500 to-amber-500"
-                  }`}
-                  style={{ width: `${safetyPercentage}%` }}
-                />
-              </div>
-
-              {/* Status Banner */}
-              <div className="flex items-start gap-2.5 mt-1 text-[11px] leading-relaxed">
-                <Info className={`h-4.5 w-4.5 shrink-0 mt-0.5 ${isOverweight ? "text-red-400" : "text-teal-400"}`} />
-                <p className={isOverweight ? "text-red-300" : "text-slate-300"}>
-                  {isOverweight ? (
-                    <strong className="text-red-400 font-bold uppercase tracking-wider block font-space">Overweight Warning</strong>
-                  ) : (
-                    <strong className="text-emerald-400 font-bold uppercase tracking-wider block font-space">Safety Approved</strong>
-                  )}
-                  {isOverweight 
-                    ? "Your weight configuration exceeds helicopter rotor lift limit. Please upgrade helicopter model or drop secondary baggage items."
-                    : "Payload coordinates are within nominal visual flight rules (VFR) safety bounds for high-altitude mountain takeoff."
-                  }
-                </p>
-              </div>
-            </div>
-
-            {/* Passenger weight grid list */}
-            <div className="flex flex-col gap-4">
-              <span className="text-[10px] font-space uppercase tracking-widest text-[#C5A880] font-bold">Individual Guest Weights</span>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {passengers.map((p, idx) => (
-                  <div key={idx} className="flex items-center gap-3 bg-white/2 border border-white/5 p-3 rounded-lg">
-                    <input
-                      type="text"
-                      value={p.name}
-                      onChange={(e) => handlePassengerWeightChange(idx, "name", e.target.value)}
-                      className="bg-[#05070D] border border-white/10 rounded px-2.5 py-1 text-xs text-white focus:outline-none focus:border-gold/50 font-sans w-2/3"
-                      placeholder={`Passenger #${idx + 1}`}
-                    />
-                    <div className="flex items-center gap-1.5 w-1/3">
-                      <input
-                        type="number"
-                        value={p.weight || ""}
-                        onChange={(e) => handlePassengerWeightChange(idx, "weight", e.target.value)}
-                        className="bg-[#05070D] border border-white/10 rounded px-2.5 py-1 text-xs text-white focus:outline-none focus:border-gold/50 font-mono text-right w-full"
-                        placeholder="kg"
-                      />
-                      <span className="text-[10px] text-slate-400">kg</span>
-                    </div>
-                    {passengers.length > 1 && (
-                      <button
-                        onClick={() => handleRemovePassenger(idx)}
-                        className="text-red-400/70 hover:text-red-400 p-1"
+                    <div className="md:col-span-5 flex flex-col gap-1">
+                      <label className="text-[10px] uppercase font-bold text-slate-400">Departure (From)</label>
+                      <select
+                        value={leg.source}
+                        onChange={(e) => handleLegChange(idx, "source", e.target.value)}
+                        className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#051433] cursor-pointer font-sans"
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
+                        {STAGING_LOCATIONS.map((loc) => (
+                          <option key={loc} value={loc}>{loc}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="md:col-span-5 flex flex-col gap-1">
+                      <label className="text-[10px] uppercase font-bold text-slate-400">Destination (To)</label>
+                      <select
+                        value={leg.destination}
+                        onChange={(e) => handleLegChange(idx, "destination", e.target.value)}
+                        className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#051433] cursor-pointer font-sans"
+                      >
+                        {STAGING_LOCATIONS.map((loc) => (
+                          <option key={loc} value={loc}>{loc}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="md:col-span-1 flex justify-end">
+                      {legs.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveLeg(idx)}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
-              
-              <div className="flex flex-wrap gap-4 items-center justify-between border-t border-white/5 pt-4 mt-2">
-                {passengers.length < 8 && (
-                  <button
-                    onClick={handleAddPassenger}
-                    className="py-1.5 px-3 border border-white/10 hover:border-gold text-xs font-space font-bold uppercase rounded transition-all cursor-pointer"
-                  >
-                    + Add Guest Row
-                  </button>
-                )}
 
-                {/* Luggage Counter */}
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-slate-400 font-sans">Baggage Bags (Max 15kg/bag):</span>
-                  <div className="flex items-center bg-[#05070D] border border-white/10 rounded overflow-hidden">
+              {legs.length < 4 && (
+                <button
+                  type="button"
+                  onClick={handleAddLeg}
+                  className="mt-4 py-2.5 px-4 bg-[#051433] hover:bg-[#092254] text-white rounded-xl text-xs font-space font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Flight Leg
+                </button>
+              )}
+            </div>
+
+            {/* 2. Select Aircraft Model */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800">
+              <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-4 mb-4 flex items-center gap-2">
+                <Helicopter className="h-4 w-4 text-[#051433]" />
+                2. Private Helicopter Model
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {HELI_MODELS.map((heli) => {
+                  const isSelected = selectedHeliId === heli.id;
+                  return (
                     <button
-                      onClick={() => setLuggageCount((c) => Math.max(0, c - 1))}
-                      className="px-2.5 py-1 hover:bg-white/5 text-xs text-slate-400 font-bold"
+                      key={heli.id}
+                      type="button"
+                      onClick={() => setSelectedHeliId(heli.id)}
+                      className={`text-left p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between min-h-36 ${
+                        isSelected
+                          ? "bg-slate-50 border-[#051433] shadow-md ring-2 ring-[#051433]/20"
+                          : "bg-white border-slate-200 hover:border-slate-300"
+                      }`}
                     >
-                      -
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${isSelected ? "bg-[#051433] text-white" : "bg-slate-100 text-slate-600"}`}>
+                            <Helicopter className="h-4.5 w-4.5" />
+                          </div>
+                          {isSelected && <span className="text-[10px] font-bold bg-[#051433] text-white px-2 py-0.5 rounded">Selected</span>}
+                        </div>
+                        <span className="font-space font-bold text-slate-900 text-sm block">{heli.name}</span>
+                        <span className="text-[10px] text-slate-500 mt-1 block leading-snug">{heli.desc}</span>
+                      </div>
+                      <div className="border-t border-slate-100 pt-3 mt-3 font-space text-xs font-bold text-slate-900">
+                        ₹{heli.ratePerLeg.toLocaleString("en-IN")} <span className="text-[10px] font-normal text-slate-500">/ Leg</span>
+                      </div>
                     </button>
-                    <span className="px-3 py-1 font-mono text-xs text-white font-bold">{luggageCount}</span>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. Payload & Manifest Logger */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800">
+              <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-4 mb-4 flex items-center gap-2">
+                <Weight className="h-4 w-4 text-[#051433]" />
+                3. Cabin Payload & Cargo Logger
+              </h3>
+
+              {/* Weight Safety Gauge */}
+              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 flex flex-col gap-3 mb-6">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-space uppercase font-bold text-slate-600">Total Cabin Payload</span>
+                  <span className={`font-mono font-bold text-sm ${isOverweight ? "text-red-600" : "text-emerald-700"}`}>
+                    {totalPayload} kg / {activeHeli.capacity} kg
+                  </span>
+                </div>
+
+                <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-500 rounded-full ${
+                      isOverweight ? "bg-red-500" : "bg-emerald-500"
+                    }`}
+                    style={{ width: `${safetyPercentage}%` }}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 text-xs font-medium">
+                  <Info className={`h-4 w-4 ${isOverweight ? "text-red-500" : "text-emerald-600"}`} />
+                  <span className={isOverweight ? "text-red-600 font-bold" : "text-slate-600"}>
+                    {isOverweight 
+                      ? "Warning: Weight limit exceeded! Upgrade helicopter model or drop secondary baggage."
+                      : "Safety Approved: Payload is within DGCA high-altitude flight safety limits."
+                    }
+                  </span>
+                </div>
+              </div>
+
+              {/* Passenger Roster Input Grid */}
+              <div className="flex flex-col gap-3">
+                <span className="text-xs font-bold text-slate-700 uppercase">Passenger Roster & Weights</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {passengers.map((p, idx) => (
+                    <div key={idx} className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                      <input
+                        type="text"
+                        value={p.name}
+                        onChange={(e) => handlePassengerWeightChange(idx, "name", e.target.value)}
+                        className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 font-bold focus:outline-none w-2/3"
+                        placeholder={`Guest #${idx + 1}`}
+                      />
+                      <div className="flex items-center gap-1 w-1/3">
+                        <input
+                          type="number"
+                          value={p.weight || ""}
+                          onChange={(e) => handlePassengerWeightChange(idx, "weight", e.target.value)}
+                          className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 font-bold font-mono text-right w-full"
+                          placeholder="kg"
+                        />
+                        <span className="text-[10px] text-slate-500">kg</span>
+                      </div>
+                      {passengers.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePassenger(idx)}
+                          className="text-red-500 p-1"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-2">
+                  {passengers.length < 8 && (
                     <button
-                      onClick={() => setLuggageCount((c) => Math.min(8, c + 1))}
-                      className="px-2.5 py-1 hover:bg-white/5 text-xs text-slate-400 font-bold"
+                      type="button"
+                      onClick={handleAddPassenger}
+                      className="py-2 px-3 border border-slate-300 hover:border-black text-xs font-bold uppercase rounded-xl transition-all cursor-pointer"
                     >
-                      +
+                      + Add Passenger
                     </button>
+                  )}
+
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-slate-600">Baggage Bags:</span>
+                    <div className="flex items-center bg-slate-100 border border-slate-300 rounded-lg">
+                      <button
+                        type="button"
+                        onClick={() => setLuggageCount((c) => Math.max(0, c - 1))}
+                        className="px-2.5 py-1 text-xs font-bold text-slate-700"
+                      >
+                        -
+                      </button>
+                      <span className="px-3 py-1 text-xs font-bold text-slate-900">{luggageCount}</span>
+                      <button
+                        type="button"
+                        onClick={() => setLuggageCount((c) => Math.min(8, c + 1))}
+                        className="px-2.5 py-1 text-xs font-bold text-slate-700"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Right column: SVG Visualizer map & pricing */}
-        <div className="lg:col-span-4 lg:sticky lg:top-28 flex flex-col gap-6">
-          
-          {/* Map visualizer */}
-          <div className="glass-card rounded-xl p-5 border border-white/10 shadow-xl flex flex-col gap-4 text-left overflow-hidden">
-            <span className="font-space text-xs uppercase tracking-widest text-[#C5A880] font-bold">
-              Flight corridor tracker
-            </span>
-
-            {/* Map Frame */}
-            <div className="h-[280px] w-full bg-[#05070D] border border-white/5 rounded-lg relative overflow-hidden flex items-center justify-center">
-              
-              {/* Map background grids */}
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:20px_20px]" />
-              
-              {/* SVG drawing paths */}
-              <svg className="absolute inset-0 h-full w-full" viewBox="0 0 350 450">
-                {/* Connecting lines of selected legs */}
-                {legs.map((leg, idx) => {
-                  const pt1 = MAP_COORDINATES[leg.source];
-                  const pt2 = MAP_COORDINATES[leg.destination];
-                  if (!pt1 || !pt2) return null;
-
-                  // Curved path coordinate control
-                  const dx = pt2.x - pt1.x;
-                  const dy = pt2.y - pt1.y;
-                  const cx = pt1.x + dx / 2 - dy * 0.15;
-                  const cy = pt1.y + dy / 2 + dx * 0.15;
-
-                  return (
-                    <g key={idx}>
-                      <path
-                        d={`M ${pt1.x} ${pt1.y} Q ${cx} ${cy} ${pt2.x} ${pt2.y}`}
-                        fill="none"
-                        stroke="#C5A880"
-                        strokeWidth="1.5"
-                        strokeDasharray="4 4"
-                        className="opacity-40"
-                      />
-                      {/* Animated overlay route */}
-                      <path
-                        d={`M ${pt1.x} ${pt1.y} Q ${cx} ${cy} ${pt2.x} ${pt2.y}`}
-                        fill="none"
-                        stroke="#3B82F6"
-                        strokeWidth="2.5"
-                        strokeDasharray="8 100"
-                        className="animate-dash"
-                        style={{
-                          strokeDashoffset: 100,
-                          animation: "dash 4s linear infinite",
-                          animationDelay: `${idx * 0.5}s`
-                        }}
-                      />
-                    </g>
-                  );
-                })}
-
-                {/* Staging coordinate markers */}
-                {Object.entries(MAP_COORDINATES).map(([name, coords]) => {
-                  // Check if point is active in current legs
-                  const isActive = legs.some((l) => l.source === name || l.destination === name);
-                  return (
-                    <g key={name} transform={`translate(${coords.x}, ${coords.y})`}>
-                      <circle
-                        r={isActive ? 4.5 : 2.5}
-                        className={isActive ? "fill-blue-500 animate-pulse stroke-white stroke-1" : "fill-white/30"}
-                      />
-                      <text
-                        y="-8"
-                        textAnchor="middle"
-                        className={`text-[7px] font-space font-bold uppercase ${
-                          isActive ? "fill-gold font-extrabold" : "fill-slate-500"
-                        }`}
-                      >
-                        {coords.label}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
             </div>
           </div>
 
-          {/* Pricing detail box */}
-          <div className="glass-card rounded-xl p-6 border border-white/10 shadow-xl flex flex-col gap-5 text-left">
-            <h3 className="font-space text-sm uppercase tracking-wider font-bold border-b border-white/5 pb-3">
-              Charter Estimate
-            </h3>
+          {/* Right Column: Interactive Flight Map Tracker & Pricing */}
+          <div className="lg:col-span-4 lg:sticky lg:top-28 flex flex-col gap-6">
+            
+            {/* SVG Flight Corridor Map */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-md text-slate-800">
+              <span className="font-space text-xs uppercase font-bold text-slate-900 block mb-3">
+                Flight Corridor Tracker
+              </span>
 
-            {/* Flight parameters */}
-            <div className="flex flex-col gap-2 font-luxury text-xs text-slate-300">
-              <div className="flex justify-between">
-                <span>Date:</span>
-                <span className="font-mono text-white">{departureDate}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Total Legs:</span>
-                <span className="text-white font-bold">{legs.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Helicopter:</span>
-                <span className="text-white font-bold">{activeHeli.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Roster Manifest:</span>
-                <span className="text-white font-bold">{passengers.length} passengers</span>
+              <div className="h-[280px] w-full bg-[#051433] border border-slate-800 rounded-xl relative overflow-hidden flex items-center justify-center">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px]" />
+                
+                <svg className="absolute inset-0 h-full w-full" viewBox="0 0 350 450">
+                  {legs.map((leg, idx) => {
+                    const pt1 = MAP_COORDINATES[leg.source];
+                    const pt2 = MAP_COORDINATES[leg.destination];
+                    if (!pt1 || !pt2) return null;
+
+                    const dx = pt2.x - pt1.x;
+                    const dy = pt2.y - pt1.y;
+                    const cx = pt1.x + dx / 2 - dy * 0.15;
+                    const cy = pt1.y + dy / 2 + dx * 0.15;
+
+                    return (
+                      <g key={idx}>
+                        <path
+                          d={`M ${pt1.x} ${pt1.y} Q ${cx} ${cy} ${pt2.x} ${pt2.y}`}
+                          fill="none"
+                          stroke="#F5A623"
+                          strokeWidth="2"
+                          strokeDasharray="4 4"
+                          className="opacity-70"
+                        />
+                      </g>
+                    );
+                  })}
+
+                  {Object.entries(MAP_COORDINATES).map(([name, coords]) => {
+                    const isActive = legs.some((l) => l.source === name || l.destination === name);
+                    return (
+                      <g key={name} transform={`translate(${coords.x}, ${coords.y})`}>
+                        <circle
+                          r={isActive ? 5 : 3}
+                          className={isActive ? "fill-[#F5A623] stroke-white stroke-2" : "fill-white/40"}
+                        />
+                        <text
+                          y="-8"
+                          textAnchor="middle"
+                          className={`text-[8px] font-space font-bold uppercase ${
+                            isActive ? "fill-white font-bold" : "fill-slate-400"
+                          }`}
+                        >
+                          {coords.label}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
               </div>
             </div>
 
-            <div className="h-[1px] bg-white/5" />
+            {/* Price Breakdown Card */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800 flex flex-col gap-4">
+              <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3">
+                Charter Estimate
+              </h3>
 
-            {/* Pricing breakdown */}
-            <div className="flex flex-col gap-2 font-luxury text-xs">
-              <div className="flex justify-between text-slate-400">
-                <span>Leg Base Rate × {legs.length}</span>
-                <span>₹{subtotal.toLocaleString("en-IN")}</span>
+              <div className="flex flex-col gap-2 text-xs font-medium text-slate-600">
+                <div className="flex justify-between">
+                  <span>Travel Date:</span>
+                  <span className="font-bold text-slate-900">{departureDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Flight Legs:</span>
+                  <span className="font-bold text-slate-900">{legs.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Aircraft:</span>
+                  <span className="font-bold text-slate-900">{activeHeli.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Passengers:</span>
+                  <span className="font-bold text-slate-900">{passengers.length} Pax</span>
+                </div>
               </div>
-              <div className="flex justify-between text-slate-400">
-                <span>Aviation GST (18%)</span>
-                <span>₹{tax.toLocaleString("en-IN")}</span>
+
+              <div className="border-t border-slate-100 pt-3 flex flex-col gap-2 text-xs">
+                <div className="flex justify-between text-slate-500">
+                  <span>Leg Subtotal</span>
+                  <span>₹{subtotal.toLocaleString("en-IN")}</span>
+                </div>
+                <div className="flex justify-between text-slate-500">
+                  <span>Aviation GST (18%)</span>
+                  <span>₹{tax.toLocaleString("en-IN")}</span>
+                </div>
+                <div className="flex justify-between items-end border-t border-slate-100 pt-3 mt-1">
+                  <span className="font-space text-xs font-bold uppercase text-slate-900">Total Charter Rate</span>
+                  <span className="font-space text-2xl font-bold text-slate-900">
+                    ₹{finalPrice.toLocaleString("en-IN")}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between items-end border-t border-white/5 pt-3 mt-1">
-                <span className="font-space text-xs uppercase font-bold text-white">Estimated Price</span>
-                <span className="font-space text-lg font-bold text-gold">
-                  ₹{finalPrice.toLocaleString("en-IN")}
-                </span>
-              </div>
+
+              <button
+                type="button"
+                onClick={handleReserveCharter}
+                disabled={isOverweight}
+                className="w-full py-3.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] hover:to-[#C57A2D] text-black font-space font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <span>BOOK PRIVATE CHARTER</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
             </div>
 
-            <div className="h-[1px] bg-white/5" />
-
-            <div className="flex gap-2 bg-[#C5A880]/5 border border-[#C5A880]/10 p-3 rounded text-[10px] text-slate-300">
-              <ShieldCheck className="h-4.5 w-4.5 text-gold shrink-0" />
-              <span>Quotes include ATC clearances, staging crew manifests, and secure priority lounge access.</span>
-            </div>
-
-            <button
-              onClick={handleReserveCharter}
-              disabled={isOverweight}
-              className="w-full py-3 bg-gold hover:bg-[#E3C69D] text-black font-space font-bold text-xs uppercase tracking-widest rounded border border-gold cursor-pointer transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
-            >
-              <span>Book Private Flight</span>
-              <ChevronRight className="h-4 w-4" />
-            </button>
           </div>
+
         </div>
       </div>
-      
-      {/* Animated SVG CSS inject */}
-      <style jsx global>{`
-        @keyframes dash {
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-      `}</style>
     </div>
   );
 }
