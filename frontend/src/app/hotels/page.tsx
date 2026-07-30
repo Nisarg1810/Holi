@@ -166,7 +166,7 @@ function HotelsListingContent() {
             <div>
               <h1 className="font-space text-3xl font-bold tracking-tight text-white flex items-center gap-2">
                 <Building className="h-7 w-7 text-amber-400" />
-                Goibibo Luxury Hotels & Resorts
+                Roman Luxury Hotels & Resorts
               </h1>
               <p className="text-xs text-slate-300 mt-1 font-sans">
                 Book top 5-star hotels with private helipad access, lake views, and executive concierge services

@@ -198,7 +198,7 @@ def seed_hotels():
             ],
             amenities=["Beachfront Access", "Infinity Pool", "Private Helipad", "Jiva Spa", "Sea View Dining", "Bar & Lounge"],
             description="India's first luxury beach resort, Taj Fort Aguada blends 16th-century Portuguese heritage with oceanfront luxury and private beachfront helipad transfers.",
-            tag="GOIBIBO PREMIER"
+            tag="ROMAN PREMIER"
         ),
         Hotel(
             id="ht-3",
