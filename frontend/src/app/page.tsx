@@ -361,8 +361,32 @@ export default function Home() {
       </section>
 
       {/* 2. Global Quick Search Panel */}
-      <section className="px-6 relative z-30 -mt-10 mb-20 max-w-7xl mx-auto">
+      <section className="px-6 relative z-30 -mt-10 mb-12 max-w-7xl mx-auto">
         <SearchBox />
+      </section>
+
+      {/* Exclusive Season Offers Banner */}
+      <section className="px-6 max-w-7xl mx-auto mb-16 relative z-20">
+        <div className="bg-gradient-to-r from-[#051433] via-[#092254] to-[#051433] border border-amber-400/30 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-amber-400/10 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0">
+              <Sparkles className="h-6 w-6" />
+            </div>
+            <div>
+              <span className="font-space text-[10px] font-bold uppercase tracking-widest text-amber-400 block">EXCLUSIVE SEASON OFFERS</span>
+              <h3 className="font-space text-base md:text-lg font-bold text-white">Save Up to ₹15,000 Extra on Char Dham &amp; Bespoke Charters</h3>
+              <p className="text-xs text-slate-300 font-sans mt-0.5">Use promo code <strong className="text-amber-400 font-mono">CHARDHAM2026</strong> or <strong className="text-amber-400 font-mono">AURA10</strong> at checkout</p>
+            </div>
+          </div>
+
+          <Link
+            href="/booking"
+            className="px-6 py-3 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shrink-0 transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <span>Claim Offer</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </section>
 
       {/* 3. Our Services Section */}
