@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import BookingProgressTracker from "@/components/booking/BookingProgressTracker";
 import { useCartStore } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
-import { ShieldCheck, Compass, CreditCard, Laptop, RefreshCw, XCircle, CheckCircle } from "lucide-react";
+import { ShieldCheck, Compass, CreditCard, Laptop, RefreshCw, XCircle, CheckCircle2, Lock, ArrowRight, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "@/utils/api";
 
@@ -32,14 +32,12 @@ export default function PaymentPage() {
   const { item, passengers, selectedSeats, selectedAddOns, insuranceEnabled, appliedPromo, clearCart } = useCartStore();
   const { addBooking, user } = useAuthStore();
 
-  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "razorpay" | "phonepe">("stripe");
+  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "stripe" | "phonepe">("razorpay");
   const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "success" | "failure">("idle");
-  const [timerText, setTimerText] = useState(3);
 
-  // Recalculate price details for checkout booking summary
   const calculateTotal = () => {
     if (!item) return 0;
-    const base = item.price;
+    const base = Number(item.price);
     const addOnsCost = selectedAddOns.reduce((acc, curr) => acc + curr.price, 0);
     const insuranceCost = insuranceEnabled ? 5000 * item.passengers : 0;
     const subtotal = base + addOnsCost + insuranceCost;
@@ -59,16 +57,17 @@ export default function PaymentPage() {
     if (!item) return;
     setPaymentStatus("processing");
 
-    const bookingId = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
-    const userEmail = user?.email || "guest@aura.com";
+    const bookingId = `BK-${Math.floor(100000 + Math.random() * 900000)}`;
+    const userEmail = passengers[0]?.email || user?.email || "guest@aura.com";
+    const userPhone = passengers[0]?.phone || "";
 
     try {
-      // 1. Create Pending Booking in database
+      // 1. Create Booking record in PostgreSQL
       await API.post("/bookings", {
         id: bookingId,
         user_email: userEmail,
-        contact_email: passengers[0]?.email || userEmail,
-        contact_phone: passengers[0]?.phone || "",
+        contact_email: userEmail,
+        contact_phone: userPhone,
         type: item.type,
         name: item.name,
         details: item.details,
@@ -86,7 +85,7 @@ export default function PaymentPage() {
         price: finalAmount,
       });
 
-      // 2. Initialize Payment order on backend
+      // 2. Initialize Payment Order
       const orderRes = await API.post("/payments/create", {
         provider: paymentMethod,
         amount: finalAmount,
@@ -100,7 +99,7 @@ export default function PaymentPage() {
         const loaded = await loadRazorpay();
         if (!loaded) {
           setPaymentStatus("failure");
-          alert("Razorpay SDK failed to load.");
+          alert("Razorpay payment gateway script failed to load.");
           return;
         }
 
@@ -108,11 +107,10 @@ export default function PaymentPage() {
           key: "rzp_test_AuraAviationKey",
           amount: orderData.amount,
           currency: orderData.currency,
-          name: "AURA Luxury Aviation",
-          description: `Charter flight reservation ${bookingId}`,
+          name: "Roman Aviation & Tourism",
+          description: `Booking Reservation #${bookingId}`,
           order_id: orderData.mock ? undefined : orderData.id,
           handler: async function (response: any) {
-            // Verify payment
             const verifyRes = await API.post("/payments/verify", {
               provider: "razorpay",
               paymentId: response.razorpay_payment_id || orderData.id,
@@ -122,7 +120,6 @@ export default function PaymentPage() {
 
             if (verifyRes.data.verified) {
               setPaymentStatus("success");
-              // Update state in local store
               addBooking({
                 id: bookingId,
                 type: item.type,
@@ -142,11 +139,12 @@ export default function PaymentPage() {
             }
           },
           prefill: {
-            name: user?.name || "VIP Guest",
+            name: passengers[0]?.fullName || user?.name || "VIP Guest",
             email: userEmail,
+            contact: userPhone,
           },
           theme: {
-            color: "#D4AF37"
+            color: "#051433"
           },
           modal: {
             ondismiss: function () {
@@ -156,7 +154,6 @@ export default function PaymentPage() {
         };
 
         if (orderData.mock) {
-          // Auto resolve simulation for sandbox mode
           setTimeout(() => {
             options.handler({ razorpay_payment_id: orderData.id });
           }, 1500);
@@ -165,7 +162,6 @@ export default function PaymentPage() {
           paymentObject.open();
         }
       } else {
-        // Stripe / PhonePe flow simulation & verified validation via backend verification API
         setTimeout(async () => {
           const verifyRes = await API.post("/payments/verify", {
             provider: paymentMethod,
@@ -193,7 +189,7 @@ export default function PaymentPage() {
           } else {
             setPaymentStatus("failure");
           }
-        }, 2000);
+        }, 1800);
       }
     } catch (e) {
       setPaymentStatus("failure");
@@ -203,190 +199,218 @@ export default function PaymentPage() {
 
   if (!item) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-20 text-center flex flex-col gap-4 items-center justify-center min-h-[60vh]">
-        <h2 className="font-space text-xl">Session expired or empty reservation details.</h2>
-        <button onClick={() => router.push("/")} className="px-4 py-2 bg-gold text-black rounded">
-          Home
+      <div className="max-w-7xl mx-auto px-6 py-20 text-center flex flex-col gap-4 items-center justify-center min-h-[60vh] bg-[#F2F5F8] text-slate-800">
+        <h2 className="font-space text-2xl font-bold">Session expired or empty reservation details.</h2>
+        <button onClick={() => router.push("/")} className="px-6 py-3 bg-[#051433] text-white rounded-xl font-space text-xs font-bold uppercase">
+          Back to Home
         </button>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
-      <BookingProgressTracker currentStep={4} />
-      {/* Title */}
-      <div className="border-b border-white/5 pb-6 mb-10">
-        <h1 className="font-space text-3xl font-bold tracking-tight">VIP Secure Payment Portal</h1>
-        <p className="font-luxury text-sm text-grey-text mt-1">
-          Authorized with bank-grade 256-bit encryption protocols.
-        </p>
+    <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
+      
+      {/* MakeMyTrip Style Hero Header */}
+      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-6 pb-16 px-4 md:px-8 text-white relative shadow-lg">
+        <div className="max-w-7xl mx-auto">
+          <BookingProgressTracker currentStep={4} />
+          <h1 className="font-space text-3xl font-bold tracking-tight text-white mt-4 flex items-center gap-2">
+            <Lock className="h-7 w-7 text-amber-400" />
+            256-Bit SSL Secure Payment Gateway
+          </h1>
+          <p className="text-xs text-slate-300 mt-1 font-sans">
+            Select your preferred payment method to authorize and instantly issue your booking ticket
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start relative">
+      {/* Main Payment Layout */}
+      <div className="max-w-5xl mx-auto px-4 md:px-8 -mt-8 relative z-20">
         {paymentStatus === "idle" && (
-          <>
-            {/* Payment options - Left */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+            
+            {/* Payment Method Selector - Left */}
             <div className="md:col-span-7 flex flex-col gap-6">
-              <h3 className="font-space text-sm uppercase tracking-wider font-bold border-b border-white/5 pb-3">
-                Select Payment Gateway
-              </h3>
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800 flex flex-col gap-4">
+                <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-[#051433]" />
+                  Select Payment Method
+                </h3>
 
-              <div className="flex flex-col gap-3">
-                {/* Stripe */}
-                <button
-                  onClick={() => setPaymentMethod("stripe")}
-                  className={`p-4 rounded-lg border text-left flex justify-between items-center transition-all cursor-pointer ${
-                    paymentMethod === "stripe"
-                      ? "bg-gold/10 border-gold text-gold"
-                      : "bg-[#05070D] border-white/10 text-grey-text hover:text-white"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <CreditCard className="h-5 w-5" />
-                    <div>
-                      <span className="font-space font-bold block text-white">Stripe Checkout</span>
-                      <span className="text-[10px] text-grey-text">International Credit / Debit Cards</span>
+                <div className="flex flex-col gap-3">
+                  {/* Razorpay SmartPay */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("razorpay")}
+                    className={`p-4 rounded-2xl border text-left flex justify-between items-center transition-all cursor-pointer ${
+                      paymentMethod === "razorpay"
+                        ? "bg-slate-50 border-[#051433] shadow-md ring-2 ring-[#051433]/20"
+                        : "bg-white border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${paymentMethod === "razorpay" ? "bg-[#051433] text-white" : "bg-slate-100 text-slate-600"}`}>
+                        <Compass className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="font-space font-bold text-slate-900 text-sm block">Razorpay SmartPay</span>
+                        <span className="text-[11px] text-slate-500 font-sans">UPI, NetBanking, Credit/Debit &amp; QR Code</span>
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-[9px] uppercase tracking-widest font-mono">Gateway A</span>
-                </button>
+                    {paymentMethod === "razorpay" && <Check className="h-5 w-5 text-emerald-600 font-bold" />}
+                  </button>
 
-                {/* Razorpay */}
-                <button
-                  onClick={() => setPaymentMethod("razorpay")}
-                  className={`p-4 rounded-lg border text-left flex justify-between items-center transition-all cursor-pointer ${
-                    paymentMethod === "razorpay"
-                      ? "bg-gold/10 border-gold text-gold"
-                      : "bg-[#05070D] border-white/10 text-grey-text hover:text-white"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Compass className="h-5 w-5" />
-                    <div>
-                      <span className="font-space font-bold block text-white">Razorpay SmartPay</span>
-                      <span className="text-[10px] text-grey-text">UPI, NetBanking & Corporate Cards</span>
+                  {/* Stripe */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("stripe")}
+                    className={`p-4 rounded-2xl border text-left flex justify-between items-center transition-all cursor-pointer ${
+                      paymentMethod === "stripe"
+                        ? "bg-slate-50 border-[#051433] shadow-md ring-2 ring-[#051433]/20"
+                        : "bg-white border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${paymentMethod === "stripe" ? "bg-[#051433] text-white" : "bg-slate-100 text-slate-600"}`}>
+                        <CreditCard className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="font-space font-bold text-slate-900 text-sm block">Stripe Express</span>
+                        <span className="text-[11px] text-slate-500 font-sans">International Cards, Apple Pay &amp; Google Pay</span>
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-[9px] uppercase tracking-widest font-mono">Gateway B</span>
-                </button>
+                    {paymentMethod === "stripe" && <Check className="h-5 w-5 text-emerald-600 font-bold" />}
+                  </button>
 
-                {/* PhonePe */}
-                <button
-                  onClick={() => setPaymentMethod("phonepe")}
-                  className={`p-4 rounded-lg border text-left flex justify-between items-center transition-all cursor-pointer ${
-                    paymentMethod === "phonepe"
-                      ? "bg-gold/10 border-gold text-gold"
-                      : "bg-[#05070D] border-white/10 text-grey-text hover:text-white"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Laptop className="h-5 w-5" />
-                    <div>
-                      <span className="font-space font-bold block text-white">PhonePe UPI</span>
-                      <span className="text-[10px] text-grey-text">Direct QR & Mobile App pay</span>
+                  {/* PhonePe */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("phonepe")}
+                    className={`p-4 rounded-2xl border text-left flex justify-between items-center transition-all cursor-pointer ${
+                      paymentMethod === "phonepe"
+                        ? "bg-slate-50 border-[#051433] shadow-md ring-2 ring-[#051433]/20"
+                        : "bg-white border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${paymentMethod === "phonepe" ? "bg-[#051433] text-white" : "bg-slate-100 text-slate-600"}`}>
+                        <Laptop className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="font-space font-bold text-slate-900 text-sm block">PhonePe UPI</span>
+                        <span className="text-[11px] text-slate-500 font-sans">Instant Mobile App Pay &amp; BHIM UPI</span>
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-[9px] uppercase tracking-widest font-mono">Gateway C</span>
+                    {paymentMethod === "phonepe" && <Check className="h-5 w-5 text-emerald-600 font-bold" />}
+                  </button>
+                </div>
+
+                {/* Bank Security Guarantee */}
+                <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-600 font-sans mt-2">
+                  <ShieldCheck className="h-5 w-5 text-emerald-600 shrink-0" />
+                  <p>
+                    All payment credentials are protected under 256-bit SSL encryption. Card CVV or banking credentials are never cached.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handlePayment}
+                  className="w-full py-4 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] hover:to-[#C57A2D] text-black font-space font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
+                >
+                  <span>AUTHORIZE &amp; PAY NOW (₹{finalAmount.toLocaleString("en-IN")})</span>
+                  <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
-
-              {/* Encryption banner */}
-              <div className="flex gap-3 bg-white/2 border border-white/5 p-4 rounded-lg text-xs font-luxury text-grey-text">
-                <ShieldCheck className="h-5 w-5 text-teal shrink-0" />
-                <p>
-                  Your transaction credentials are encrypted end-to-end. We do not store PIN details, credit card numbers, or biometric assets in local caches.
-                </p>
-              </div>
-
-              <button
-                onClick={handlePayment}
-                className="w-full py-4 bg-gold hover:bg-gold/90 text-black rounded font-space font-bold text-xs uppercase tracking-widest transition-all glow-gold border border-gold cursor-pointer"
-              >
-                Proceed to Authorized Payment
-              </button>
             </div>
 
-            {/* Invoice Summary - Right */}
+            {/* Summary Invoice - Right */}
             <div className="md:col-span-5">
-              <div className="glass-card rounded-xl p-6 border border-white/10 shadow-lg flex flex-col gap-4 font-luxury text-xs text-grey-text">
-                <h3 className="font-space text-sm uppercase tracking-wider font-bold text-white border-b border-white/5 pb-3">
-                  Summary Invoice
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800 flex flex-col gap-4">
+                <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3">
+                  Booking Summary
                 </h3>
-                <div className="flex justify-between">
-                  <span>Reserved Service</span>
-                  <span className="text-white font-semibold text-right truncate max-w-[150px]">
-                    {item.name}
-                  </span>
+
+                <div className="flex flex-col gap-2.5 text-xs font-sans text-slate-600">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Reserved Service:</span>
+                    <span className="font-bold text-slate-900 text-right truncate max-w-[170px]">{item.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Travel Date:</span>
+                    <span className="font-bold text-slate-900">{item.date}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Manifest Size:</span>
+                    <span className="font-bold text-slate-900">{item.passengers} Guest(s)</span>
+                  </div>
+                  {passengers[0]?.email && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Delivery Email:</span>
+                      <span className="font-bold text-slate-900 truncate max-w-[170px]">{passengers[0].email}</span>
+                    </div>
+                  )}
+                  {passengers[0]?.phone && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Mobile No:</span>
+                      <span className="font-bold text-slate-900">+91 {passengers[0].phone}</span>
+                    </div>
+                  )}
                 </div>
-                <div className="flex justify-between">
-                  <span>Flight Date</span>
-                  <span className="text-white font-semibold">{item.date}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Manifest Size</span>
-                  <span className="text-white font-semibold">{item.passengers} Passengers</span>
-                </div>
-                <div className="h-[1px] bg-white/5 my-2" />
-                <div className="flex justify-between items-end">
-                  <span className="font-space text-xs uppercase text-white font-bold">Payable Amount</span>
-                  <span className="font-space text-lg font-bold text-gold">
+
+                <div className="border-t border-slate-100 pt-3 flex justify-between items-end">
+                  <span className="font-space text-xs font-bold uppercase text-slate-900">Total Amount Payable</span>
+                  <span className="font-space text-2xl font-bold text-slate-900">
                     ₹{finalAmount.toLocaleString("en-IN")}
                   </span>
                 </div>
               </div>
             </div>
-          </>
+
+          </div>
         )}
 
-        {/* Processing screen animation */}
+        {/* Processing State Animation */}
         {paymentStatus === "processing" && (
-          <div className="col-span-12 flex flex-col items-center justify-center py-20 text-center gap-4">
-            <RefreshCw className="h-10 w-10 text-gold animate-spin" />
-            <h3 className="font-space text-lg font-bold text-white">Authorizing Booking Transaction...</h3>
-            <p className="font-luxury text-xs text-grey-text">
-              Contacting payment gateway servers. Secure token expires in {timerText}s. Do not click refresh.
+          <div className="bg-white rounded-2xl p-12 border border-slate-200 shadow-xl flex flex-col items-center justify-center text-center gap-4 text-slate-800">
+            <RefreshCw className="h-10 w-10 text-[#051433] animate-spin" />
+            <h3 className="font-space text-xl font-bold text-slate-900">Authorizing Booking Payment...</h3>
+            <p className="text-xs text-slate-500 font-sans max-w-sm">
+              Connecting to secure banking gateway server. Please do not close or refresh this page.
             </p>
           </div>
         )}
 
-        {/* Success splash */}
+        {/* Success State */}
         {paymentStatus === "success" && (
-          <div className="col-span-12 flex flex-col items-center justify-center py-20 text-center gap-4">
-            <CheckCircle className="h-12 w-12 text-teal animate-bounce" />
-            <h3 className="font-space text-xl font-bold text-white">Payment Authorized</h3>
-            <p className="font-luxury text-xs text-grey-text">
-              Generating secure flight invoice. Redirecting to receipt workspace...
+          <div className="bg-white rounded-2xl p-12 border border-slate-200 shadow-xl flex flex-col items-center justify-center text-center gap-4 text-slate-800">
+            <CheckCircle2 className="h-12 w-12 text-emerald-600 animate-bounce" />
+            <h3 className="font-space text-2xl font-bold text-slate-900">Payment Authorized &amp; Confirmed!</h3>
+            <p className="text-xs text-slate-500 font-sans">
+              Generating your flight ticket &amp; boarding pass. Redirecting to receipt workspace...
             </p>
           </div>
         )}
 
-        {/* Failure Retry workspace */}
+        {/* Failure Retry Workspace */}
         {paymentStatus === "failure" && (
-          <div className="col-span-12 flex flex-col items-center justify-center py-16 text-center gap-5">
-            <XCircle className="h-12 w-12 text-red-400" />
-            <div>
-              <h3 className="font-space text-xl font-bold text-white">Transaction Declined</h3>
-              <p className="font-luxury text-xs text-grey-text mt-1 max-w-sm mx-auto">
-                The banking authority rejected the token handshake. Please ensure credit thresholds or try another gateway card.
-              </p>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={() => setPaymentStatus("idle")}
-                className="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded font-space text-xs uppercase tracking-widest text-white transition-all cursor-pointer"
-              >
-                Change Gateway
-              </button>
-              <button
-                onClick={handlePayment}
-                className="px-6 py-2.5 bg-gold hover:bg-gold/90 border border-gold rounded font-space text-xs uppercase tracking-widest text-black transition-all glow-gold cursor-pointer"
-              >
-                Retry Transaction
-              </button>
-            </div>
+          <div className="bg-white rounded-2xl p-12 border border-slate-200 shadow-xl flex flex-col items-center justify-center text-center gap-4 text-slate-800">
+            <XCircle className="h-12 w-12 text-red-500" />
+            <h3 className="font-space text-xl font-bold text-slate-900">Payment Authorization Declined</h3>
+            <p className="text-xs text-slate-500 font-sans max-w-sm">
+              The banking gateway rejected the payment handshake. Please try another card or UPI option.
+            </p>
+            <button
+              type="button"
+              onClick={() => setPaymentStatus("idle")}
+              className="mt-2 px-6 py-2.5 bg-[#051433] text-white rounded-xl font-space text-xs font-bold uppercase"
+            >
+              Try Again
+            </button>
           </div>
         )}
+
       </div>
     </div>
   );
