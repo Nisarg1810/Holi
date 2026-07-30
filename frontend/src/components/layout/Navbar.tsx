@@ -19,6 +19,7 @@ export default function Navbar() {
 
   const serviceOptions = [
     { name: "Helicopter Booking", href: "/booking" },
+    { name: "Bespoke Charters", href: "/charter" },
     { name: "Tour Packages", href: "/tours" },
     { name: "Hotels", href: "/hotels" },
     { name: "Boat Services", href: "/boats" },
