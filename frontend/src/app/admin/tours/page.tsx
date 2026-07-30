@@ -52,6 +52,8 @@ export default function AdminTours() {
   const [imageUploading, setImageUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [isEditing, setIsEditing] = useState(false);
+
   // Form state
   const [form, setForm] = useState({
     id: "",
@@ -91,6 +93,7 @@ export default function AdminTours() {
 
   // ── Auto-number on open ──────────────────────────────────────────────────────
   const openModal = () => {
+    setIsEditing(false);
     const nextNum = tours.length + 1;
     const nextId = `p-${nextNum}`;
     setForm({
@@ -107,6 +110,40 @@ export default function AdminTours() {
     });
     setDays([{ day: 1, title: "", desc: "", stay: "Luxury Lodge", transport: "Airbus H145" }]);
     setImagePreview("");
+    setSavedOk(false);
+    setShowModal(true);
+  };
+
+  const handleEdit = (tour: TourPackage) => {
+    setIsEditing(true);
+    setForm({
+      id: tour.id,
+      name: tour.name,
+      tagline: tour.tagline || tour.description || "",
+      duration: tour.duration,
+      price: tour.price,
+      rating: tour.rating || "4.8",
+      tag: tour.tag || "VIP Expedition",
+      image: tour.image || "",
+      inclusions: Array.isArray(tour.inclusions) && tour.inclusions.length > 0 
+        ? tour.inclusions 
+        : ["VIP Priority Access", "Bespoke high-altitude catering"],
+      exclusions: Array.isArray(tour.exclusions) && tour.exclusions.length > 0 
+        ? tour.exclusions 
+        : ["Personal offerings at temple"],
+    });
+    setDays(
+      Array.isArray(tour.itinerary) && tour.itinerary.length > 0
+        ? tour.itinerary.map((d, i) => ({
+            day: d.day || i + 1,
+            title: d.title || "",
+            desc: d.desc || "",
+            stay: d.stay || "Luxury Lodge",
+            transport: d.transport || "Airbus H145",
+          }))
+        : [{ day: 1, title: "", desc: "", stay: "Luxury Lodge", transport: "Airbus H145" }]
+    );
+    setImagePreview(tour.image || "");
     setSavedOk(false);
     setShowModal(true);
   };
@@ -213,12 +250,16 @@ export default function AdminTours() {
     };
 
     try {
-      await API.post("/tours", payload);
+      if (isEditing) {
+        await API.put(`/tours/${form.id}`, payload);
+      } else {
+        await API.post("/tours", payload);
+      }
       setSavedOk(true);
       fetchTours();
       setTimeout(() => { setSavedOk(false); setShowModal(false); }, 1600);
     } catch (err) {
-      console.error("Failed to create tour:", err);
+      console.error("Failed to save tour:", err);
       alert("Failed to save tour package to database.");
     } finally {
       setSaving(false);
@@ -275,7 +316,9 @@ export default function AdminTours() {
               <div className="flex justify-between items-center px-6 py-4 border-b border-white/8">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-gold" />
-                  <h3 className="font-space text-base font-bold text-white">Create Tour Package</h3>
+                  <h3 className="font-space text-base font-bold text-white">
+                    {isEditing ? "Edit Tour Package" : "Create Tour Package"}
+                  </h3>
                   <span className="ml-2 px-2 py-0.5 bg-gold/10 border border-gold/20 rounded text-gold font-mono text-[10px] font-bold">
                     #{form.id}
                   </span>
@@ -633,7 +676,7 @@ export default function AdminTours() {
                     {saving ? (
                       <><div className="w-3.5 h-3.5 border-2 border-black/40 border-t-transparent rounded-full animate-spin" /> Saving…</>
                     ) : (
-                      <>Create Package</>
+                      <>{isEditing ? "Save Changes" : "Create Package"}</>
                     )}
                   </button>
                 </div>
@@ -710,7 +753,7 @@ export default function AdminTours() {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => alert(`Editing ${tour.id} — edit modal coming soon.`)}
+                      onClick={() => handleEdit(tour)}
                       className="p-2 bg-white/2 hover:bg-white/5 border border-white/10 rounded-lg cursor-pointer transition-colors"
                     >
                       <Edit2 className="h-3.5 w-3.5 text-grey-text hover:text-white" />
