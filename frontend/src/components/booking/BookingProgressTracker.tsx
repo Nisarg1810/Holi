@@ -17,14 +17,14 @@ const STEPS = [
 
 export default function BookingProgressTracker({ currentStep }: TrackerProps) {
   return (
-    <div className="max-w-3xl mx-auto mb-12 mt-6 px-4 relative z-10">
+    <div className="max-w-3xl mx-auto my-6 px-4 relative z-20">
       <div className="flex items-center justify-between relative">
-        {/* Background track */}
-        <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-white/5 -translate-y-1/2 z-0" />
+        {/* Background track line */}
+        <div className="absolute top-1/2 left-0 right-0 h-[3px] bg-white/20 -translate-y-1/2 z-0 rounded-full" />
         
-        {/* Active track fill */}
+        {/* Active golden progress line */}
         <div 
-          className="absolute top-1/2 left-0 h-[2px] bg-[#C5A880] -translate-y-1/2 z-0 transition-all duration-500"
+          className="absolute top-1/2 left-0 h-[3px] bg-gradient-to-r from-amber-400 via-[#F5A623] to-[#D68B3E] -translate-y-1/2 z-0 transition-all duration-500 rounded-full shadow-[0_0_12px_rgba(245,166,35,0.5)]"
           style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
         />
 
@@ -35,19 +35,20 @@ export default function BookingProgressTracker({ currentStep }: TrackerProps) {
           return (
             <div key={s.step} className="flex flex-col items-center z-10 relative">
               <div 
-                className={`h-8 w-8 rounded-full flex items-center justify-center font-space text-xs font-bold border transition-all duration-300 ${
+                className={`h-9 w-9 rounded-full flex items-center justify-center font-space text-xs font-bold transition-all duration-300 ${
                   isCompleted 
-                    ? "bg-[#C5A880] text-black border-[#C5A880]" 
+                    ? "bg-amber-400 text-slate-950 shadow-md shadow-amber-400/20 scale-100" 
                     : isActive 
-                    ? "bg-[#020B1E] text-[#C5A880] border-[#C5A880] shadow-[0_0_10px_rgba(197,168,128,0.3)]" 
-                    : "bg-[#020B1E] text-slate-500 border-white/10"
+                    ? "bg-[#051433] text-amber-400 border-2 border-amber-400 ring-4 ring-amber-400/20 shadow-xl scale-110" 
+                    : "bg-[#051433]/90 text-slate-400 border border-slate-700"
                 }`}
               >
-                {isCompleted ? <Check className="h-4.5 w-4.5 stroke-[3]" /> : s.step}
+                {isCompleted ? <Check className="h-5 w-5 stroke-[3] text-slate-950" /> : s.step}
               </div>
+              
               <span 
-                className={`text-[9px] uppercase tracking-widest font-space mt-2 transition-colors duration-300 font-bold ${
-                  isActive ? "text-[#C5A880]" : isCompleted ? "text-white font-medium" : "text-slate-500"
+                className={`text-[10px] uppercase tracking-wider font-space mt-2.5 transition-colors duration-300 font-bold ${
+                  isActive ? "text-amber-400 scale-105 drop-shadow-md" : isCompleted ? "text-white font-semibold" : "text-slate-400"
                 }`}
               >
                 {s.label}
