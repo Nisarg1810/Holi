@@ -710,62 +710,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. Luxury Testimonial Grid Section (Expanded to 5 reviews) */}
-      <section className="py-20 px-6 max-w-7xl mx-auto text-center relative z-10 border-t border-white/5">
-        <div className="flex flex-col gap-3 mb-16">
-          <span className="font-space text-xs uppercase tracking-widest text-[#C5A880] font-bold">
-            Client Testimonials
-          </span>
-          <h2 className="font-serif text-3xl font-bold text-white">Noble Client Endorsements</h2>
-          <div className="h-[1px] w-12 bg-gold mx-auto mt-2" />
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {testimonials.map((testi, idx) => (
-            <div 
-              key={idx} 
-              className={`glass-card rounded-2xl p-8 relative overflow-hidden bg-[#051433]/30 border border-white/5 text-left flex flex-col justify-between hover:border-[#C5A880]/30 transition-all duration-300 shadow-lg ${
-                idx >= 3 ? "md:col-span-1 lg:col-span-1 lg:max-w-md mx-auto w-full" : ""
-              }`}
-            >
-              <div className="absolute top-4 right-6 font-serif text-6xl text-gold/5 pointer-events-none select-none">
-                “
-              </div>
-              
-              <div>
-                {/* Rating stars */}
-                <div className="flex items-center gap-0.5 mb-4 text-[#C5A880]">
-                  {[...Array(testi.rating)].map((_, i) => (
-                    <Star key={i} className="h-3.5 w-3.5 fill-[#C5A880] text-[#C5A880]" />
-                  ))}
-                </div>
-                
-                <p className="font-serif text-sm italic text-white/90 leading-relaxed mb-6">
-                  "{testi.quote}"
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 mt-auto pt-4 border-t border-white/5">
-                <div className="h-10 w-10 rounded-full overflow-hidden relative border border-[#C5A880]/20 shrink-0">
-                  <Image 
-                    src={testi.photo} 
-                    alt={`Portrait of ${testi.name} for testimonial review`} 
-                    fill
-                    sizes="40px"
-                    className="object-cover"
-                  />
-                </div>
-                <div>
-                  <h4 className="font-space text-xs font-bold text-gold uppercase tracking-wider">{testi.name}</h4>
-                  <span className="font-sans text-[9px] tracking-wider text-slate-400 uppercase block mt-0.5">
-                    {testi.role}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* 7. Stats Footer Strip */}
       <section className="py-12 bg-[#051433]/40 border-y border-white/5 relative z-10">
@@ -817,7 +762,7 @@ export default function Home() {
               desc: "Learn about official slot booking calendars, DGCA regulations, baggage constraints, and flight timings for the 2026 pilgrimage season.",
               date: "July 12, 2026",
               author: "Capt. A. Singh",
-              image: "https://images.unsplash.com/photo-1626014903708-544413740c4c?q=80&w=400&auto=format&fit=crop",
+              image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=400&auto=format&fit=crop",
               alt: "Snow peaks on route to Kedarnath temple sanctum"
             },
             {
@@ -833,7 +778,7 @@ export default function Home() {
               desc: "Understand peak seasons, weather coordinates, monsoon delay schedules, and how to book express Darshan passes in Katra.",
               date: "May 15, 2026",
               author: "Dr. P. Nair",
-              image: "https://images.unsplash.com/photo-1585016495481-91613a37932d?q=80&w=400&auto=format&fit=crop",
+              image: "https://images.unsplash.com/photo-1590001155093-a3c66ab0c3ff?q=80&w=400&auto=format&fit=crop",
               alt: "Green valley landscape around Vaishno Devi Katra terminal"
             }
           ].map((article, idx) => (
@@ -950,9 +895,9 @@ export default function Home() {
             "telephone": "+917041861886",
             "address": {
               "@type": "PostalAddress",
-              "streetAddress": "VIP Terminal 3, Indira Gandhi International Airport",
-              "addressLocality": "New Delhi",
-              "postalCode": "110037",
+              "streetAddress": "SHOP NO. 10, RUPAN VILLAGE, RUPAN VILLAGE ROAD",
+              "addressLocality": "Surat",
+              "postalCode": "394160",
               "addressCountry": "IN"
             },
             "aggregateRating": {

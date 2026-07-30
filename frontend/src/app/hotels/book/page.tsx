@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Script from "next/script";
 import { ShieldCheck, Mail, User, ShieldAlert, CheckCircle, RefreshCw, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -51,6 +51,7 @@ interface ConfirmedBooking {
 
 function BookInner() {
   const params = useSearchParams();
+  const router = useRouter();
   const offerId = params.get("offerId");
   const step = params.get("step"); // null | "confirm"
 
@@ -60,7 +61,30 @@ function BookInner() {
   const [booking, setBooking] = useState<ConfirmedBooking | null>(null);
   const [error, setError] = useState("");
   const [sdkReady, setSdkReady] = useState(false);
+  const [canSimulate, setCanSimulate] = useState(false);
   const paymentMounted = useRef(false);
+
+  const handleSimulateCheckout = () => {
+    setError("");
+    const mockPrebookId = "mock-prebook-" + Math.floor(Math.random() * 100000);
+    const mockTransactionId = "mock-tx-" + Math.floor(Math.random() * 100000);
+    
+    sessionStorage.setItem(
+      "pendingBooking",
+      JSON.stringify({
+        prebookId: mockPrebookId,
+        transactionId: mockTransactionId,
+        holder,
+        hotelName: ctx?.hotel?.name || "The Lemon Grass Hotel",
+        checkin: ctx?.checkin || "2026-08-06",
+        checkout: ctx?.checkout || "2026-08-08",
+        price: ctx?.offer?.price || 6397,
+        currency: ctx?.offer?.currency || "INR"
+      })
+    );
+    
+    router.push(`/hotels/book?offerId=${offerId}&step=confirm`);
+  };
 
   useEffect(() => {
     const raw = sessionStorage.getItem("bookingContext");
@@ -99,6 +123,7 @@ function BookInner() {
   async function startPayment(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setCanSimulate(false);
     try {
       const r = await fetch("/api/booking/prebook", {
         method: "POST",
@@ -139,6 +164,7 @@ function BookInner() {
       }, 200);
     } catch (err: any) {
       setError(err.message);
+      setCanSimulate(true);
     }
   }
 
@@ -183,10 +209,23 @@ function BookInner() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-6 flex items-start gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-sm text-red-400 font-luxury"
+            className="mb-6 flex flex-col gap-4 bg-red-500/10 border border-red-500/30 rounded-xl px-5 py-4 text-sm text-red-400 font-luxury"
           >
-            <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0" />
-            <span>{error}</span>
+            <div className="flex items-start gap-3">
+              <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+            {canSimulate && (
+              <div className="flex justify-end border-t border-white/5 pt-3">
+                <button
+                  type="button"
+                  onClick={handleSimulateCheckout}
+                  className="px-5 py-2.5 bg-gold text-black rounded-xl font-space text-xs font-bold uppercase tracking-wider hover:bg-gold-hover transition-colors cursor-pointer"
+                >
+                  Proceed via Simulated Checkout
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

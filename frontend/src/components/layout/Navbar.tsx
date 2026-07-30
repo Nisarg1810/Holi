@@ -144,21 +144,13 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-6">
             {/* Dashboard / Login */}
             {isLoggedIn ? (
-              <div className="flex items-center gap-4">
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 font-space text-[10px] uppercase tracking-widest text-slate-800 hover:text-gold transition-colors py-1.5 px-4 border border-gold/40 rounded-full bg-slate-50 hover:bg-gold hover:text-black"
-                >
-                  <User className="h-3.5 w-3.5 text-gold" />
-                  <span>{user?.name.split(" ")[0]}</span>
-                </Link>
-                <button
-                  onClick={logout}
-                  className="text-[10px] uppercase tracking-wider text-slate-500 hover:text-red-500 transition-colors cursor-pointer"
-                >
-                  Logout
-                </button>
-              </div>
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 font-space text-[10px] uppercase tracking-widest text-slate-800 hover:text-gold transition-colors py-1.5 px-4 border border-gold/40 rounded-full bg-slate-50 hover:bg-gold hover:text-black"
+              >
+                <User className="h-3.5 w-3.5 text-gold" />
+                <span>{user?.name.split(" ")[0]}</span>
+              </Link>
             ) : (
               <Link
                 href="/auth"
