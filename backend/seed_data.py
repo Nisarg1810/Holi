@@ -166,43 +166,73 @@ def seed_hotels():
     hotels = [
         Hotel(
             id="ht-1",
-            name="JW Marriott Mussoorie Walnut Grove",
+            name="JW Marriott Mussoorie Walnut Grove Resort",
+            city="Mussoorie",
             location="Mussoorie, Uttarakhand",
             rating="4.9/5.0",
+            stars=5,
             price=28000,
+            original_price=35000,
             image="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600&auto=format&fit=crop",
-            amenities=["Helipad Access", "Luxury Spa", "Valley View Suites", "Heated Pool", "Fine Dining"],
-            description="Perched amidst the lush Garhwal Himalayas, JW Marriott Mussoorie offers 5-star luxury with panoramic mountain views and private helipad access."
+            gallery=[
+                "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=600&auto=format&fit=crop"
+            ],
+            amenities=["Helipad Access", "Luxury Spa", "Valley View Suites", "Heated Pool", "Fine Dining", "Free WiFi"],
+            description="Perched amidst the lush Garhwal Himalayas, JW Marriott Mussoorie offers 5-star luxury with panoramic mountain views and private helipad access.",
+            tag="GOISAFE LUXURY"
         ),
         Hotel(
             id="ht-2",
             name="Taj Fort Aguada Resort & Spa",
+            city="Goa",
             location="Sinquerim, Goa",
             rating="4.8/5.0",
+            stars=5,
             price=22000,
+            original_price=28000,
             image="https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=600&auto=format&fit=crop",
-            amenities=["Beachfront Access", "Infinity Pool", "Private Helipad", "Jiva Spa", "Sea View Dining"],
-            description="India's first luxury beach resort, Taj Fort Aguada blends 16th-century Portuguese heritage with oceanfront luxury and private beachfront helipad transfers."
+            gallery=[
+                "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=600&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600&auto=format&fit=crop"
+            ],
+            amenities=["Beachfront Access", "Infinity Pool", "Private Helipad", "Jiva Spa", "Sea View Dining", "Bar & Lounge"],
+            description="India's first luxury beach resort, Taj Fort Aguada blends 16th-century Portuguese heritage with oceanfront luxury and private beachfront helipad transfers.",
+            tag="GOIBIBO PREMIER"
         ),
         Hotel(
             id="ht-3",
             name="Sarovar Portico Badrinath",
+            city="Badrinath",
             location="Badrinath, Uttarakhand",
             rating="4.7/5.0",
+            stars=4,
             price=15000,
+            original_price=18500,
             image="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=600&auto=format&fit=crop",
+            gallery=[
+                "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=600&auto=format&fit=crop"
+            ],
             amenities=["Heated Rooms", "Pure Veg Restaurant", "Temple Escort", "24/7 Oxygen Supply", "Helipad Shuttle"],
-            description="Located just 1 km from the sacred Badrinath Temple, Sarovar Portico provides warm Himalayan hospitality and premium comfort for pilgrims."
+            description="Located just 1 km from the sacred Badrinath Temple, Sarovar Portico provides warm Himalayan hospitality and premium comfort for pilgrims.",
+            tag="SACRED STAY"
         ),
         Hotel(
             id="ht-4",
             name="The Oberoi Udaivilas",
+            city="Udaipur",
             location="Udaipur, Rajasthan",
             rating="5.0/5.0",
+            stars=5,
             price=45000,
+            original_price=55000,
             image="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=600&auto=format&fit=crop",
-            amenities=["Private Boat Arrival", "Lake View Suites", "Royal Spa", "Butler Service", "Helipad Access"],
-            description="Set on the banks of Lake Pichola, The Oberoi Udaivilas features romantic courtyards, marble corridors, and regal lakeside hospitality."
+            gallery=[
+                "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=600&auto=format&fit=crop"
+            ],
+            amenities=["Private Boat Arrival", "Lake View Suites", "Royal Spa", "Butler Service", "Helipad Access", "Infinity Pool"],
+            description="Set on the banks of Lake Pichola, The Oberoi Udaivilas features romantic courtyards, marble corridors, and regal lakeside hospitality.",
+            tag="ROYAL PALACE"
         )
     ]
     Hotel.objects.bulk_create(hotels)
