@@ -497,29 +497,7 @@ export default function Home() {
 
 
 
-      {/* 7. Stats Footer Strip */}
-      <section className="py-12 bg-[#051433]/40 border-y border-white/5 relative z-10">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map((st, idx) => {
-            const Icon = st.icon;
-            return (
-              <div key={idx} className="flex items-center gap-4 justify-center md:justify-start">
-                <div className="h-10 w-10 rounded-full bg-gold/5 border border-gold/20 flex items-center justify-center text-gold">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="font-space text-xl md:text-2xl font-bold text-white">
-                    {st.value}
-                  </div>
-                  <div className="font-space text-[10px] tracking-wider text-[#cbd5e1] uppercase font-semibold">
-                    {st.label}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+
 
 
 
