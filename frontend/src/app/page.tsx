@@ -491,58 +491,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trust Signals: Certifications & Licenses Section */}
-      <section className="py-20 px-6 max-w-7xl mx-auto border-b border-white/5 relative z-10">
-        <div className="flex flex-col items-center justify-center text-center mb-16">
-          <span className="font-space text-xs uppercase tracking-widest text-[#C5A880] font-bold">
-            Safety Credentials
-          </span>
-          <h2 className="font-serif text-3xl md:text-4xl font-bold tracking-tight text-white mt-2">
-            Certifications & Licenses
-          </h2>
-          <div className="h-[1px] w-12 bg-gold mt-4" />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Card 1: DGCA License */}
-          <div className="bg-[#051433]/50 p-6 rounded-xl border border-white/5 flex flex-col gap-4 text-left hover:border-[#C5A880]/30 transition-all duration-300 shadow-md">
-            <div className="h-12 w-12 bg-[#C5A880]/10 border border-[#C5A880]/30 rounded-full flex items-center justify-center text-[#C5A880] mb-2">
-              <ShieldCheck className="h-6 w-6" />
-            </div>
-            <h3 className="font-space text-base font-bold uppercase tracking-wider text-white">DGCA Operator License</h3>
-            <p className="font-sans text-xs text-slate-300 leading-relaxed">
-              Fully authorized under Non-Scheduled Operator Permit (NSOP) No. 24/2026 issued by the Directorate General of Civil Aviation, Government of India.
-            </p>
-            <a href="/dgca-operator-license.pdf" target="_blank" rel="noopener noreferrer" className="font-mono text-[10px] text-[#C5A880] hover:underline mt-auto block font-semibold">
-              LICENSE: NSOP-24/2026-DGCA (Verify/Download PDF) ↗
-            </a>
-          </div>
-          
-          {/* Card 2: Insurance Coverage */}
-          <div className="bg-[#051433]/50 p-6 rounded-xl border border-white/5 flex flex-col gap-4 text-left hover:border-[#C5A880]/30 transition-all duration-300 shadow-md">
-            <div className="h-12 w-12 bg-[#C5A880]/10 border border-[#C5A880]/30 rounded-full flex items-center justify-center text-[#C5A880] mb-2">
-              <Award className="h-6 w-6" />
-            </div>
-            <h3 className="font-space text-base font-bold uppercase tracking-wider text-white">Comprehensive Insurance</h3>
-            <p className="font-sans text-xs text-slate-300 leading-relaxed">
-              Every flight is backed by a comprehensive passenger liability and hull insurance coverage of up to ₹50 Crores per flight, underwritten by The New India Assurance Co.
-            </p>
-            <span className="font-mono text-[10px] text-[#C5A880] mt-auto block font-semibold">COVERAGE: ₹50,00,00,000 INR</span>
-          </div>
 
-          {/* Card 3: Safety Audit Badges */}
-          <div className="bg-[#051433]/50 p-6 rounded-xl border border-white/5 flex flex-col gap-4 text-left hover:border-[#C5A880]/30 transition-all duration-300 shadow-md">
-            <div className="h-12 w-12 bg-[#C5A880]/10 border border-[#C5A880]/30 rounded-full flex items-center justify-center text-[#C5A880] mb-2">
-              <Sparkles className="h-6 w-6" />
-            </div>
-            <h3 className="font-space text-base font-bold uppercase tracking-wider text-white">Safety Audits & Standards</h3>
-            <p className="font-sans text-xs text-slate-300 leading-relaxed">
-              ISO 9001:2015 Safety Management certified, aligned with ICAO Annex 19 safety standard benchmarks. Undergoes bi-annual external operations audits.
-            </p>
-            <span className="font-mono text-[10px] text-[#C5A880] mt-auto block font-semibold">STANDARDS: ISO 9001 | ICAO ANNEX 19</span>
-          </div>
-        </div>
-          </section>
 
 
 
