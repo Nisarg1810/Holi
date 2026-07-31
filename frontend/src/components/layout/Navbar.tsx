@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCartStore } from "@/store/useCartStore";
-import { Compass, Menu, X, User, ShoppingCart, Phone, ChevronDown } from "lucide-react";
+import { useWishlistStore } from "@/store/useWishlistStore";
+import { Compass, Menu, X, User, ShoppingCart, Phone, ChevronDown, Heart, Briefcase } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
@@ -16,6 +17,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const { isLoggedIn, user, logout } = useAuthStore();
   const { item } = useCartStore();
+  const { items: wishlistItems } = useWishlistStore();
 
   const serviceOptions = [
     { name: "Helicopter Booking", href: "/booking" },
@@ -138,14 +140,37 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Right Action buttons */}
-          <div className="hidden lg:flex items-center gap-4">
+          {/* Right Action buttons (MakeMyTrip Style) */}
+          <div className="hidden lg:flex items-center gap-3">
+            {/* My Trips Button */}
+            <Link
+              href="/my-trips"
+              className="flex items-center gap-2 px-3 py-2 text-slate-800 hover:text-gold transition-colors font-space text-[10px] uppercase font-bold tracking-wider rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200"
+            >
+              <Briefcase className="h-4 w-4 text-gold" />
+              <span>My Trips</span>
+            </Link>
+
+            {/* Wishlist Button */}
+            <Link
+              href="/wishlist"
+              className="flex items-center gap-1.5 px-3 py-2 text-slate-800 hover:text-gold transition-colors font-space text-[10px] uppercase font-bold tracking-wider rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 relative"
+            >
+              <Heart className={`h-4 w-4 ${wishlistItems.length > 0 ? "fill-red-500 text-red-500" : "text-gold"}`} />
+              <span>Wishlist</span>
+              {wishlistItems.length > 0 && (
+                <span className="h-4 w-4 rounded-full bg-red-500 text-white font-mono text-[9px] flex items-center justify-center font-bold">
+                  {wishlistItems.length}
+                </span>
+              )}
+            </Link>
+
             {/* Dashboard / Login or Create Account */}
             {isLoggedIn ? (
               <div className="relative group">
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-2.5 px-4 py-2 bg-gradient-to-r from-[#051433] to-[#092254] hover:from-[#092254] hover:to-[#0D2D6C] text-white rounded-xl border border-gold/30 shadow-md font-space text-[10px] uppercase font-bold tracking-wider transition-all"
+                  className="flex items-center gap-2.5 px-3.5 py-2 bg-gradient-to-r from-[#051433] to-[#092254] hover:from-[#092254] hover:to-[#0D2D6C] text-white rounded-xl border border-gold/30 shadow-md font-space text-[10px] uppercase font-bold tracking-wider transition-all"
                 >
                   <div className="h-6 w-6 rounded-full bg-gold/20 flex items-center justify-center text-gold border border-gold/40">
                     <User className="h-3.5 w-3.5" />
@@ -166,9 +191,23 @@ export default function Navbar() {
                     <User className="h-3.5 w-3.5 text-blue-600" />
                     <span>My Account & Bookings</span>
                   </Link>
+                  <Link
+                    href="/my-trips"
+                    className="px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#051433] rounded-lg transition-colors flex items-center gap-2"
+                  >
+                    <Briefcase className="h-3.5 w-3.5 text-amber-600" />
+                    <span>My Trips</span>
+                  </Link>
+                  <Link
+                    href="/wishlist"
+                    className="px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#051433] rounded-lg transition-colors flex items-center gap-2"
+                  >
+                    <Heart className="h-3.5 w-3.5 text-red-500" />
+                    <span>Saved Wishlist</span>
+                  </Link>
                   <button
                     onClick={() => logout()}
-                    className="px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 text-left w-full cursor-pointer"
+                    className="px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 text-left w-full cursor-pointer border-t border-slate-100 mt-1"
                   >
                     <span>Sign Out</span>
                   </button>
@@ -194,7 +233,7 @@ export default function Navbar() {
             {/* Book Now Primary CTA Button */}
             <Link
               href="/booking"
-              className="flex items-center gap-2 font-space text-[10px] uppercase tracking-widest text-black transition-all py-2.5 px-5 border border-gold rounded-xl bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] hover:to-[#C57A2D] shadow-md font-bold cursor-pointer"
+              className="flex items-center gap-2 font-space text-[10px] uppercase tracking-widest text-black transition-all py-2.5 px-4 border border-gold rounded-xl bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] hover:to-[#C57A2D] shadow-md font-bold cursor-pointer"
             >
               <span>Book Now</span>
             </Link>
@@ -279,6 +318,35 @@ export default function Navbar() {
                   </Link>
                 );
               })}
+
+              <Link
+                href="/my-trips"
+                onClick={() => setIsOpen(false)}
+                className={`font-space text-lg uppercase tracking-wider hover:text-gold transition-colors py-2 border-b border-white/5 flex justify-between items-center ${
+                  pathname === "/my-trips" ? "text-gold" : "text-white"
+                }`}
+              >
+                <span>My Trips</span>
+                <Briefcase className="h-4 w-4 text-gold/60" />
+              </Link>
+
+              <Link
+                href="/wishlist"
+                onClick={() => setIsOpen(false)}
+                className={`font-space text-lg uppercase tracking-wider hover:text-gold transition-colors py-2 border-b border-white/5 flex justify-between items-center ${
+                  pathname === "/wishlist" ? "text-gold" : "text-white"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span>Saved Wishlist</span>
+                  {wishlistItems.length > 0 && (
+                    <span className="h-4 w-4 rounded-full bg-red-500 text-white font-mono text-[10px] flex items-center justify-center font-bold">
+                      {wishlistItems.length}
+                    </span>
+                  )}
+                </div>
+                <Heart className="h-4 w-4 text-red-400" />
+              </Link>
             </div>
 
             <div className="flex flex-col gap-4">
