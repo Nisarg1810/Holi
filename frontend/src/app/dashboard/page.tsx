@@ -271,15 +271,16 @@ export default function DashboardPage() {
         <div className="h-16 w-16 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 mb-4 shadow-xl">
           <Lock className="h-8 w-8" />
         </div>
-        <h2 className="font-serif text-2xl md:text-3xl font-bold text-white mb-2">Access Denied</h2>
-        <p className="text-xs md:text-sm text-slate-400 max-w-md mb-6 font-sans">
-          Please log in to your Roman Aviation account to view your flight reservations and account settings.
+        <h2 className="font-serif text-2xl md:text-3xl font-bold text-white mb-2">Authentication Required</h2>
+        <p className="text-xs md:text-sm text-slate-300 max-w-md mb-6 font-sans">
+          You are currently signed out. Please sign in on the dedicated login page to view your flight reservations and account settings.
         </p>
         <button
-          onClick={() => router.push("/auth?mode=login")}
-          className="px-8 py-3.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg transition-all"
+          onClick={() => router.push("/auth?mode=login&redirect=/dashboard")}
+          className="px-8 py-3.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2"
         >
-          Sign In / Register
+          <span>Open Login Page</span>
+          <ChevronRight className="h-4 w-4" />
         </button>
       </div>
     );

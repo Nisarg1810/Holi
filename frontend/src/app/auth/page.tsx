@@ -96,8 +96,8 @@ function OtpBoxes({ value, onChange, disabled }: OtpBoxesProps) {
   );
 }
 
-const INPUT_CLS = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-gold/50 transition-colors placeholder-white/25 font-luxury";
-const LABEL_CLS = "text-[10px] font-space uppercase tracking-widest text-gold/70 font-bold mb-1.5 block";
+const INPUT_CLS = "w-full bg-[#051433] border border-white/20 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition-all placeholder-slate-400 font-sans shadow-inner";
+const LABEL_CLS = "text-[10px] font-space uppercase tracking-widest text-amber-400 font-bold mb-1.5 block";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -134,6 +134,18 @@ export default function AuthPage() {
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
   const [showNewPass, setShowNewPass] = useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const mode = params.get("mode");
+      if (mode === "signup" || mode === "register") {
+        setStep("signup_profile");
+      } else if (mode === "login") {
+        setStep("login");
+      }
+    }
+  }, []);
 
   // ── Login ──────────────────────────────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
