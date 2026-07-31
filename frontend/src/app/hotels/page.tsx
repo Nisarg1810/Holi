@@ -36,6 +36,7 @@ function HotelsListingContent() {
   const [priceFilter, setPriceFilter] = useState<string>("all");
   const [starFilter, setStarFilter] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("rating");
 
   const [dbHotels, setDbHotels] = useState<any[]>([]);
   const [filteredHotels, setFilteredHotels] = useState<any[]>([]);
@@ -110,8 +111,17 @@ function HotelsListingContent() {
       result = result.filter((h) => Number(h.price) > 25000);
     }
 
+    // Sort results
+    if (sortBy === "price_asc") {
+      result.sort((a, b) => Number(a.price) - Number(b.price));
+    } else if (sortBy === "price_desc") {
+      result.sort((a, b) => Number(b.price) - Number(a.price));
+    } else if (sortBy === "rating") {
+      result.sort((a, b) => (Number(b.rating) || 5.0) - (Number(a.rating) || 5.0));
+    }
+
     setFilteredHotels(result);
-  }, [city, searchQuery, starFilter, priceFilter, dbHotels]);
+  }, [city, searchQuery, starFilter, priceFilter, sortBy, dbHotels]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -260,11 +270,26 @@ function HotelsListingContent() {
 
           {/* Right Column: Goibibo Hotel Result Cards */}
           <div className="lg:col-span-9 flex flex-col gap-6">
-            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center justify-between">
+            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center justify-between animate-fadeIn">
               <span className="text-xs text-slate-600 font-medium">
                 Found <span className="font-bold text-slate-900">{filteredHotels.length}</span> Verified Hotels in <span className="font-bold text-slate-900">{city === "All" ? "India" : city}</span>
               </span>
-              <span className="text-xs text-slate-400 font-medium">Prices include 18% GST</span>
+              
+              <div className="flex items-center gap-4 text-xs font-sans">
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400 font-bold uppercase text-[10px]">Sort By:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-800 focus:outline-none cursor-pointer"
+                  >
+                    <option value="rating">Top Rated</option>
+                    <option value="price_asc">Price: Low to High</option>
+                    <option value="price_desc">Price: High to Low</option>
+                  </select>
+                </div>
+                <span className="text-slate-400 font-medium hidden sm:inline">Prices include 18% GST</span>
+              </div>
             </div>
 
             {filteredHotels.map((hotel) => {
