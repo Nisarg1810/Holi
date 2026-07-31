@@ -174,8 +174,23 @@ export default function Home() {
       </div>
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020B1E]/80 to-[#020B1E] pointer-events-none z-0" />
 
-      {/* 1. Cinematic Hero Section */}
-      <section className="relative pt-12 pb-24 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center z-10">
+      {/* 1. MMT-Style Top Hero with Search Widget (Booking details first) */}
+      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#020B1E] pt-8 pb-16 px-4 md:px-8 text-white relative shadow-lg z-30">
+        <div className="max-w-7xl mx-auto text-center mb-8">
+          <h1 className="font-space text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase leading-tight">
+            Elevating Travel Across India
+          </h1>
+          <p className="text-xs text-slate-300 mt-1 font-sans">
+            Book premium helicopters, luxury hotels, holiday packages, bespoke charters, and yacht services
+          </p>
+        </div>
+        <div className="max-w-7xl mx-auto px-2 sm:px-6 relative z-30">
+          <SearchBox />
+        </div>
+      </div>
+
+      {/* 2. Cinematic Presentation Section */}
+      <section className="relative py-16 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center z-10">
         {/* Left column text content */}
         <div className="lg:col-span-7 flex flex-col gap-6 text-left relative z-10">
           <motion.div
@@ -190,16 +205,15 @@ export default function Home() {
             </span>
           </motion.div>
 
-          <motion.h1
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-6.5xl font-bold tracking-tight leading-[1.1]"
+            className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1] text-white"
           >
-            Elevating Travel <br />
-            <span className="text-gold italic font-normal">Across India</span> <br />
-            by Air, Land & Water
-          </motion.h1>
+            Experience India by <br />
+            <span className="text-gold italic font-normal">Air, Land &amp; Water</span>
+          </motion.h2>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -207,7 +221,7 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="font-sans text-sm md:text-base text-[#cbd5e1] leading-relaxed max-w-xl"
           >
-            Experience India like never before with our premium helicopter tours, curated travel packages, hotels and boat services.
+            Roman Aviation is India's leading coordinator of premium flights, hotel stays, tours, and cruises with elite priority access.
           </motion.p>
 
           {/* Flyer bullet points */}
@@ -223,7 +237,7 @@ export default function Home() {
               </div>
               <div className="flex flex-col">
                 <span className="font-space font-bold uppercase tracking-wider text-white text-[11px] block">Premium Helicopter Services</span>
-                <span className="text-[10px] text-slate-400 mt-0.5">Safe, Reliable & Comfortable</span>
+                <span className="text-[10px] text-slate-400 mt-0.5">Safe, Reliable &amp; Comfortable</span>
               </div>
             </div>
             <div className="flex items-start gap-3.5">
@@ -240,7 +254,7 @@ export default function Home() {
                 <Hotel className="h-4.5 w-4.5" />
               </div>
               <div className="flex flex-col">
-                <span className="font-space font-bold uppercase tracking-wider text-white text-[11px] block">Hotels & Cruise Bookings</span>
+                <span className="font-space font-bold uppercase tracking-wider text-white text-[11px] block">Hotels &amp; Cruise Bookings</span>
                 <span className="text-[10px] text-slate-400 mt-0.5">Complete travel solutions at one place</span>
               </div>
             </div>
@@ -321,11 +335,6 @@ export default function Home() {
             <p className="text-[10px] text-slate-300 font-sans mt-0.5">High altitude certified cabin with dynamic autopilot safety configuration.</p>
           </div>
         </motion.div>
-      </section>
-
-      {/* 2. Global Quick Search Panel */}
-      <section className="px-6 relative z-30 -mt-10 mb-12 max-w-7xl mx-auto">
-        <SearchBox />
       </section>
 
       {/* Exclusive Season Offers Banner */}
