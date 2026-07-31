@@ -164,8 +164,8 @@ export default function AuthPage() {
       const redirectParam = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("redirect") : null;
       const targetRoute = res.data.user?.role === "admin" 
         ? "/admin" 
-        : (redirectParam ? decodeURIComponent(redirectParam) : "/dashboard");
-      setTimeout(() => router.push(targetRoute), 1500);
+        : (redirectParam ? decodeURIComponent(redirectParam) : "/#booking-section");
+      setTimeout(() => router.push(targetRoute), 1200);
     } catch (err: any) {
       setError(err.response?.data?.error || "Login failed. Please check your credentials.");
     } finally {
@@ -231,8 +231,8 @@ export default function AuthPage() {
       login(res.data.user, res.data.token);
       setStep("success");
       const redirectParam = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("redirect") : null;
-      const targetRoute = redirectParam ? decodeURIComponent(redirectParam) : "/dashboard";
-      setTimeout(() => router.push(targetRoute), 1500);
+      const targetRoute = redirectParam ? decodeURIComponent(redirectParam) : "/#booking-section";
+      setTimeout(() => router.push(targetRoute), 1200);
     } catch (err: any) {
       setError(err.response?.data?.error || "Registration failed. Please try again.");
     } finally {

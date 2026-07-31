@@ -82,7 +82,7 @@ export default function Home() {
       {/* ─────────────────────────────────────────── */}
       {/* 1. MakeMyTrip Style Hero & Search Section    */}
       {/* ─────────────────────────────────────────── */}
-      <section className="relative bg-gradient-to-b from-[#051433] via-[#092254] to-[#020B1E] pt-8 pb-16 px-4 md:px-8 border-b border-white/10 shadow-2xl z-20">
+      <section id="booking-section" className="relative bg-gradient-to-b from-[#051433] via-[#092254] to-[#020B1E] pt-8 pb-16 px-4 md:px-8 border-b border-white/10 shadow-2xl z-20">
         <div className="max-w-7xl mx-auto">
           
           {/* Header Title & Tagline Banner */}
