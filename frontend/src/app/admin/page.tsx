@@ -6,7 +6,7 @@ import API from "@/utils/api";
 import {
   TrendingUp, Users, Calendar, CreditCard, ArrowUpRight,
   ShieldCheck, AlertCircle, FileSpreadsheet, Download, Mail,
-  Zap, Lock, Eye, EyeOff,
+  Zap, Lock, Eye, EyeOff, Ship, Plus, Trash2, Check, MapPin,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -239,6 +239,262 @@ function AdminDashboardContent() {
             <span>Database status: connected. All systems clear.</span>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ───────────────────────────────────────────
+// 🚢 Boat Fleet Manager Component
+// ───────────────────────────────────────────
+export function BoatFleetManager() {
+  const [boats, setBoats] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [form, setForm] = useState({
+    id: "",
+    name: "",
+    type: "",
+    location: "",
+    capacity: "",
+    price: "",
+    image: "",
+    description: "",
+    features: "",
+  });
+
+  const fetchBoats = async () => {
+    try {
+      setLoading(true);
+      const res = await API.get("/boats");
+      setBoats(res.data || []);
+    } catch (e) {
+      console.error("Failed to fetch boats:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchBoats(); }, []);
+
+  const handleAddBoat = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const payload = {
+        id: form.id || `b-${Date.now()}`,
+        name: form.name,
+        type: form.type,
+        location: form.location,
+        capacity: Number(form.capacity) || 6,
+        price: Number(form.price) || 0,
+        image: form.image || "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?q=80&w=600&auto=format&fit=crop",
+        description: form.description,
+        features: form.features.split(",").map((f) => f.trim()).filter(Boolean),
+        schedules: [],
+        reviews: [],
+      };
+      await API.post("/boats", payload);
+      setSaved(true);
+      setShowForm(false);
+      setForm({ id: "", name: "", type: "", location: "", capacity: "", price: "", image: "", description: "", features: "" });
+      await fetchBoats();
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      console.error("Failed to add boat:", err);
+      alert("Failed to save boat. Check console for details.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const charterTypes = ["Motor Yacht", "Luxury Houseboat", "Executive Catamaran", "VIP Speedboat", "Premium Schooner", "Traditional Shikara", "Motor Cruiser"];
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-space text-xl font-bold text-white flex items-center gap-2 uppercase tracking-tight">
+            <Ship className="h-5 w-5 text-amber-400" /> Fleet Manager — Boats & Yachts
+          </h2>
+          <p className="font-luxury text-xs text-grey-text mt-0.5">
+            Add, view and manage all vessel records in the live database.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="flex items-center gap-2 px-4 py-2 bg-amber-400 hover:bg-amber-300 text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+        >
+          <Plus className="h-4 w-4" />
+          Add New Vessel
+        </button>
+      </div>
+
+      {/* Success Banner */}
+      {saved && (
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-emerald-400 text-xs font-space font-bold">
+          <Check className="h-4 w-4" /> New vessel successfully added to the live database and now visible on /boats listing!
+        </motion.div>
+      )}
+
+      {/* Add Boat Form */}
+      {showForm && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          className="glass-card rounded-xl p-6 border border-amber-400/20 flex flex-col gap-5"
+        >
+          <h3 className="font-space text-sm font-bold text-white uppercase tracking-wider border-b border-white/10 pb-3 flex items-center gap-2">
+            <Ship className="h-4 w-4 text-amber-400" /> Register New Vessel
+          </h3>
+          <form onSubmit={handleAddBoat} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Name */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold text-grey-text uppercase tracking-wider">Vessel Name *</label>
+              <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="e.g. Goa Sunset Premium Catamaran"
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-amber-400/50 placeholder-grey-text"
+              />
+            </div>
+            {/* Type */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold text-grey-text uppercase tracking-wider">Charter Type *</label>
+              <select required value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-amber-400/50 cursor-pointer">
+                <option value="" disabled className="bg-[#051433]">Select charter type</option>
+                {charterTypes.map((t) => <option key={t} value={t} className="bg-[#051433]">{t}</option>)}
+              </select>
+            </div>
+            {/* Location */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold text-grey-text uppercase tracking-wider">Location / Marina *</label>
+              <input required value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}
+                placeholder="e.g. Goa Harbor, Panaji, Goa"
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-amber-400/50 placeholder-grey-text"
+              />
+            </div>
+            {/* Capacity */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold text-grey-text uppercase tracking-wider">Guest Capacity *</label>
+              <input required type="number" min="1" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+                placeholder="e.g. 12"
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-amber-400/50 placeholder-grey-text"
+              />
+            </div>
+            {/* Price */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold text-grey-text uppercase tracking-wider">Price per Hour (₹) *</label>
+              <input required type="number" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })}
+                placeholder="e.g. 45000"
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-amber-400/50 placeholder-grey-text"
+              />
+            </div>
+            {/* Image URL */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold text-grey-text uppercase tracking-wider">Image URL</label>
+              <input value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })}
+                placeholder="https://images.unsplash.com/..."
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-amber-400/50 placeholder-grey-text"
+              />
+            </div>
+            {/* Features */}
+            <div className="flex flex-col gap-1.5 md:col-span-2">
+              <label className="text-[10px] font-bold text-grey-text uppercase tracking-wider">Features (comma-separated)</label>
+              <input value={form.features} onChange={(e) => setForm({ ...form, features: e.target.value })}
+                placeholder="e.g. Private Captain, Snorkeling Gear, Onboard BBQ, Sound System"
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-amber-400/50 placeholder-grey-text"
+              />
+            </div>
+            {/* Description */}
+            <div className="flex flex-col gap-1.5 md:col-span-2">
+              <label className="text-[10px] font-bold text-grey-text uppercase tracking-wider">Description</label>
+              <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder="Describe the vessel, experience, and unique features..."
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-amber-400/50 placeholder-grey-text resize-none"
+              />
+            </div>
+            {/* Submit */}
+            <div className="md:col-span-2 flex gap-3 pt-2">
+              <button type="submit" disabled={saving}
+                className="flex items-center gap-2 px-6 py-2.5 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black font-space text-xs font-bold uppercase rounded-xl transition-all cursor-pointer">
+                {saving ? "Saving to Database..." : <><Plus className="h-4 w-4" /> Add Vessel to Database</>}
+              </button>
+              <button type="button" onClick={() => setShowForm(false)}
+                className="px-6 py-2.5 border border-white/10 bg-white/5 hover:bg-white/10 text-grey-text font-space text-xs font-bold uppercase rounded-xl transition-all cursor-pointer">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      )}
+
+      {/* Boats Table */}
+      <div className="glass-card rounded-xl border border-white/8 overflow-hidden">
+        <div className="flex justify-between items-center border-b border-white/5 px-6 py-4">
+          <h3 className="font-space text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+            <Ship className="h-4 w-4 text-amber-400" />
+            Live Fleet Registry ({loading ? "..." : boats.length} vessels)
+          </h3>
+          <button onClick={fetchBoats} className="text-[10px] text-grey-text hover:text-white font-space font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer">
+            Refresh
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-10 font-luxury text-xs text-grey-text animate-pulse">Loading fleet database...</div>
+        ) : boats.length === 0 ? (
+          <div className="text-center py-10 font-luxury text-xs text-grey-text">No vessels in database. Add one above.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs font-space">
+              <thead>
+                <tr className="text-[10px] text-grey-text uppercase tracking-wider border-b border-white/5">
+                  <th className="px-6 py-3">Vessel</th>
+                  <th className="px-6 py-3">Type</th>
+                  <th className="px-6 py-3">Location</th>
+                  <th className="px-6 py-3 text-center">Capacity</th>
+                  <th className="px-6 py-3 text-right">Price/Hr</th>
+                  <th className="px-6 py-3 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {boats.map((boat: any) => (
+                  <tr key={boat.id} className="hover:bg-white/3 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        {boat.image && (
+                          <div className="h-10 w-14 rounded-lg overflow-hidden bg-white/5 shrink-0">
+                            <img src={boat.image} alt={boat.name} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div>
+                          <span className="font-bold text-white block">{boat.name}</span>
+                          <span className="text-[10px] text-grey-text font-mono">{boat.id}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-grey-text">{boat.type || "—"}</td>
+                    <td className="px-6 py-4">
+                      <span className="flex items-center gap-1 text-grey-text">
+                        <MapPin className="h-3 w-3 text-amber-400" />
+                        {boat.location || "—"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center text-white font-bold">{boat.capacity || "—"}</td>
+                    <td className="px-6 py-4 text-right font-mono text-amber-400 font-bold">₹{Number(boat.price).toLocaleString("en-IN")}</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-[9px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold uppercase">
+                        Active
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

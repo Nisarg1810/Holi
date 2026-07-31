@@ -30,7 +30,7 @@ export default function Footer() {
       { name: "Boat & Yacht Charters", href: "/boats" },
     ],
     company: [
-      { name: "About Brand", href: "/about" },
+      { name: "Brand Philosophy", href: "/contact" },
       { name: "Guides & Chronicles", href: "/blog" },
       { name: "Careers Portal", href: "/careers" },
       { name: "Contact & Support", href: "/contact" },

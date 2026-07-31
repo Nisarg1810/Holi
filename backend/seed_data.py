@@ -231,7 +231,6 @@ def seed_hotels():
                 "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=600&auto=format&fit=crop"
             ],
             amenities=["Private Boat Arrival", "Lake View Suites", "Royal Spa", "Butler Service", "Helipad Access", "Infinity Pool"],
-            description="Set on the banks of Lake Pichola, The Oberoi Udaivilas features romantic courtyards, marble corridors, and regal lakeside hospitality.",
             tag="ROYAL PALACE"
         )
     ]
@@ -245,42 +244,94 @@ def seed_boats():
             id="b-1",
             name="Azure Voyager Luxury Yacht",
             type="Executive Catamaran Yacht",
-            capacity="12 Guests",
+            capacity=12,
             price=45000,
             image="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?q=80&w=600&auto=format&fit=crop",
+            location="Goa Harbor, Panaji, Goa",
             schedules=["09:00 AM - 12:00 PM", "02:00 PM - 05:00 PM", "05:30 PM - 08:30 PM (Sunset Cruise)"],
-            description="A sleek 45-foot double-deck luxury catamaran yacht featuring a sunbathing deck, air-conditioned saloon, and gourmet dining area."
+            description="A sleek 45-foot double-deck luxury catamaran yacht featuring a sunbathing deck, air-conditioned saloon, and gourmet dining area. Perfect for corporate events, birthday parties, and romantic sunset cruises along the Goa coastline.",
+            features=["Flybridge Sunbed", "Air-Conditioned Saloon", "Gourmet Kitchen Onboard", "Sound System & DJ Setup", "Snorkeling Equipment", "Crew of 4 included"],
+            reviews=[
+                {"author": "Deepak S.", "rating": 5, "text": "Outstanding yacht. Ideal for sunset cruising with champagne.", "date": "2026-06-10"},
+                {"author": "Priya R.", "rating": 5, "text": "Fabulous experience! The crew was amazing and food was delicious.", "date": "2026-06-22"}
+            ]
         ),
         Boat(
             id="b-2",
             name="Mandovi Royal Speedboat",
             type="VIP Speedboat",
-            capacity="6 Guests",
+            capacity=6,
             price=18000,
             image="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=600&auto=format&fit=crop",
-            schedules=["10:00 AM", "01:00 PM", "04:00 PM"],
-            description="High-speed twin-engine boat built for fast coastal transit and private island hopping around Goa shores."
+            location="Mandovi River, Panjim, Goa",
+            schedules=["09:00 AM", "11:30 AM", "03:00 PM"],
+            description="High-speed twin-engine speedboat for fast coastal transit and private island hopping around Goa shores. Experience the thrill of riding the waves at up to 60 knots.",
+            features=["Twin Yamaha Engines", "Cushioned Seating", "Life Jackets", "Cooler Box", "GoPro Mount Points", "Bluetooth Speaker"],
+            reviews=[
+                {"author": "Rahul M.", "rating": 5, "text": "What a rush! Best speedboat experience I have had in Goa.", "date": "2026-07-01"}
+            ]
         ),
         Boat(
             id="b-3",
             name="Sacred Ganges Shikara Cruise",
             type="Traditional Luxury Shikara",
-            capacity="8 Guests",
+            capacity=8,
             price=12000,
             image="https://images.unsplash.com/photo-1609946727137-013009587422?q=80&w=600&auto=format&fit=crop",
+            location="Dashashwamedh Ghat, Varanasi",
             schedules=["05:30 AM (Sunrise Aarti)", "06:00 PM (Ganga Aarti)"],
-            description="Handcrafted wooden boat equipped with velvet seating for peaceful, spiritual river cruises during evening Aarti."
+            description="Handcrafted wooden shikara boat with velvet seating for peaceful, spiritual river cruises during the evening Ganga Aarti. A transcendent experience on the holy Ganges.",
+            features=["Velvet Cushioned Seating", "Flower Petal Decoration", "Aarti Kit Provided", "Photography Assistance", "Spiritual Commentary", "Traditional Chai Service"],
+            reviews=[
+                {"author": "Anjali T.", "rating": 5, "text": "A truly spiritual and beautiful experience. The Aarti from the river is breathtaking.", "date": "2026-06-18"}
+            ]
         ),
         Boat(
             id="b-4",
-            name="Bet Dwarka Pilgrimage Ferry",
-            type="VIP Private Motorboat",
-            capacity="10 Guests",
-            price=15000,
-            image="https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=600&auto=format&fit=crop",
-            schedules=["08:00 AM", "11:30 AM", "03:00 PM"],
-            description="Comfortable private motorboat charter for direct crossing to Bet Dwarka island temple."
-        )
+            name="Kerala Backwaters Sovereign Suite",
+            type="Luxury Houseboat",
+            capacity=6,
+            price=85000,
+            image="https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=600&auto=format&fit=crop",
+            location="Alleppey (Alappuzha) Backwaters, Kerala",
+            schedules=["Full Day Charter", "Overnight (24 Hours)"],
+            description="A magnificent 70-foot traditional Kerala kettuvallam houseboat with glass-walled lounge, sprawling upper deck, traditional chefs onboard, and full AC cabins. Glide through the serene palm-lined backwaters of Alleppey.",
+            features=["Glass-Walled Lounge", "2 AC Cabins", "Traditional Kerala Chef", "Sprawling Upper Deck", "Fishing Rods", "Kayak Available"],
+            reviews=[
+                {"author": "Priya Menon", "rating": 5, "text": "So peaceful. Floating past coco palms in absolute luxury.", "date": "2026-06-22"},
+                {"author": "Kiran B.", "rating": 5, "text": "The Kerala fish curry was phenomenal. Best backwaters trip ever!", "date": "2026-07-10"}
+            ]
+        ),
+        Boat(
+            id="b-5",
+            name="Andaman Pearl Schooner",
+            type="Premium Schooner Yacht",
+            capacity=10,
+            price=65000,
+            image="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?q=80&w=600&auto=format&fit=crop",
+            location="Port Blair Marina, Andaman Islands",
+            schedules=["07:00 AM - 01:00 PM (Island Hop)", "02:00 PM - 07:00 PM (Sunset Sail)"],
+            description="Sail the crystal-clear turquoise waters of the Andaman Sea on this classic 55-foot schooner. Visit Havelock Island, Neil Island, and Ross Island in a single charter with private snorkeling stops.",
+            features=["Island Hopping Route", "Professional Dive Guide", "Snorkel & Mask Sets", "Underwater GoPro", "BBQ Lunch Onboard", "Hammock Net at Bow"],
+            reviews=[
+                {"author": "Vikram J.", "rating": 5, "text": "Absolutely stunning waters and a magnificent boat. Once-in-a-lifetime experience.", "date": "2026-05-14"}
+            ]
+        ),
+        Boat(
+            id="b-6",
+            name="Mumbai Harbour Royal Cruise",
+            type="Motor Cruiser",
+            capacity=20,
+            price=35000,
+            image="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=600&auto=format&fit=crop",
+            location="Gateway of India, Mumbai, Maharashtra",
+            schedules=["10:00 AM", "12:30 PM", "04:00 PM", "07:00 PM (Night Cruise)"],
+            description="Experience Mumbai's iconic skyline and the Gateway of India from the water on this premium motor cruiser. Perfect for corporate events, product launches, and private parties with stunning city views.",
+            features=["Air-Conditioned Deck", "Full Bar Setup", "LED Dance Floor", "Live Music Option", "City Panorama Views", "Photo Booth"],
+            reviews=[
+                {"author": "Sneha A.", "rating": 5, "text": "Mumbai from the sea is magical. The night cruise with city lights was unforgettable.", "date": "2026-07-05"}
+            ]
+        ),
     ]
     Boat.objects.bulk_create(boats)
     print(f"Seeded {len(boats)} Boats into PostgreSQL")

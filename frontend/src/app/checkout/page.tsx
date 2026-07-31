@@ -51,7 +51,14 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
-  const addOnOptions: AddOn[] = [
+  const isBoat = item?.type === "boat";
+
+  const addOnOptions: AddOn[] = isBoat ? [
+    { id: "ao-b1", name: "Gourmet Seafood Platter", price: 8500, description: "Chef-prepared fresh catch with wine pairing" },
+    { id: "ao-b2", name: "Snorkeling Gear Package", price: 4500, description: "Full set for all guests — masks, fins, vests" },
+    { id: "ao-b3", name: "Sunset Photography Session", price: 6500, description: "Professional photographer for 1 hour onboard" },
+    { id: "ao-b4", name: "Private DJ & Sound System", price: 12000, description: "Live DJ with premium marine speaker setup" },
+  ] : [
     { id: "ao-1", name: "Gourmet Caviar & Champagne", price: 12500, description: "VIP cabin flight refreshments" },
     { id: "ao-2", name: "Airport Limousine Pickup", price: 15000, description: "Audi A8 terminal transfer service" },
     { id: "ao-3", name: "Extended Heli Baggage (+15kg)", price: 8000, description: "Additional custom weight allowance" },
@@ -113,7 +120,9 @@ export default function CheckoutPage() {
       }
     }
     
-    const taxes = (subtotal - discount) * 0.18;
+    // Boats use 5% marine GST; others use 18% aviation GST
+    const taxRate = item.type === "boat" ? 0.05 : 0.18;
+    const taxes = (subtotal - discount) * taxRate;
     return {
       subtotal,
       discount,
@@ -312,8 +321,37 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* 3. Interactive Seating Chart (Helicopters only - shown after filling passenger details) */}
-            {item.type === "helicopter" && (
+            {/* 3. Boat Charter Info OR Helicopter Seating */}
+            {item.type === "boat" ? (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800"
+              >
+                <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2 mb-4">
+                  <Ticket className="h-4 w-4 text-[#051433]" />
+                  Charter Details & Special Requests
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-col gap-2">
+                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Charter Summary</span>
+                    <p className="text-xs text-slate-700 font-medium">{item.details}</p>
+                    <p className="text-[10px] text-slate-500">Date: <strong className="text-slate-800">{item.date}</strong></p>
+                    <p className="text-[10px] text-slate-500">Guests: <strong className="text-slate-800">{item.passengers}</strong></p>
+                  </div>
+                  <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex flex-col gap-2">
+                    <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Important Notes</span>
+                    <ul className="text-[10px] text-slate-600 space-y-1">
+                      <li>✓ Life jackets provided for all guests</li>
+                      <li>✓ Experienced certified captain included</li>
+                      <li>✓ Report 30 mins before departure</li>
+                      <li>✓ Valid govt ID required for boarding</li>
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+            item.type === "helicopter" && (
               passengers.every((p) => p.fullName && p.fullName.trim() !== "") ? (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -362,19 +400,19 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 </motion.div>
-              ) : (
+            ) : (
                 <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm text-center flex flex-col items-center gap-2 text-slate-500">
                   <Armchair className="h-6 w-6 text-slate-400" />
                   <span className="font-space font-bold text-slate-700 text-xs uppercase">Interactive Cabin Seating Selection</span>
                   <p className="text-xs">Please fill in passenger full name(s) above to unlock cabin seating selection.</p>
                 </div>
               )
-            )}
+            ))}
 
-            {/* 4. Flight Add-ons */}
+            {/* 4. Add-ons */}
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md text-slate-800">
               <h3 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3 mb-4">
-                Luxury Flight Add-ons
+                {item.type === "boat" ? "🌊 Boat Charter Add-ons" : "Luxury Flight Add-ons"}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {addOnOptions.map((addon) => {
@@ -494,9 +532,9 @@ export default function CheckoutPage() {
                       </div>
                     )}
                     <div className="flex justify-between text-slate-500">
-                      <span>GST Aviation Tax (18%)</span>
-                      <span>₹{priceSummary.taxes.toLocaleString("en-IN")}</span>
-                    </div>
+                        <span>{item.type === "boat" ? "Marine Service Tax (5%)" : "GST Aviation Tax (18%)"}</span>
+                        <span>₹{priceSummary.taxes.toLocaleString("en-IN")}</span>
+                      </div>
                     <div className="flex justify-between items-end border-t border-slate-100 pt-3 mt-1">
                       <span className="font-space text-xs font-bold uppercase text-slate-900">Total Price</span>
                       <span className="font-space text-2xl font-bold text-slate-900">

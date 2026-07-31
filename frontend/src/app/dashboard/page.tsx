@@ -46,7 +46,7 @@ export default function DashboardPage() {
     isLoggedIn, user, bookings, tickets, notifications,
     logout, fetchBookings, fetchTickets, addTicket,
     addReplyToTicket, updateProfile, markNotificationsAsRead,
-    cancelBooking,
+    cancelBooking, requestCancelBooking,
   } = useAuthStore();
 
   const [activeTab, setActiveTab] = useState<Tab>("overview");
@@ -71,6 +71,19 @@ export default function DashboardPage() {
 
   // Documents
   const [docUploaded, setDocUploaded] = useState({ passport: false, aadhaar: false, visa: false, medical: false });
+
+  // Cancellation Wizard States
+  const [cancellingBooking, setCancellingBooking] = useState<any | null>(null);
+  const [cancelStep, setCancelStep] = useState<number>(1);
+  const [cancelReason, setCancelReason] = useState<string>("Change of Plans");
+  const [cancelNotes, setCancelNotes] = useState<string>("");
+  const [refundMethod, setRefundMethod] = useState<"original" | "bank">("original");
+  const [bankDetails, setBankDetails] = useState({
+    bankName: "",
+    accountNumber: "",
+    ifscCode: "",
+    accountHolder: ""
+  });
 
   // Favourites
   const [favorites, setFavorites] = useState([
@@ -424,6 +437,10 @@ export default function DashboardPage() {
                                 <span className={`text-[10px] uppercase border px-2 py-0.5 rounded-full font-space font-bold tracking-wider ${
                                   booking.status === 'Cancelled' 
                                     ? 'bg-red-500/10 border-red-500/25 text-red-400 shadow-md shadow-red-500/5' 
+                                    : booking.status === 'Cancellation Requested'
+                                    ? 'bg-amber-500/10 border-amber-500/25 text-amber-400 shadow-md shadow-amber-500/5'
+                                    : booking.status === 'Refunded'
+                                    ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400 shadow-md shadow-emerald-500/5'
                                     : 'bg-teal/10 border-teal/25 text-teal shadow-md shadow-teal/5'
                                 }`}>
                                   {booking.status || 'Confirmed'}
@@ -452,10 +469,17 @@ export default function DashboardPage() {
                                 className="px-4 py-2 border border-white/10 hover:border-teal/50 rounded-xl font-space text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-teal bg-white/[0.02] hover:bg-teal/5 transition-all cursor-pointer">
                                 Support
                               </button>
-                              {booking.status !== 'Cancelled' && (
-                                <button onClick={() => cancelBooking(booking.id)}
+                              {(booking.status === 'Confirmed' || booking.status === 'Pending') && (
+                                <button onClick={() => {
+                                  setCancellingBooking(booking);
+                                  setCancelStep(1);
+                                  setCancelReason("Change of Plans");
+                                  setCancelNotes("");
+                                  setRefundMethod("original");
+                                  setBankDetails({ bankName: "", accountNumber: "", ifscCode: "", accountHolder: "" });
+                                }}
                                   className="px-4 py-2 border border-red-500/20 hover:border-red-500/60 rounded-xl font-space text-xs font-bold uppercase tracking-wider text-red-400 hover:text-red-300 bg-white/[0.02] hover:bg-red-500/10 transition-all cursor-pointer">
-                                  Cancel
+                                  Cancel Booking
                                 </button>
                               )}
                             </div>
@@ -463,32 +487,85 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Refund Processing Timeline */}
-                        {booking.status === 'Cancelled' && (
+                        {(booking.status === 'Cancelled' || booking.status === 'Cancellation Requested' || booking.status === 'Refunded') && (
                           <div className="border-t border-white/[0.06] pt-5 flex flex-col gap-4">
                             <div className="flex items-center justify-between text-xs font-space uppercase tracking-widest">
-                              <span className="font-bold text-slate-400">Refund Processing Pipeline</span>
-                              <span className="text-red-400 font-bold bg-red-400/10 border border-red-400/20 px-2 py-0.5 rounded">Processing</span>
+                              <span className="font-bold text-slate-400">Return &amp; Refund Progress Pipeline</span>
+                              <span className={`font-bold px-2 py-0.5 rounded ${
+                                booking.status === 'Refunded'
+                                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                                  : booking.status === 'Cancelled'
+                                  ? 'bg-red-500/10 border border-red-500/20 text-red-400'
+                                  : 'bg-amber-500/10 border border-amber-500/20 text-amber-400 animate-pulse'
+                              }`}>
+                                {booking.status === 'Refunded' ? 'Refund Credited' : booking.status === 'Cancelled' ? 'Corridor Released' : 'Reviewing Request'}
+                              </span>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs font-space uppercase tracking-wider">
-                              {/* Step 1 */}
-                              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-red-500/5 border border-red-500/15">
-                                <div className="h-6 w-6 rounded-full bg-red-500/20 text-red-400 border border-red-500/35 flex items-center justify-center font-bold text-xs">✓</div>
-                                <span className="text-white font-semibold">Cancelled</span>
+                              {/* Step 1: Cancellation Requested */}
+                              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/15">
+                                <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/35 flex items-center justify-center font-bold text-xs">✓</div>
+                                <span className="text-white font-semibold">Requested</span>
                               </div>
-                              {/* Step 2 */}
-                              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-red-500/5 border border-red-500/15">
-                                <div className="h-6 w-6 rounded-full bg-red-500/20 text-red-400 border border-red-500/35 flex items-center justify-center font-bold text-xs">✓</div>
+
+                              {/* Step 2: Under Review */}
+                              <div className={`flex items-center gap-2.5 p-3 rounded-xl ${
+                                booking.status === 'Cancellation Requested'
+                                  ? 'bg-amber-500/5 border border-amber-500/15'
+                                  : 'bg-emerald-500/5 border border-emerald-500/15'
+                              }`}>
+                                <div className={`h-6 w-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                                  booking.status === 'Cancellation Requested'
+                                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/35 animate-pulse'
+                                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/35'
+                                }`}>
+                                  {booking.status === 'Cancellation Requested' ? '/' : '✓'}
+                                </div>
+                                <span className={booking.status === 'Cancellation Requested' ? 'text-amber-400 font-bold' : 'text-white font-semibold'}>
+                                  Admin Review
+                                </span>
+                              </div>
+
+                              {/* Step 3: Corridor Released */}
+                              <div className={`flex items-center gap-2.5 p-3 rounded-xl ${
+                                booking.status === 'Cancellation Requested'
+                                  ? 'opacity-40 bg-white/[0.01] border border-white/[0.06]'
+                                  : booking.status === 'Cancelled'
+                                  ? 'bg-emerald-500/5 border border-emerald-500/15'
+                                  : 'bg-emerald-500/5 border border-emerald-500/15'
+                              }`}>
+                                <div className={`h-6 w-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                                  booking.status === 'Cancellation Requested'
+                                    ? 'bg-white/5 text-slate-400 border border-white/10'
+                                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/35'
+                                }`}>
+                                  {booking.status === 'Cancellation Requested' ? '3' : '✓'}
+                                </div>
                                 <span className="text-white font-semibold">Corridor Released</span>
                               </div>
-                              {/* Step 3 */}
-                              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-gold/5 border border-gold/15">
-                                <div className="h-6 w-6 rounded-full bg-gold/20 text-gold border border-gold/35 flex items-center justify-center font-bold text-xs animate-pulse">/</div>
-                                <span className="text-gold font-bold">Processing</span>
-                              </div>
-                              {/* Step 4 */}
-                              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.01] border border-white/[0.06] opacity-40">
-                                <div className="h-6 w-6 rounded-full bg-white/5 text-slate-400 border border-white/10 flex items-center justify-center text-xs">4</div>
-                                <span className="text-slate-400 font-medium">Credited</span>
+
+                              {/* Step 4: Credited / Refunded */}
+                              <div className={`flex items-center gap-2.5 p-3 rounded-xl ${
+                                booking.status === 'Cancellation Requested'
+                                  ? 'opacity-40 bg-white/[0.01] border border-white/[0.06]'
+                                  : booking.status === 'Cancelled'
+                                  ? 'bg-red-500/5 border border-red-500/15'
+                                  : 'bg-emerald-500/5 border border-emerald-500/15'
+                              }`}>
+                                <div className={`h-6 w-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                                  booking.status === 'Cancellation Requested'
+                                    ? 'bg-white/5 text-slate-400 border border-white/10'
+                                    : booking.status === 'Cancelled'
+                                    ? 'bg-red-500/20 text-red-400 border border-red-500/35'
+                                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/35'
+                                }`}>
+                                  {booking.status === 'Cancellation Requested' ? '4' : booking.status === 'Cancelled' ? '✗' : '✓'}
+                                </div>
+                                <span className={
+                                  booking.status === 'Cancelled' ? 'text-red-400 font-bold' : booking.status === 'Refunded' ? 'text-emerald-400 font-bold' : 'text-slate-400 font-medium'
+                                }>
+                                  {booking.status === 'Cancelled' ? 'Void / Reverted' : booking.status === 'Refunded' ? 'Refund Credited' : 'Pending Return'}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -845,6 +922,356 @@ export default function DashboardPage() {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* ─── Premium Step-by-Step Cancellation Wizard Modal ─── */}
+      <AnimatePresence>
+        {cancellingBooking && (
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#0b0f19] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col text-slate-300"
+            >
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-[#051433] to-[#0d2d6c] px-6 py-4 flex items-center justify-between border-b border-white/5">
+                <div>
+                  <span className="text-[9px] font-space font-bold uppercase tracking-widest text-gold">Booking Cancellation wizard</span>
+                  <h3 className="font-space text-base font-bold text-white mt-0.5">Cancel Reservation {cancellingBooking.id}</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCancellingBooking(null)}
+                  className="text-grey-text hover:text-white font-space text-sm font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Steps Indicator Progress Bar */}
+              <div className="px-6 py-3.5 bg-white/[0.02] border-b border-white/5 grid grid-cols-4 gap-2 text-center text-[10px] font-space uppercase font-bold tracking-wider">
+                {[
+                  { step: 1, label: "Reason" },
+                  { step: 2, label: "Policy Calculation" },
+                  { step: 3, label: "Refund Info" },
+                  { step: 4, label: "Confirmation" }
+                ].map((item) => (
+                  <div key={item.step} className="flex flex-col gap-1 items-center">
+                    <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
+                      cancelStep === item.step
+                        ? "bg-gold text-black border border-gold"
+                        : cancelStep > item.step
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                        : "bg-white/5 text-grey-text border border-white/10"
+                    }`}>
+                      {cancelStep > item.step ? "✓" : item.step}
+                    </div>
+                    <span className={cancelStep === item.step ? "text-gold font-bold" : "text-grey-text font-medium"}>
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Steps Content Area */}
+              <div className="p-6 overflow-y-auto max-h-[380px] flex flex-col gap-4 font-luxury text-sm">
+                
+                {/* STEP 1: CANCELLATION REASON */}
+                {cancelStep === 1 && (
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-gold uppercase tracking-wider">Select Primary Reason *</label>
+                      <select
+                        value={cancelReason}
+                        onChange={(e) => setCancelReason(e.target.value)}
+                        className="bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-gold/50 cursor-pointer"
+                      >
+                        <option value="Change of Plans" className="bg-[#0b0f19]">Change of plans / Schedule Conflict</option>
+                        <option value="Medical Reasons" className="bg-[#0b0f19]">Medical Emergency or Health concerns</option>
+                        <option value="Weather Disruptions" className="bg-[#0b0f19]">Inclement weather expected</option>
+                        <option value="Booking Mistake" className="bg-[#0b0f19]">Made booking by mistake</option>
+                        <option value="Others" className="bg-[#0b0f19]">Other reasons (Please describe)</option>
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-gold uppercase tracking-wider">Provide details / remarks</label>
+                      <textarea
+                        value={cancelNotes}
+                        onChange={(e) => setCancelNotes(e.target.value)}
+                        placeholder="Write down any additional comments or instructions for return request..."
+                        rows={3}
+                        className="bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-gold/50 resize-none"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 2: POLICY & CHARGES CALCULATION */}
+                {cancelStep === 2 && (() => {
+                  const getRefundInfo = (b: any) => {
+                    const price = Number(b.price);
+                    if (!b.date) return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
+                    try {
+                      const today = new Date();
+                      const departure = new Date(b.date);
+                      const diffMs = departure.getTime() - today.getTime();
+                      const diffHrs = diffMs / (1000 * 60 * 60);
+
+                      if (diffHrs < 24) return { fee: price, refund: 0, percentage: 0 };
+                      if (diffHrs <= 72) return { fee: price * 0.50, refund: price * 0.50, percentage: 50 };
+                      return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
+                    } catch {
+                      return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
+                    }
+                  };
+                  const calc = getRefundInfo(cancellingBooking);
+
+                  return (
+                    <div className="flex flex-col gap-4">
+                      <div className="p-4 bg-white/2 border border-white/5 rounded-xl flex flex-col gap-3">
+                        <span className="text-[10px] font-bold text-gold uppercase tracking-wider">Cancellation Policy & Charges breakdown</span>
+                        
+                        <div className="flex justify-between items-center text-xs font-mono border-b border-white/5 pb-2">
+                          <span className="text-grey-text">Charter booking amount:</span>
+                          <span className="text-white">₹{Number(cancellingBooking.price).toLocaleString("en-IN")}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center text-xs font-mono border-b border-white/5 pb-2">
+                          <span className="text-grey-text">Cancellation charge percentage:</span>
+                          <span className="text-red-400 font-bold">{100 - calc.percentage}%</span>
+                        </div>
+
+                        <div className="flex justify-between items-center text-xs font-mono border-b border-white/5 pb-2">
+                          <span className="text-grey-text">Cancellation service fee (deducted):</span>
+                          <span className="text-red-400">₹{Math.round(calc.fee).toLocaleString("en-IN")}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center text-sm font-space font-bold pt-1">
+                          <span className="text-gold">Expected refund payout:</span>
+                          <span className="text-emerald-400 font-mono text-base">₹{Math.round(calc.refund).toLocaleString("en-IN")}</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-3.5 flex flex-col gap-1 text-[11px] text-amber-300">
+                        <span className="font-space uppercase font-bold tracking-wider">✓ Booking Policy Notice</span>
+                        <p className="leading-relaxed font-sans mt-1">
+                          Our policy requires a 5% handling retention fee for slots canceled &gt; 72 hours before staging. Within 24-72 hours, a 50% charge applies.
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* STEP 3: REFUND Payout Details */}
+                {cancelStep === 3 && (
+                  <div className="flex flex-col gap-4">
+                    <span className="text-[10px] font-bold text-gold uppercase tracking-wider">Choose Payout Payout Destination</span>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setRefundMethod("original")}
+                        className={`p-4 rounded-xl border flex flex-col gap-1.5 text-left transition-all ${
+                          refundMethod === "original"
+                            ? "bg-gold/5 border-gold text-white"
+                            : "bg-white/[0.01] border-white/5 text-grey-text hover:border-white/10"
+                        }`}
+                      >
+                        <span className="font-space text-xs font-bold uppercase tracking-wider">Original Payout Source</span>
+                        <span className="text-[10px] opacity-70">Refund to Razorpay / PhonePe card used during booking checkout</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setRefundMethod("bank")}
+                        className={`p-4 rounded-xl border flex flex-col gap-1.5 text-left transition-all ${
+                          refundMethod === "bank"
+                            ? "bg-gold/5 border-gold text-white"
+                            : "bg-white/[0.01] border-white/5 text-grey-text hover:border-white/10"
+                        }`}
+                      >
+                        <span className="font-space text-xs font-bold uppercase tracking-wider">Direct Bank Transfer</span>
+                        <span className="text-[10px] opacity-70">Payout via IMPS / NEFT directly into your selected account</span>
+                      </button>
+                    </div>
+
+                    {refundMethod === "bank" && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-white/2 p-4 rounded-xl border border-white/5"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[9px] uppercase tracking-wider text-grey-text font-bold">Bank Name *</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. HDFC Bank"
+                            value={bankDetails.bankName}
+                            onChange={(e) => setBankDetails({ ...bankDetails, bankName: e.target.value })}
+                            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-gold/50"
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[9px] uppercase tracking-wider text-grey-text font-bold">Account Holder Name *</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Rahul Sharma"
+                            value={bankDetails.accountHolder}
+                            onChange={(e) => setBankDetails({ ...bankDetails, accountHolder: e.target.value })}
+                            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-gold/50"
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[9px] uppercase tracking-wider text-grey-text font-bold">Account Number *</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. 501002345678"
+                            value={bankDetails.accountNumber}
+                            onChange={(e) => setBankDetails({ ...bankDetails, accountNumber: e.target.value })}
+                            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-gold/50"
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[9px] uppercase tracking-wider text-grey-text font-bold">IFSC Code *</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. HDFC0000123"
+                            value={bankDetails.ifscCode}
+                            onChange={(e) => setBankDetails({ ...bankDetails, ifscCode: e.target.value })}
+                            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-gold/50"
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                )}
+
+                {/* STEP 4: REVIEW & CONFIRM */}
+                {cancelStep === 4 && (() => {
+                  const getRefundInfo = (b: any) => {
+                    const price = Number(b.price);
+                    if (!b.date) return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
+                    try {
+                      const today = new Date();
+                      const departure = new Date(b.date);
+                      const diffMs = departure.getTime() - today.getTime();
+                      const diffHrs = diffMs / (1000 * 60 * 60);
+
+                      if (diffHrs < 24) return { fee: price, refund: 0, percentage: 0 };
+                      if (diffHrs <= 72) return { fee: price * 0.50, refund: price * 0.50, percentage: 50 };
+                      return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
+                    } catch {
+                      return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
+                    }
+                  };
+                  const calc = getRefundInfo(cancellingBooking);
+
+                  return (
+                    <div className="flex flex-col gap-4">
+                      <div className="bg-[#051433]/40 border border-white/5 rounded-xl p-4 flex flex-col gap-3">
+                        <span className="text-[10px] font-bold text-gold uppercase tracking-wider block border-b border-white/5 pb-2">Final Cancellation Summary</span>
+                        
+                        <p className="text-xs text-grey-text">Vessel / Package: <strong className="text-white">{cancellingBooking.name}</strong></p>
+                        <p className="text-xs text-grey-text">Reason: <strong className="text-white">{cancelReason}</strong></p>
+                        <p className="text-xs text-grey-text">Notes: <span className="italic text-white">"{cancelNotes || 'None'}"</span></p>
+                        <p className="text-xs text-grey-text">Payout Destination: <strong className="text-white">{refundMethod === "original" ? "Original Payment Source" : `Bank Transfer (${bankDetails.bankName})`}</strong></p>
+                        
+                        <div className="border-t border-white/5 pt-3 mt-1 flex justify-between items-baseline">
+                          <span className="text-xs font-bold text-gold uppercase">Expected Payout:</span>
+                          <span className="text-emerald-400 font-mono font-bold text-lg">₹{Math.round(calc.refund).toLocaleString("en-IN")}</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3.5 text-[11px] text-red-300 font-sans leading-relaxed">
+                        ⚠️ <strong>Warning:</strong> Canceled routes release slot allocations immediately. Reversing this action will require placing a new booking. The return refund request will be automatically dispatched to superadmins for immediate authorization.
+                      </div>
+                    </div>
+                  );
+                })()}
+
+              </div>
+
+              {/* Modal Footer (Controls) */}
+              <div className="bg-white/[0.01] px-6 py-4 flex items-center justify-between border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (cancelStep === 1) {
+                      setCancellingBooking(null);
+                    } else {
+                      setCancelStep(cancelStep - 1);
+                    }
+                  }}
+                  className="px-5 py-2 border border-white/10 bg-white/2 hover:bg-white/5 text-grey-text hover:text-white font-space text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                >
+                  {cancelStep === 1 ? "Discard" : "Previous Step"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (cancelStep < 4) {
+                      // Validation check for Step 3 direct transfer values
+                      if (cancelStep === 3 && refundMethod === "bank") {
+                        if (!bankDetails.bankName || !bankDetails.accountNumber || !bankDetails.ifscCode || !bankDetails.accountHolder) {
+                          alert("Please fill in all direct bank transfer payout details.");
+                          return;
+                        }
+                      }
+                      setCancelStep(cancelStep + 1);
+                    } else {
+                      // Final Submit
+                      const getRefundInfo = (b: any) => {
+                        const price = Number(b.price);
+                        if (!b.date) return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
+                        try {
+                          const today = new Date();
+                          const departure = new Date(b.date);
+                          const diffMs = departure.getTime() - today.getTime();
+                          const diffHrs = diffMs / (1000 * 60 * 60);
+
+                          if (diffHrs < 24) return { fee: price, refund: 0, percentage: 0 };
+                          if (diffHrs <= 72) return { fee: price * 0.50, refund: price * 0.50, percentage: 50 };
+                          return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
+                        } catch {
+                          return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
+                        }
+                      };
+                      const calc = getRefundInfo(cancellingBooking);
+
+                      const payload = {
+                        reason: cancelReason,
+                        notes: cancelNotes,
+                        fee: calc.fee,
+                        refund: calc.refund,
+                        refundPercentage: calc.percentage,
+                        refundMethod,
+                        bankDetails: refundMethod === "bank" ? bankDetails : null,
+                        requestedAt: new Date().toISOString()
+                      };
+                      await requestCancelBooking(cancellingBooking.id, payload);
+                      setCancellingBooking(null);
+                    }
+                  }}
+                  className="px-6 py-2 bg-amber-400 hover:bg-amber-300 text-black font-space text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-md shadow-amber-400/10"
+                >
+                  {cancelStep === 4 ? "Submit Cancellation Request" : "Next Step"}
+                </button>
+              </div>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+

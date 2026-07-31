@@ -85,16 +85,46 @@ export default function AdminBookings() {
     }
   };
 
+  // Approve Refund Action
+  const handleApproveRefund = async (id: string) => {
+    if (confirm(`Authorize return/refund and cancel reservation for booking ${id}?`)) {
+      try {
+        await API.post(`/bookings/approve-refund/${id}`);
+        fetchBookings();
+        if (selectedBooking && selectedBooking.id === id) {
+          setSelectedBooking((prev: any) => ({ ...prev, status: "Refunded" }));
+        }
+      } catch (err) {
+        alert("Failed to authorize refund. Try again later.");
+      }
+    }
+  };
+
+  // Reject Cancellation Request Action
+  const handleRejectCancel = async (id: string) => {
+    if (confirm(`Reject cancellation and reinstate booking ${id} as Confirmed?`)) {
+      try {
+        await API.post(`/bookings/reject-cancel/${id}`);
+        fetchBookings();
+        if (selectedBooking && selectedBooking.id === id) {
+          setSelectedBooking((prev: any) => ({ ...prev, status: "Confirmed" }));
+        }
+      } catch (err) {
+        alert("Failed to reject cancellation request.");
+      }
+    }
+  };
+
   // Confirm booking Action
   const handleConfirmBooking = async (id: string) => {
     try {
-      // Simulate state update if needed or run API check
       alert(`Booking ${id} set to confirmed status.`);
       fetchBookings();
     } catch (err) {
       console.error(err);
     }
   };
+
 
   // Export CSV functionality
   const handleExportCSV = () => {
@@ -163,7 +193,9 @@ export default function AdminBookings() {
           <option value="all">All Booking Statuses</option>
           <option value="Confirmed">Confirmed</option>
           <option value="Pending">Pending</option>
+          <option value="Cancellation Requested">Cancellation Requested</option>
           <option value="Cancelled">Cancelled</option>
+          <option value="Refunded">Refunded</option>
         </select>
       </div>
 
@@ -223,6 +255,10 @@ export default function AdminBookings() {
                             ? "bg-teal/5 text-teal border border-teal/15"
                             : b.status === "Cancelled"
                             ? "bg-red-400/5 text-red-400 border border-red-400/15"
+                            : b.status === "Cancellation Requested"
+                            ? "bg-amber-400/5 text-amber-400 border border-amber-400/15 animate-pulse"
+                            : b.status === "Refunded"
+                            ? "bg-emerald-400/5 text-emerald-400 border border-emerald-400/15"
                             : "bg-yellow-400/5 text-yellow-400 border border-yellow-400/15"
                         }`}
                       >
@@ -237,7 +273,25 @@ export default function AdminBookings() {
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </button>
-                      {b.status !== "Cancelled" && (
+                      {b.status === "Cancellation Requested" && (
+                        <>
+                          <button
+                            onClick={() => handleApproveRefund(b.id)}
+                            className="p-1.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 cursor-pointer"
+                            title="Approve refund"
+                          >
+                            <CheckCircle className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleRejectCancel(b.id)}
+                            className="p-1.5 rounded bg-red-400/5 hover:bg-red-400/10 border border-red-400/10 text-red-400 cursor-pointer"
+                            title="Reject request"
+                          >
+                            <XCircle className="h-3.5 w-3.5" />
+                          </button>
+                        </>
+                      )}
+                      {b.status !== "Cancelled" && b.status !== "Refunded" && b.status !== "Cancellation Requested" && (
                         <button
                           onClick={() => handleCancelBooking(b.id)}
                           className="p-1.5 rounded bg-red-400/5 hover:bg-red-400/10 border border-red-400/10 text-red-400 cursor-pointer"
@@ -325,6 +379,56 @@ export default function AdminBookings() {
                     </span>
                   </div>
                 </div>
+
+                {/* Cancellation & Refund payout details */}
+                {selectedBooking.cancellation_data && Object.keys(selectedBooking.cancellation_data).length > 0 && (
+                  <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-4 flex flex-col gap-3.5 text-xs text-grey-text mt-2">
+                    <span className="text-[10px] font-space font-bold uppercase tracking-wider text-amber-400 block border-b border-white/5 pb-2">
+                      ⚠️ Cancellation &amp; Payout Request
+                    </span>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-[9px] uppercase tracking-wider text-grey-text block">Reason</span>
+                        <span className="text-white font-medium">{selectedBooking.cancellation_data.reason || "—"}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] uppercase tracking-wider text-grey-text block">Requested Date</span>
+                        <span className="text-white font-mono">{selectedBooking.cancellation_data.requestedAt ? new Date(selectedBooking.cancellation_data.requestedAt).toLocaleDateString() : "—"}</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[9px] uppercase tracking-wider text-grey-text block">Customer Notes</span>
+                      <p className="text-white italic bg-black/30 p-2 rounded mt-1">
+                        "{selectedBooking.cancellation_data.notes || "No extra remarks"}"
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 border-t border-white/5 pt-3">
+                      <div>
+                        <span className="text-[9px] uppercase tracking-wider text-grey-text block">Refund Method</span>
+                        <span className="text-white font-bold">{selectedBooking.cancellation_data.refundMethod === "bank" ? "Bank Payout (IMPS/NEFT)" : "Original Payout Source"}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] uppercase tracking-wider text-grey-text block text-right font-space font-bold">Eligible Payout</span>
+                        <span className="text-emerald-400 font-mono font-bold text-sm block text-right">
+                          ₹{Math.round(Number(selectedBooking.cancellation_data.refund) || 0).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    </div>
+
+                    {selectedBooking.cancellation_data.refundMethod === "bank" && selectedBooking.cancellation_data.bankDetails && (
+                      <div className="bg-black/40 border border-white/5 p-3 rounded-lg flex flex-col gap-1.5 font-mono text-[11px] text-white">
+                        <span className="text-[9px] uppercase font-space text-amber-400 font-bold tracking-widest block mb-1">IMPS Payout Bank Account</span>
+                        <div>Bank Name: <strong className="text-white">{selectedBooking.cancellation_data.bankDetails.bankName}</strong></div>
+                        <div>Account Holder: <strong className="text-white">{selectedBooking.cancellation_data.bankDetails.accountHolder}</strong></div>
+                        <div>Account Number: <strong className="text-white">{selectedBooking.cancellation_data.bankDetails.accountNumber}</strong></div>
+                        <div>IFSC Code: <strong className="text-white">{selectedBooking.cancellation_data.bankDetails.ifscCode}</strong></div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Actions footer */}
@@ -340,12 +444,28 @@ export default function AdminBookings() {
                 </button>
 
                 <div className="flex gap-2">
-                  {selectedBooking.status !== "Cancelled" && (
+                  {selectedBooking.status === "Cancellation Requested" && (
+                    <>
+                      <button
+                        onClick={() => handleApproveRefund(selectedBooking.id)}
+                        className="py-2 px-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 font-space text-[10px] font-bold uppercase tracking-widest rounded cursor-pointer transition-all"
+                      >
+                        Approve Refund
+                      </button>
+                      <button
+                        onClick={() => handleRejectCancel(selectedBooking.id)}
+                        className="py-2 px-3 bg-white/5 border border-white/10 text-grey-text hover:text-white font-space text-[10px] font-bold uppercase tracking-widest rounded cursor-pointer transition-all"
+                      >
+                        Reject
+                      </button>
+                    </>
+                  )}
+                  {selectedBooking.status !== "Cancelled" && selectedBooking.status !== "Refunded" && (
                     <button
                       onClick={() => handleCancelBooking(selectedBooking.id)}
-                      className="py-2 px-4 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 font-space text-[10px] font-bold uppercase tracking-widest rounded cursor-pointer transition-all"
+                      className="py-2 px-3 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 font-space text-[10px] font-bold uppercase tracking-widest rounded cursor-pointer transition-all"
                     >
-                      Cancel Flight
+                      Void / Cancel
                     </button>
                   )}
                   <button

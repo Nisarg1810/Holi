@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Compass, Mail, Phone, Clock, Send, ShieldAlert, CheckCircle, Search, HelpCircle, ChevronDown, ChevronUp, MapPin, Award, Check } from "lucide-react";
+import {
+  Compass, Mail, Phone, Clock, Send, ShieldAlert, CheckCircle, Search, HelpCircle,
+  ChevronDown, ChevronUp, MapPin, Award, Check, Calendar, Users, Target, ShieldCheck
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function ContactPage() {
@@ -9,13 +12,6 @@ export default function ContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
-
-  // Flight tracker states
-  const [searchRef, setSearchRef] = useState("");
-  const [trackingResult, setTrackingResult] = useState<any>(null);
-  const [trackingError, setTrackingError] = useState("");
-
-  // FAQ Accordion state
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   const handleContactSubmit = (e: React.FormEvent) => {
@@ -31,34 +27,51 @@ export default function ContactPage() {
     }
   };
 
-  const handleTrackRequest = (e: React.FormEvent) => {
-    e.preventDefault();
-    setTrackingError("");
-    setTrackingResult(null);
+  const coreValues = [
+    {
+      title: "Premium Helicopter Services",
+      desc: "Safe, Reliable & Comfortable high-altitude charters operated under strict DGCA certifications and dual-pilot requirements."
+    },
+    {
+      title: "Scenic Tour Packages",
+      desc: "Handcrafted journeys and sacred spiritual mountain tours across India's most breathtaking cultural and wilderness destinations."
+    },
+    {
+      title: "Hotels & Cruise Bookings",
+      desc: "Complete travel solutions featuring premier lakeside retreats, heritage lodges, and sunset luxury yacht services at one place."
+    },
+  ];
 
-    const ref = searchRef.trim().toUpperCase();
-    if (!ref) return;
+  const timeline = [
+    { year: "2020", title: "Flight Inception", desc: "Founded Roman Aviation in New Delhi with 1 light utility helicopter, catering to private regional transits." },
+    { year: "2022", title: "Himalayan Corridor Launch", desc: "Expanded the fleet to 3 multi-engine turbine helicopters and launched daily priority corridors to Kedarnath & Badrinath." },
+    { year: "2024", title: "Yachts & ISO Standards", desc: "Earned ISO 9001:2015 safety certification and launched the Goan luxury yacht charter division." },
+    { year: "2026", title: "National Air Ambulance & Elite Concierge", desc: "Integrated medical evacuation helicopters and launched bespoke HNWI elite travel concierge systems." }
+  ];
 
-    // Direct mock match or fallback simulation
-    if (ref.startsWith("ROM-") || ref.startsWith("KED-") || ref.length >= 4) {
-      setTrackingResult({
-        ref: ref,
-        from: ref.includes("KED") ? "Dehradun (DED)" : "Delhi T3 VIP",
-        to: ref.includes("KED") ? "Kedarnath Sanctuary" : "Goa Marina Base",
-        date: "2026-07-12",
-        passengers: "2 Passengers",
-        status: "ATC Corridor Scheduled",
-        steps: [
-          { label: "Inquiry Logged", desc: "Received at central Roman dispatch desk", done: true },
-          { label: "corridor clearance", desc: "Spiritual route ATC slot approved", done: true },
-          { label: "helicopter staging", desc: "Airbus H145 prepped at Sahastradhara hangar", done: true },
-          { label: "crew check-in", desc: "Pre-flight checks by Capt. R. Sharma (Retired Air Force)", done: false }
-        ]
-      });
-    } else {
-      setTrackingError("No active booking request found with this reference key. Try entering 'ROM-2026' or 'KED-7672'.");
+  const fleet = [
+    {
+      name: "Airbus H145",
+      type: "Twin-Engine Utility",
+      specs: { Capacity: "4 VIPs", Speed: "240 km/h", Ceiling: "20,000 ft", Avionics: "Helionix Suite" },
+      desc: "The pinnacle of high-altitude luxury, complete with vibration containment and scenic panorama glass windows.",
+      image: "https://images.unsplash.com/photo-1583244532610-2a234e7c3eca?q=80&w=600&auto=format&fit=crop"
+    },
+    {
+      name: "Bell 429",
+      type: "Light Twin Engine",
+      specs: { Capacity: "6 VIPs", Speed: "273 km/h", Ceiling: "18,700 ft", Avionics: "P&W Glass Cockpit" },
+      desc: "Twin-engine security combined with an elegant flat-floor cabin, perfect for coastal shoreline shuttle flights.",
+      image: "https://images.unsplash.com/photo-1612459284970-e8f027596582?q=80&w=600&auto=format&fit=crop"
+    },
+    {
+      name: "Augusta AW109",
+      type: "High-Speed Executive",
+      specs: { Capacity: "5 VIPs", Speed: "285 km/h", Ceiling: "15,000 ft", Avionics: "3-Axis Autopilot" },
+      desc: "Aerodynamic corporate transport featuring fully retractable landing gear for rapid city shuttle lanes.",
+      image: "https://images.unsplash.com/photo-1540962351504-03099e0a754b?q=80&w=600&auto=format&fit=crop"
     }
-  };
+  ];
 
   const offices = [
     { city: "Corporate Head Office", address: "SHOP NO. 10, RUPAN VILLAGE, RUPAN VILLAGE ROAD, SURAT 394160", phone: "+91 70418 61886" },
@@ -84,311 +97,295 @@ export default function ContactPage() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col gap-16">
+    <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
       
-      {/* Title & Helplines Strip */}
-      <div className="border-b border-white/5 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="flex flex-col gap-2">
-          <span style={{ color: '#C5A880' }} className="font-space text-xs uppercase tracking-widest text-gold font-bold">
-            Concierge Desk
-          </span>
-          <h1 style={{ color: '#ffffff' }} className="font-serif text-3xl md:text-4xl font-bold tracking-tight uppercase">
-            VIP Support Desk
-          </h1>
-          <p style={{ color: '#cbd5e1' }} className="font-sans text-xs sm:text-sm text-slate-300">
-            Reach our flight coordinators and terminal offices instantly.
-          </p>
-        </div>
-        
-        {/* Flyer Coordinates Strip */}
-        <div className="flex flex-wrap gap-4 text-xs font-sans">
-          <div className="p-3 bg-[#051433] border border-white/5 rounded-lg flex items-center gap-3">
-            <Phone className="h-4 w-4 text-gold shrink-0 text-gold-explicit" />
-            <div>
-              <span className="text-[8px] uppercase tracking-wider text-slate-400 block leading-none">24/7 Helpline</span>
-              <span style={{ color: '#ffffff' }} className="font-semibold text-white">+91 70418 61886</span>
-            </div>
+      {/* ── Header & Helplines Strip ────────────────────────────── */}
+      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-12 pb-24 px-4 md:px-8 text-white relative shadow-lg">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="flex flex-col gap-2">
+            <span style={{ color: '#C5A880' }} className="font-space text-xs uppercase tracking-widest text-gold font-bold">
+              Flight Concierge &amp; Heritage
+            </span>
+            <h1 style={{ color: '#ffffff' }} className="font-space text-3xl md:text-5xl font-bold tracking-tight uppercase">
+              Contact &amp; Corporate Desk
+            </h1>
+            <p style={{ color: '#cbd5e1' }} className="font-sans text-xs sm:text-sm text-slate-300">
+              Establish flight routes, review our luxury fleet, or connect with our dispatch offices.
+            </p>
           </div>
-          <div className="p-3 bg-[#051433] border border-white/5 rounded-lg flex items-center gap-3">
-            <Mail className="h-4 w-4 text-gold shrink-0 text-gold-explicit" />
-            <div>
-              <span className="text-[8px] uppercase tracking-wider text-slate-400 block leading-none">Email Office</span>
-              <span style={{ color: '#ffffff' }} className="font-semibold text-white">info@romanaviation.in</span>
+          
+          <div className="flex flex-wrap gap-4 text-xs font-sans">
+            <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
+              <Phone className="h-4 w-4 text-amber-400 shrink-0" />
+              <div>
+                <span className="text-[8px] uppercase tracking-wider text-slate-400 block leading-none">24/7 Helpline</span>
+                <span className="font-semibold text-white">+91 70418 61886</span>
+              </div>
+            </div>
+            <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
+              <Mail className="h-4 w-4 text-amber-400 shrink-0" />
+              <div>
+                <span className="text-[8px] uppercase tracking-wider text-slate-400 block leading-none">Email Office</span>
+                <span className="font-semibold text-white">info@romanaviation.in</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Visual Showcase Banner */}
-      <section className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative h-[250px] sm:h-[350px] lg:h-[400px]">
-        <img 
-          src="/luxury_concierge_contact.png" 
-          alt="Roman Aviation Luxury Concierge Desk" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#020B1E] via-[#020B1E]/40 to-transparent" />
-        <div className="absolute bottom-6 left-6 right-6 md:left-10 md:right-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <span style={{ color: '#C5A880' }} className="font-space text-[10px] uppercase tracking-widest text-gold font-bold">VIP Concierge Services</span>
-            <h2 style={{ color: '#ffffff' }} className="font-serif text-xl sm:text-2xl font-bold text-white mt-1">First-Class Passenger Lounges</h2>
-          </div>
-          <span style={{ color: '#cbd5e1' }} className="text-xs text-slate-300 font-sans max-w-sm leading-relaxed text-slate-light">
-            Our luxury dispatch lounges at New Delhi VIP Terminal 3 and Sahastradhara Base coordinate all private board transfers and flight itineraries.
-          </span>
-        </div>
-      </section>
-
-      {/* Middle Columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      <div className="max-w-6xl mx-auto px-6 -mt-12 relative z-20 flex flex-col gap-20">
         
-        {/* Contact form & Tracker - Left */}
-        <div className="lg:col-span-7 flex flex-col gap-10">
+        {/* ── Part 1: Contact Form & Main Offices ───────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Form */}
-          <div className="bg-[#051433] rounded-xl p-6 md:p-8 border border-white/5 shadow-lg high-contrast-card">
-            <h2 style={{ color: '#ffffff' }} className="font-space text-sm font-bold uppercase tracking-wider text-white border-b border-white/5 pb-3 mb-6">
-              Send Dispatch Inquiry
+          {/* Dispatch Inquiry Form (Left) */}
+          <div className="lg:col-span-7 bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-xl">
+            <h2 className="font-space text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-3 mb-6 flex items-center gap-2">
+              <Compass className="h-4 w-4 text-[#051433]" /> Send Dispatch Inquiry
             </h2>
 
             {formSubmitted ? (
-              <div className="text-center py-12 flex flex-col gap-4 items-center justify-center">
-                <CheckCircle className="h-10 w-10 text-gold animate-bounce text-gold-explicit" />
-                <h4 style={{ color: '#ffffff' }} className="font-space text-sm font-bold text-white">Inquiry Forwarded</h4>
-                <p style={{ color: '#cbd5e1' }} className="font-sans text-[11px] text-slate-300">
-                  Our private travel concierge will contact your office in less than 15 minutes.
+              <div className="text-center py-16 flex flex-col gap-4 items-center justify-center">
+                <CheckCircle className="h-12 w-12 text-emerald-500 animate-bounce" />
+                <h4 className="font-space text-base font-bold text-slate-900">Inquiry Forwarded Successfully</h4>
+                <p className="font-sans text-xs text-slate-500 max-w-sm">
+                  Our private travel concierge has queued your request and will contact your office in less than 15 minutes.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleContactSubmit} className="flex flex-col gap-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label style={{ color: '#cbd5e1' }} className="text-[10px] font-space text-slate-300 uppercase">Noble Name</label>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">FullName *</label>
                     <input
                       type="text"
                       required
-                      placeholder="Dev Patel"
+                      placeholder="e.g. Dev Patel"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-[#020B1E] border border-white/10 rounded px-3 py-2.5 text-xs text-white focus:outline-none focus:border-gold/50 font-sans"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#051433]"
                     />
                   </div>
 
-                  <div className="flex flex-col gap-2">
-                    <label style={{ color: '#cbd5e1' }} className="text-[10px] font-space text-slate-300 uppercase">Corporate Email</label>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Email Address *</label>
                     <input
                       type="email"
                       required
                       placeholder="dev@patelcorp.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-[#020B1E] border border-white/10 rounded px-3 py-2.5 text-xs text-white focus:outline-none focus:border-gold/50 font-sans"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#051433]"
                     />
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <label style={{ color: '#cbd5e1' }} className="text-[10px] font-space text-slate-300 uppercase">Details & Route Request</label>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Details &amp; Route Requirements *</label>
                   <textarea
                     rows={4}
                     required
-                    placeholder="Describe your charter details, locations, passenger count, and scheduling requirements..."
+                    placeholder="Describe your desired flight path, passenger count, preferred helicopter model, and scheduling requirements..."
                     value={msg}
                     onChange={(e) => setMsg(e.target.value)}
-                    className="w-full bg-[#020B1E] border border-white/10 rounded px-3 py-2.5 text-xs text-white focus:outline-none focus:border-gold/50 font-sans resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#051433] resize-none"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  style={{ color: '#ffffff', borderColor: '#C5A880' }}
-                  className="py-3.5 bg-transparent hover:bg-gold hover:text-black border border-gold rounded font-space font-bold text-[10px] uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2 mt-2 btn-explicit"
+                  className="py-3.5 bg-[#051433] hover:bg-[#092254] text-white rounded-xl font-space font-bold text-xs uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2 mt-2 shadow-md"
                 >
                   <span>Dispatch Inquiry Request</span>
-                  <Send className="h-4 w-4" />
+                  <Send className="h-4 w-4 text-amber-400" />
                 </button>
               </form>
             )}
           </div>
 
-          {/* Interactive Mock Flight Request Tracker */}
-          <div className="bg-[#051433] rounded-xl p-6 md:p-8 border border-white/5 shadow-lg high-contrast-card">
-            <h2 style={{ color: '#ffffff' }} className="font-space text-sm font-bold uppercase tracking-wider text-white border-b border-white/5 pb-3 mb-2">
-              Flight Dispatch Tracker
-            </h2>
-            <p style={{ color: '#cbd5e1' }} className="font-sans text-[11px] text-slate-300 mb-6">
-              Enter your inquiry reference ID to monitor ATC slot coordinates and flight staging.
+          {/* Location & Credentials (Right) */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xl flex flex-col gap-5">
+              <h3 className="font-space text-sm uppercase tracking-wider font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
+                <Target className="h-4 w-4 text-[#051433]" /> Headquarters Address
+              </h3>
+
+              <div className="flex flex-col gap-6">
+                {offices.map((of, i) => (
+                  <div key={i} className="flex flex-col gap-1.5 font-sans text-xs text-slate-600">
+                    <span className="font-space text-xs font-bold text-slate-900 uppercase">{of.city}</span>
+                    <p className="leading-relaxed mt-0.5">{of.address}</p>
+                    <span className="text-xs text-amber-600 font-mono mt-1 font-bold">Phone: {of.phone}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="h-[1px] bg-slate-100 my-1" />
+
+              {/* Emergency Heli-Rescue Box */}
+              <div className="flex gap-3 bg-red-500/5 border border-red-500/10 p-4 rounded-xl text-xs font-sans text-slate-600 leading-relaxed">
+                <ShieldAlert className="h-5 w-5 text-red-500 shrink-0" />
+                <div>
+                  <span className="text-red-600 font-bold block mb-0.5 uppercase tracking-wider font-space text-[10px]">24/7 Air Evac Emergency</span>
+                  For instant search and rescue staging coordinates or mountain medical airlifts: <br />
+                  <span className="font-bold text-slate-900 block mt-1">Call +91 70418 61886</span>
+                </div>
+              </div>
+
+              {/* Tax Details */}
+              <div className="flex items-center gap-3 bg-[#051433]/5 border border-slate-200 p-4 rounded-xl text-xs font-sans text-slate-600">
+                <Award className="h-5 w-5 text-amber-500 shrink-0" />
+                <div>
+                  <span className="text-[8px] uppercase tracking-wider text-slate-500 block leading-none mb-1">Corporate Registration</span>
+                  <span className="font-mono text-slate-800 font-bold text-[11px]">GST IN: 24AAPCR7672B1Z6</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Google Map Embed */}
+            <div className="bg-white rounded-2xl p-3 border border-slate-200 shadow-xl overflow-hidden h-[240px]">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3504.6644781498616!2d77.08182967630043!3d28.549806475711684!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d1bf47b0e14a1%3A0xe21287c9362e524d!2sIndira%20Gandhi%20International%20Airport%20Terminal%203!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+                width="100%"
+                height="100%"
+                style={{ border: 0, borderRadius: "0.75rem" }}
+                allowFullScreen={true}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Part 2: Corporate Pillars / Philosophy ─────────────── */}
+        <section className="flex flex-col gap-8 text-center border-t border-slate-200 pt-16">
+          <div>
+            <span style={{ color: '#C5A880' }} className="font-space text-xs uppercase tracking-widest text-gold font-bold">
+              Roman Philosophy
+            </span>
+            <h2 className="font-space text-2xl md:text-3xl font-bold text-slate-900 mt-2">Fly Beyond The Ordinary</h2>
+            <div className="h-[1.5px] w-12 bg-amber-500 mx-auto mt-3" />
+            <p className="font-sans text-xs md:text-sm text-slate-600 leading-relaxed max-w-2xl mx-auto mt-4">
+              Established in 2020, Roman Aviation &amp; Tourism was founded to redefine private regional transit. We cater to guests demanding seamless helicopter transits, elite concierge coordinates, and uncompromised flight safety dynamics.
             </p>
+          </div>
 
-            <form onSubmit={handleTrackRequest} className="flex gap-2 mb-6">
-              <input
-                type="text"
-                placeholder="Enter ID (e.g. ROM-2026)"
-                value={searchRef}
-                onChange={(e) => setSearchRef(e.target.value)}
-                className="flex-grow bg-[#020B1E] border border-white/10 rounded px-3 py-2.5 text-xs text-white focus:outline-none focus:border-gold/50 font-mono"
-              />
-              <button
-                type="submit"
-                style={{ color: '#020B1E', backgroundColor: '#C5A880' }}
-                className="px-4 bg-gold text-black rounded font-space font-bold text-[10px] uppercase tracking-widest transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <Search className="h-3.5 w-3.5" />
-                <span>Track</span>
-              </button>
-            </form>
-
-            {trackingError && (
-              <span className="text-red-400 font-sans text-xs block">{trackingError}</span>
-            )}
-
-            {trackingResult && (
-              <div className="p-4 rounded-lg bg-[#020B1E] border border-white/10 flex flex-col gap-4 text-left">
-                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                  <div>
-                    <span className="text-[8px] uppercase tracking-wider text-slate-400">Reference Key</span>
-                    <span className="font-mono text-xs font-bold text-white block">{trackingResult.ref}</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded bg-gold/10 border border-gold/25 font-space text-[8px] text-gold uppercase font-bold text-gold-explicit">
-                    {trackingResult.status}
-                  </span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-4 text-left">
+            {coreValues.map((v, i) => (
+              <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-lg flex flex-col gap-4">
+                <div className="h-10 w-10 rounded-full bg-[#051433]/5 border border-[#051433]/20 flex items-center justify-center text-[#051433] shrink-0">
+                  <Award className="h-5 w-5 text-amber-500" />
                 </div>
+                <h3 className="font-space text-sm uppercase tracking-wider font-bold text-slate-900">{v.title}</h3>
+                <p className="font-sans text-xs text-slate-500 leading-relaxed">
+                  {v.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-                <div className="grid grid-cols-2 gap-4 text-[11px] font-sans text-slate-300 text-slate-light border-b border-white/5 pb-3">
-                  <div>
-                    <span className="text-[8px] uppercase text-slate-500 block">Flight Corridor</span>
-                    <span>{trackingResult.from} → {trackingResult.to}</span>
-                  </div>
-                  <div>
-                    <span className="text-[8px] uppercase text-slate-500 block">Staging Coordinates</span>
-                    <span>{trackingResult.date} ({trackingResult.passengers})</span>
-                  </div>
+        {/* ── Part 3: Company Timeline & Milestones ─────────────── */}
+        <section className="flex flex-col gap-8 border-t border-slate-200 pt-16">
+          <div className="text-center">
+            <span className="font-space text-xs uppercase tracking-widest text-gold font-bold">Our Journey</span>
+            <h2 className="font-space text-2xl md:text-3xl font-bold text-slate-900 mt-2">Timeline &amp; Milestones</h2>
+            <div className="h-[1.5px] w-12 bg-amber-500 mx-auto mt-3" />
+          </div>
+
+          <div className="relative border-l-2 border-slate-200 pl-6 ml-4 space-y-8 max-w-3xl mx-auto text-xs font-sans">
+            {timeline.map((mile, i) => (
+              <div key={i} className="relative">
+                <div className="absolute -left-[32px] top-0 h-4 w-4 rounded-full bg-[#051433] border-4 border-[#F2F5F8]" />
+                <div className="font-space text-sm font-bold text-amber-500">{mile.year}</div>
+                <h4 className="font-space text-sm font-bold text-slate-900 mt-0.5">{mile.title}</h4>
+                <p className="text-slate-500 leading-relaxed mt-1">{mile.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Part 4: Aircraft Fleet Details ─────────────────────── */}
+        <section className="flex flex-col gap-8 border-t border-slate-200 pt-16">
+          <div className="text-center">
+            <span className="font-space text-xs uppercase tracking-widest text-gold font-bold">Our Fleet</span>
+            <h2 className="font-space text-2xl md:text-3xl font-bold text-slate-900 mt-2">Aircraft Fleet Specifications</h2>
+            <div className="h-[1.5px] w-12 bg-amber-500 mx-auto mt-3" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {fleet.map((aircraft, i) => (
+              <div key={i} className="rounded-2xl overflow-hidden border border-slate-200 bg-white flex flex-col group shadow-md hover:shadow-xl transition-all duration-300">
+                <div className="h-44 relative bg-slate-100 overflow-hidden">
+                  <img src={aircraft.image} alt={aircraft.name} className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
                 </div>
-
-                <div className="flex flex-col gap-3 mt-1">
-                  {trackingResult.steps.map((st: any, idx: number) => (
-                    <div key={idx} className="flex gap-3">
-                      <div className="flex flex-col items-center">
-                        <div className={`h-4.5 w-4.5 rounded-full border flex items-center justify-center shrink-0 ${st.done ? "border-gold bg-gold/15 text-gold text-gold-explicit" : "border-white/20 text-slate-500"}`}>
-                          {st.done ? <Check className="h-2.5 w-2.5" /> : <span className="text-[8px] font-bold font-mono">{idx+1}</span>}
-                        </div>
-                        {idx < trackingResult.steps.length - 1 && (
-                          <div className={`w-[1px] h-6 mt-1 ${st.done ? "bg-gold/30" : "bg-white/10"}`} />
-                        )}
+                <div className="p-5 text-left flex-grow flex flex-col justify-between">
+                  <div>
+                    <h4 className="font-space text-base font-bold text-slate-900">{aircraft.name}</h4>
+                    <span className="font-space text-[9px] uppercase tracking-wider text-amber-500 font-bold block mb-2">{aircraft.type}</span>
+                    <p className="font-sans text-xs text-slate-500 leading-relaxed mb-4">{aircraft.desc}</p>
+                  </div>
+                  <div className="border-t border-slate-100 pt-3 flex flex-col gap-1.5 font-mono text-[10px] text-slate-500">
+                    {Object.entries(aircraft.specs).map(([key, val]) => (
+                      <div key={key} className="flex justify-between">
+                        <span className="opacity-70">{key}:</span>
+                        <span className="text-slate-800 font-semibold">{val}</span>
                       </div>
-                      <div>
-                        <span style={{ color: st.done ? '#ffffff' : '#94a3b8' }} className="font-space text-[10px] uppercase font-bold tracking-wider block leading-none mb-0.5">
-                          {st.label}
-                        </span>
-                        <span className="font-sans text-[10px] text-slate-400 block leading-tight">{st.desc}</span>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
-            )}
+            ))}
           </div>
-        </div>
+        </section>
 
-        {/* Office addresses - Right */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
-          <div className="bg-[#051433] rounded-xl p-6 border border-white/10 flex flex-col gap-5 shadow-lg high-contrast-card">
-            <h3 style={{ color: '#ffffff' }} className="font-space text-sm uppercase tracking-wider font-bold text-white border-b border-white/5 pb-2">
-              Corporate Terminal Offices
-            </h3>
-
-            <div className="flex flex-col gap-6">
-              {offices.map((of, i) => (
-                <div key={i} className="flex flex-col gap-1 font-sans text-xs text-slate-300 text-slate-light">
-                  <span style={{ color: '#ffffff' }} className="font-space text-xs font-semibold text-white">{of.city}</span>
-                  <p className="leading-relaxed mt-0.5">{of.address}</p>
-                  <span style={{ color: '#C5A880' }} className="text-[10px] text-gold font-mono mt-1 block font-semibold text-gold-explicit">Phone: {of.phone}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="h-[1px] bg-white/5 my-2" />
-
-            {/* Emergency Rescue Box */}
-            <div className="flex gap-3 bg-red-400/5 border border-red-400/10 p-4 rounded text-xs font-sans text-slate-300 text-slate-light leading-relaxed">
-              <ShieldAlert className="h-5 w-5 text-red-400 shrink-0" />
-              <div>
-                <span className="text-red-400 font-bold block mb-0.5 uppercase tracking-wider font-space text-[10px]">24/7 Heli-Rescue Emergency</span>
-                For instant weather reports or search and rescue coordinates: <br />
-                <span className="font-bold text-white text-white-explicit block mt-1">Call +91 70418 61886</span>
-              </div>
-            </div>
-
-            {/* Corporate Tax block */}
-            <div className="flex items-center gap-3 bg-[#020B1E] border border-white/10 p-4 rounded text-xs font-sans text-slate-300 text-slate-light">
-              <Award className="h-5 w-5 text-gold shrink-0 text-gold-explicit" />
-              <div>
-                <span className="text-[8px] uppercase tracking-wider text-slate-400 block leading-none mb-1">GST Registration</span>
-                <span className="font-mono text-white text-white-explicit font-semibold text-[11px]">GST IN: 24AAPCR7672B1Z6</span>
-              </div>
-            </div>
+        {/* ── Part 5: FAQs Section ─────────────────────────────── */}
+        <section className="flex flex-col gap-8 border-t border-slate-200 pt-16">
+          <div className="text-center flex flex-col items-center">
+            <span style={{ color: '#C5A880' }} className="font-space text-xs uppercase tracking-widest text-gold font-bold">FAQ Desk</span>
+            <h2 className="font-space text-2xl md:text-3xl font-bold text-slate-900 mt-2">Common Booking Inquiries</h2>
+            <div className="h-[1.5px] w-12 bg-amber-500 mt-4" />
           </div>
 
-          {/* Google Maps Embed Card */}
-          <div className="bg-[#051433] rounded-xl p-4 border border-white/10 shadow-lg overflow-hidden h-[300px] high-contrast-card">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3504.6644781498616!2d77.08182967630043!3d28.549806475711684!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d1bf47b0e14a1%3A0xe21287c9362e524d!2sIndira%20Gandhi%20International%20Airport%20Terminal%203!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
-              width="100%"
-              height="100%"
-              style={{ border: 0, borderRadius: "0.5rem" }}
-              allowFullScreen={true}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
-          </div>
-        </div>
-      </div>
-
-      {/* FAQs Section */}
-      <section className="flex flex-col gap-8">
-        <div className="text-center flex flex-col items-center">
-          <span style={{ color: '#C5A880' }} className="font-space text-xs uppercase tracking-widest text-gold font-bold">FAQ Desk</span>
-          <h2 style={{ color: '#ffffff' }} className="font-serif text-2xl md:text-3xl font-bold text-white mt-2">Common Booking Inquiries</h2>
-          <div className="h-[1px] w-12 bg-gold mt-4" />
-        </div>
-
-        <div className="max-w-4xl mx-auto w-full flex flex-col gap-4">
-          {faqs.map((faq, index) => {
-            const isOpen = activeFaq === index;
-            return (
-              <div
-                key={index}
-                className="rounded-lg border border-white/5 bg-[#051433] overflow-hidden transition-all duration-300"
-              >
-                <button
-                  onClick={() => setActiveFaq(isOpen ? null : index)}
-                  className="w-full px-6 py-4 flex items-center justify-between gap-4 text-left font-space text-xs font-bold uppercase tracking-wider text-white hover:text-gold cursor-pointer transition-colors"
+          <div className="max-w-4xl mx-auto w-full flex flex-col gap-3">
+            {faqs.map((faq, index) => {
+              const isOpen = activeFaq === index;
+              return (
+                <div
+                  key={index}
+                  className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all"
                 >
-                  <span style={{ color: isOpen ? '#C5A880' : '#ffffff' }} className="flex items-center gap-2.5">
-                    <HelpCircle className="h-4 w-4 shrink-0 text-gold" />
-                    {faq.q}
-                  </span>
-                  {isOpen ? <ChevronUp className="h-4 w-4 text-gold shrink-0" /> : <ChevronDown className="h-4 w-4 text-slate-400 shrink-0" />}
-                </button>
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: "auto" }}
-                      exit={{ height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="border-t border-white/5 bg-[#020B1E]/40"
-                    >
-                      <p style={{ color: '#cbd5e1' }} className="px-6 py-4 font-sans text-xs sm:text-sm text-slate-300 leading-relaxed text-slate-light">
-                        {faq.a}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+                  <button
+                    onClick={() => setActiveFaq(isOpen ? null : index)}
+                    className="w-full px-6 py-4.5 flex items-center justify-between gap-4 text-left font-space text-xs font-bold uppercase tracking-wider text-slate-800 hover:text-amber-500 cursor-pointer transition-colors"
+                  >
+                    <span style={{ color: isOpen ? '#D68B3E' : '#1E293B' }} className="flex items-center gap-2.5">
+                      <HelpCircle className="h-4 w-4 shrink-0 text-[#051433]" />
+                      {faq.q}
+                    </span>
+                    {isOpen ? <ChevronUp className="h-4 w-4 text-[#051433] shrink-0" /> : <ChevronDown className="h-4 w-4 text-slate-400 shrink-0" />}
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: "auto" }}
+                        exit={{ height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="border-t border-slate-100 bg-slate-50/50"
+                      >
+                        <p className="px-6 py-4 font-sans text-xs sm:text-sm text-slate-500 leading-relaxed">
+                          {faq.a}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

@@ -4,7 +4,9 @@ class Booking(models.Model):
     STATUS_CHOICES = (
         ('Confirmed', 'Confirmed'),
         ('Pending', 'Pending'),
+        ('Cancellation Requested', 'Cancellation Requested'),
         ('Cancelled', 'Cancelled'),
+        ('Refunded', 'Refunded'),
         ('In Flight', 'In Flight'),
     )
     
@@ -34,6 +36,7 @@ class Booking(models.Model):
     addons = models.JSONField(default=list, blank=True)
     price = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Confirmed')
+    cancellation_data = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

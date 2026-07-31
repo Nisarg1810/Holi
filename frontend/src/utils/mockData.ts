@@ -53,6 +53,7 @@ export interface BoatListing {
   type: string;
   description?: string;
   features: string[];
+  schedules?: string[];
   reviews: { author: string; rating: number; text: string; date: string }[];
 }
 
@@ -68,7 +69,7 @@ export const HELICOPTERS: HelicopterListing[] = [
     range: "650 km",
     safetyRating: "5.0/5.0",
     description: "The Airbus H145 is the pinnacle of luxury aviation engineering. Featuring a spacious, vibration-isolated executive cabin, club-seating configurations, and large panoramic windows, it is the premier choice for VIP transfers to holy sanctuaries and high-altitude mountain locations.",
-    image: "https://images.unsplash.com/photo-1681281896815-bfa3b9b47e2b?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1583244532610-2a234e7c3eca?q=80&w=600&auto=format&fit=crop",
     features: ["Noise Cancellation Cabin", "Climate Control", "Panoramic Glass Windows", "Refreshment Bar", "VIP Lounge Boarding"],
     specs: {
       "Engine Type": "Dual Safran Arriel 2E",
@@ -94,7 +95,7 @@ export const HELICOPTERS: HelicopterListing[] = [
     range: "720 km",
     safetyRating: "4.9/5.0",
     description: "Perfect for coastal cruising and dynamic island hopping. The Bell 429 offers state-of-the-art flight dynamics with an expansive flat-floor cabin that accommodates up to six passengers in full executive luxury.",
-    image: "https://images.unsplash.com/photo-1508849789987-4e5333c12b78?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1612459284970-e8f027596582?q=80&w=600&auto=format&fit=crop",
     features: ["Leather Club Seats", "LED Ambient Lighting", "Integrated Bluetooth Audio", "Extra Luggage Space", "Premium Snacks"],
     specs: {
       "Engine Type": "Pratt & Whitney PW207D1",
@@ -119,7 +120,7 @@ export const HELICOPTERS: HelicopterListing[] = [
     range: "930 km",
     safetyRating: "4.9/5.0",
     description: "Built for speed and sleek aesthetic refinement, the AW109 features a highly retractable landing gear and aerodynamically streamlined build. Navigate urban traffic lanes and regional flyovers instantly.",
-    image: "https://images.unsplash.com/photo-1498084393753-b411b2d26b34?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1540962351504-03099e0a754b?q=80&w=600&auto=format&fit=crop",
     features: ["Super Silent Blades", "Mini Dining Table", "In-flight Wi-Fi", "Champagne Service", "Concierge Assist"],
     specs: {
       "Engine Type": "Pratt & Whitney PW206C",
@@ -355,30 +356,94 @@ export const HOTELS: HotelListing[] = [
 export const BOATS: BoatListing[] = [
   {
     id: "b-1",
-    name: "AURA Prestige 75 Yacht",
-    location: "Goa Harbor, Goa",
+    name: "Azure Voyager Luxury Yacht",
+    location: "Goa Harbor, Panaji, Goa",
     price: 45000,
     capacity: 12,
-    duration: "Per Hour (Min 3 hrs)",
-    image: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?q=80&w=600&auto=format&fit=crop",
-    type: "Motor Yacht",
-    features: ["Flybridge Sunbed", "Dual Luxury Cabins", "Jet Ski Attachment", "Sound System", "Crew of 4 included"],
+    duration: "Per Charter",
+    image: "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?q=80&w=600&auto=format&fit=crop",
+    type: "Executive Catamaran Yacht",
+    features: ["Flybridge Sunbed", "Air-Conditioned Saloon", "Gourmet Kitchen Onboard", "Sound System & DJ Setup", "Snorkeling Equipment", "Crew of 4 included"],
     reviews: [
       { author: "Deepak S.", rating: 5, text: "Outstanding yacht. Ideal for sunset cruising with champagne.", date: "2026-06-10" },
+      { author: "Priya R.", rating: 5, text: "Fabulous experience! The crew was amazing and food was delicious.", date: "2026-06-22" }
     ],
+    schedules: ["09:00 AM - 12:00 PM", "02:00 PM - 05:00 PM", "05:30 PM - 08:30 PM (Sunset Cruise)"]
   },
   {
     id: "b-2",
+    name: "Mandovi Royal Speedboat",
+    location: "Mandovi River, Panjim, Goa",
+    price: 18000,
+    capacity: 6,
+    duration: "Per Charter",
+    image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=600&auto=format&fit=crop",
+    type: "VIP Speedboat",
+    features: ["Twin Yamaha Engines", "Cushioned Seating", "Life Jackets", "Cooler Box", "GoPro Mount Points", "Bluetooth Speaker"],
+    reviews: [
+      { author: "Rahul M.", rating: 5, text: "What a rush! Best speedboat experience I have had in Goa.", date: "2026-07-01" }
+    ],
+    schedules: ["09:00 AM", "11:30 AM", "03:00 PM"]
+  },
+  {
+    id: "b-3",
+    name: "Sacred Ganges Shikara Cruise",
+    location: "Dashashwamedh Ghat, Varanasi",
+    price: 12000,
+    capacity: 8,
+    duration: "Per Charter",
+    image: "https://images.unsplash.com/photo-1609946727137-013009587422?q=80&w=600&auto=format&fit=crop",
+    type: "Traditional Luxury Shikara",
+    features: ["Velvet Cushioned Seating", "Flower Petal Decoration", "Aarti Kit Provided", "Photography Assistance", "Spiritual Commentary", "Traditional Chai Service"],
+    reviews: [
+      { author: "Anjali T.", rating: 5, text: "A truly spiritual and beautiful experience. The Aarti from the river is breathtaking.", date: "2026-06-18"}
+    ],
+    schedules: ["05:30 AM (Sunrise Aarti)", "06:00 PM (Ganga Aarti)"]
+  },
+  {
+    id: "b-4",
     name: "Kerala Backwaters Sovereign Suite",
-    location: "Alleppey, Kerala",
+    location: "Alleppey (Alappuzha) Backwaters, Kerala",
     price: 85000,
     capacity: 6,
-    duration: "Full Day / Overnight",
+    duration: "Per Charter",
     image: "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=600&auto=format&fit=crop",
     type: "Luxury Houseboat",
-    features: ["Glass walled lounge", "Sprawling Upper Deck", "Traditional Chefs onboard", "Full AC Cabins"],
+    features: ["Glass-Walled Lounge", "2 AC Cabins", "Traditional Kerala Chef", "Sprawling Upper Deck", "Fishing Rods", "Kayak Available"],
     reviews: [
       { author: "Priya Menon", rating: 5, text: "So peaceful. Floating past coco palms in absolute luxury.", date: "2026-06-22" },
+      { author: "Kiran B.", rating: 5, text: "The Kerala fish curry was phenomenal. Best backwaters trip ever!", date: "2026-07-10"}
     ],
+    schedules: ["Full Day Charter", "Overnight (24 Hours)"]
   },
+  {
+    id: "b-5",
+    name: "Andaman Pearl Schooner",
+    location: "Port Blair Marina, Andaman Islands",
+    price: 65000,
+    capacity: 10,
+    duration: "Per Charter",
+    image: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?q=80&w=600&auto=format&fit=crop",
+    type: "Premium Schooner Yacht",
+    features: ["Island Hopping Route", "Professional Dive Guide", "Snorkel & Mask Sets", "Underwater GoPro", "BBQ Lunch Onboard", "Hammock Net at Bow"],
+    reviews: [
+      { author: "Vikram J.", rating: 5, text: "Absolutely stunning waters and a magnificent boat. Once-in-a-lifetime experience.", date: "2026-05-14" }
+    ],
+    schedules: ["07:00 AM - 01:00 PM (Island Hop)", "02:00 PM - 07:00 PM (Sunset Sail)"]
+  },
+  {
+    id: "b-6",
+    name: "Mumbai Harbour Royal Cruise",
+    location: "Gateway of India, Mumbai, Maharashtra",
+    price: 35000,
+    capacity: 20,
+    duration: "Per Charter",
+    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=600&auto=format&fit=crop",
+    type: "Motor Cruiser",
+    features: ["Air-Conditioned Deck", "Full Bar Setup", "LED Dance Floor", "Live Music Option", "City Panorama Views", "Photo Booth"],
+    reviews: [
+      { author: "Sneha A.", rating: 5, text: "Mumbai from the sea is magical. The night cruise with city lights was unforgettable.", date: "2026-07-05" }
+    ],
+    schedules: ["10:00 AM", "12:30 PM", "04:00 PM", "07:00 PM (Night Cruise)"]
+  }
 ];

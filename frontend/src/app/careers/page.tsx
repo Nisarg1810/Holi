@@ -39,44 +39,6 @@ const JOBS = [
       "Fluency in English & Hindi (additional languages preferred).",
       "No visible tattoos or piercings while in uniform."
     ]
-  },
-  {
-    title: "Aviation Maintenance Engineer (AME)",
-    department: "Fleet Engineering",
-    location: "Dehradun Hangar Base",
-    salary: "₹12,00,000 - ₹18,00,000 P.A.",
-    desc: "Responsible for line maintenance, pre-flight safety checks, and telemetry logs for Airbus H145 and Bell 429 helicopters.",
-    responsibilities: [
-      "Perform scheduled telemetry and mechanical inspections.",
-      "Verify engine and rotor blade fatigue standards under DGCA guidelines.",
-      "Sign off flight safety logs prior to daily staging.",
-      "Troubleshoot complex mechanical or avionics issues immediately."
-    ],
-    criteria: [
-      "Valid DGCA AME License (B1.3 or B2 rating).",
-      "Minimum 3 years of hands-on helicopter maintenance experience.",
-      "Thorough knowledge of Helionix avionics is a major advantage.",
-      "Strong analytical and emergency response capabilities."
-    ]
-  },
-  {
-    title: "First Officer / Co-Pilot (Bell 429)",
-    department: "Flight Operations",
-    location: "All Bases (Pan-India)",
-    salary: "₹18,00,000 - ₹24,00,000 P.A.",
-    desc: "Assist the Pilot-in-Command in executing VFR flight corridors, ensuring precision flight logs and absolute safety compliance.",
-    responsibilities: [
-      "Conduct pre-flight weather path checks and fuel calculation audits.",
-      "Assist PIC in flight dynamics, autopilot configurations, and landing staging.",
-      "Monitor air traffic control corridors in real-time.",
-      "Ensure clean flight manifest logs are uploaded post-transit."
-    ],
-    criteria: [
-      "Current DGCA Commercial Pilot License (CPL/CHPL) with multi-engine rating.",
-      "Minimum 500 total flying hours (150 hours on turbine helicopters).",
-      "Valid FRTOL, RTR(A), and Class I Medical Certificate.",
-      "Excellent crew resource management (CRM) standards."
-    ]
   }
 ];
 
@@ -338,10 +300,10 @@ export default function CareersPage() {
           </div>
           
           <h1 className="font-space text-3xl md:text-5xl font-bold tracking-tight text-white uppercase">
-            Join Our Aviation &amp; Hospitality Crew
+            Join Our Elite Cabin Crew
           </h1>
           <p className="text-xs md:text-sm text-slate-300 max-w-xl mt-2 font-sans">
-            Explore high-performing career tracks in cabin hospitality, aircraft maintenance engineering, and helicopter pilot operations.
+            Serve premium clients onboard our bespoke chartered flights and luxury private corridors.
           </p>
         </div>
       </div>
@@ -361,8 +323,8 @@ export default function CareersPage() {
             >
               <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md">
                 <h2 className="font-space text-sm uppercase font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center justify-between">
-                  <span>Open Operational Positions</span>
-                  <span className="text-xs text-slate-400 font-mono">3 Active Listings</span>
+                  <span>Open Hospitality Positions</span>
+                  <span className="text-xs text-[#051433] bg-[#051433]/5 px-2 py-0.5 rounded font-mono font-bold">1 Active Listing</span>
                 </h2>
 
                 <div className="flex flex-col gap-6 mt-6">

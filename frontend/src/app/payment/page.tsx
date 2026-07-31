@@ -47,7 +47,9 @@ export default function PaymentPage() {
       discount = subtotal * (appliedPromo.discountPercent / 100);
     }
     
-    const taxes = (subtotal - discount) * 0.18;
+    // Boats: 5% marine GST; others: 18% aviation GST
+    const taxRate = item.type === "boat" ? 0.05 : 0.18;
+    const taxes = (subtotal - discount) * taxRate;
     return subtotal - discount + taxes;
   };
 
@@ -446,8 +448,8 @@ export default function PaymentPage() {
                     </div>
                   )}
                   <div className="flex justify-between text-slate-500">
-                    <span>GST Tax (18%)</span>
-                    <span>₹{((Number(item.price) + selectedAddOns.reduce((a, c) => a + c.price, 0)) * 0.18).toLocaleString("en-IN")}</span>
+                    <span>{item.type === "boat" ? "Marine Service Tax (5%)" : "GST Tax (18%)"}</span>
+                    <span>₹{((Number(item.price) + selectedAddOns.reduce((a, c) => a + c.price, 0)) * (item.type === "boat" ? 0.05 : 0.18)).toLocaleString("en-IN")}</span>
                   </div>
                   
                   <div className="border-t border-slate-200 pt-3 mt-1 flex justify-between items-end">
@@ -480,7 +482,10 @@ export default function PaymentPage() {
             <CheckCircle2 className="h-12 w-12 text-emerald-600 animate-bounce" />
             <h3 className="font-space text-2xl font-bold text-slate-900">Payment Authorized &amp; Confirmed!</h3>
             <p className="text-xs text-slate-500 font-sans">
-              Generating your flight ticket &amp; boarding pass. Redirecting to receipt workspace...
+              {item.type === "boat"
+                ? "Charter confirmed! Generating your official booking certificate & boarding pass..."
+                : "Generating your flight ticket & boarding pass. Redirecting to receipt workspace..."
+              }
             </p>
           </div>
         )}

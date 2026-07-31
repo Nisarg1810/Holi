@@ -4,4 +4,8 @@ from .models import Boat
 class BoatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Boat
-        fields = '__all__'
+        fields = [
+            'id', 'name', 'type', 'capacity', 'price',
+            'image', 'location', 'description',
+            'features', 'schedules', 'reviews'
+        ]

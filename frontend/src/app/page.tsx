@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import API from "@/utils/api";
@@ -493,10 +494,14 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ⚓ YACHT & BOAT CHARTER SEARCH SECTION */}
+      <BoatCharterSearchSection />
+
       {/* 4. Why Choose Roman Aviation Banner */}
       <section className="py-16 bg-[#051433]/70 border-y border-white/5 relative overflow-hidden z-10">
         {/* Ambient glow in banner */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[500px] rounded-full bg-gold/5 blur-[80px] pointer-events-none" />
+
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="text-center mb-12 flex flex-col items-center">
@@ -975,5 +980,191 @@ export default function Home() {
         }}
       />
     </div>
+  );
+}
+
+// ───────────────────────────────────────────
+// 🚢 Boat Charter Search Section Component
+// ───────────────────────────────────────────
+function BoatCharterSearchSection() {
+  const router = useRouter();
+  const [destination, setDestination] = useState("");
+  const [charterType, setCharterType] = useState("");
+  const [date, setDate] = useState("");
+  const [guests, setGuests] = useState(2);
+
+  const destinations = [
+    "Goa Harbor, Panaji",
+    "Alleppey Backwaters, Kerala",
+    "Mumbai Harbour, Maharashtra",
+    "Andaman Islands",
+    "Dashashwamedh Ghat, Varanasi",
+    "Mandovi River, Goa",
+  ];
+  const charterTypes = [
+    "Motor Yacht",
+    "Luxury Houseboat",
+    "Executive Catamaran",
+    "VIP Speedboat",
+    "Premium Schooner",
+    "Traditional Shikara",
+  ];
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (destination) params.set("destination", destination);
+    if (charterType) params.set("type", charterType);
+    if (date) params.set("date", date);
+    params.set("guests", String(guests));
+    router.push(`/boats?${params.toString()}`);
+  };
+
+  return (
+    <section className="py-20 px-6 max-w-7xl mx-auto relative z-10">
+      {/* Section Header */}
+      <div className="flex flex-col items-center justify-center text-center mb-10">
+        <span className="font-space text-xs uppercase tracking-widest text-[#C5A880] font-bold">
+          Premium Water Experiences
+        </span>
+        <h2 className="font-serif text-3xl md:text-4xl font-bold tracking-tight text-white mt-2">
+          Yacht &amp; Boat Charters
+        </h2>
+        <div className="flex items-center justify-center gap-4 mt-4">
+          <div className="h-[1px] w-12 bg-gradient-to-r from-transparent to-[#C5A880]" />
+          <Ship className="h-4 w-4 text-[#C5A880]" />
+          <div className="h-[1px] w-12 bg-gradient-to-l from-transparent to-[#C5A880]" />
+        </div>
+        <p className="font-sans text-sm text-slate-300 mt-3 max-w-lg">
+          Luxury catamarans, speedboats, houseboats &amp; private river cruisers across Goa, Kerala, Mumbai &amp; Andamans
+        </p>
+      </div>
+
+      {/* Search Widget Card */}
+      <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+        {/* Top Bar */}
+        <div className="bg-gradient-to-r from-[#051433] to-[#0D2D6C] px-6 py-3 flex items-center gap-2">
+          <Ship className="h-4 w-4 text-amber-400" />
+          <span className="font-space text-xs font-bold text-white uppercase tracking-widest">
+            Book Domestic &amp; International Yacht Charters
+          </span>
+        </div>
+
+        <form onSubmit={handleSearch} className="p-6">
+          {/* Form Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 border border-slate-200 rounded-xl overflow-hidden">
+            {/* Destination */}
+            <div className="flex flex-col gap-1 p-4 border-r border-slate-200 bg-white hover:bg-slate-50 transition-colors">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                <MapPin className="h-3 w-3 text-[#051433]" />
+                CRUISING TO <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="boat-destination"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                required
+                className="font-space font-bold text-slate-800 text-base bg-transparent border-none outline-none cursor-pointer appearance-none"
+              >
+                <option value="" disabled>Select Destination</option>
+                {destinations.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Charter Type */}
+            <div className="flex flex-col gap-1 p-4 border-r border-slate-200 bg-white hover:bg-slate-50 transition-colors">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                <Ship className="h-3 w-3 text-[#051433]" />
+                CHARTER TYPE
+              </label>
+              <select
+                id="boat-charter-type"
+                value={charterType}
+                onChange={(e) => setCharterType(e.target.value)}
+                className="font-space font-bold text-slate-800 text-base bg-transparent border-none outline-none cursor-pointer appearance-none"
+              >
+                <option value="">All Vessel Types</option>
+                {charterTypes.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Travel Date */}
+            <div className="flex flex-col gap-1 p-4 border-r border-slate-200 bg-white hover:bg-slate-50 transition-colors">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                <Calendar className="h-3 w-3 text-[#051433]" />
+                TRAVEL DATE <span className="text-slate-400 font-normal">(Optional)</span>
+              </label>
+              <input
+                type="date"
+                id="boat-date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+                className="font-space font-bold text-slate-800 text-base bg-transparent border-none outline-none cursor-pointer"
+              />
+              {!date && <span className="font-space font-bold text-slate-400 text-base -mt-6 pointer-events-none">Select Date</span>}
+            </div>
+
+            {/* Guests */}
+            <div className="flex flex-col gap-1 p-4 bg-white hover:bg-slate-50 transition-colors">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                <Users className="h-3 w-3 text-[#051433]" />
+                GUESTS
+              </label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setGuests(Math.max(1, guests - 1))}
+                  className="h-7 w-7 rounded-full bg-slate-100 border border-slate-300 font-bold text-slate-700 flex items-center justify-center hover:bg-[#051433] hover:text-white transition-colors text-sm"
+                >
+                  -
+                </button>
+                <span className="font-space font-bold text-slate-800 text-base w-12 text-center">
+                  {guests} {guests === 1 ? "Guest" : "Guests"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setGuests(Math.min(30, guests + 1))}
+                  className="h-7 w-7 rounded-full bg-slate-100 border border-slate-300 font-bold text-slate-700 flex items-center justify-center hover:bg-[#051433] hover:text-white transition-colors text-sm"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Search CTA */}
+          <div className="flex justify-center mt-6">
+            <button
+              id="boat-charter-search-btn"
+              type="submit"
+              className="px-16 py-4 bg-gradient-to-r from-[#1a6bcc] to-[#0D52A0] hover:from-[#155ab8] hover:to-[#0A4490] text-white font-space font-bold text-sm uppercase tracking-widest rounded-full shadow-xl transition-all flex items-center gap-2.5 cursor-pointer"
+            >
+              <Ship className="h-5 w-5" />
+              SEARCH CHARTERS
+            </button>
+          </div>
+        </form>
+
+        {/* Quick destination pills */}
+        <div className="px-6 pb-5 flex flex-wrap gap-2">
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider self-center">Popular:</span>
+          {["Goa Sunset Cruise", "Kerala Backwaters", "Andaman Island Hop", "Mumbai Night Cruise"].map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => router.push(`/boats?destination=${encodeURIComponent(tag)}&guests=2`)}
+              className="px-3 py-1.5 rounded-full bg-[#051433]/5 border border-[#051433]/15 text-[10px] font-bold text-[#051433] hover:bg-[#051433] hover:text-white transition-all cursor-pointer"
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

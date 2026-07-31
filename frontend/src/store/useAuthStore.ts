@@ -24,7 +24,7 @@ export interface Booking {
   passenger_manifest?: any[];
   addons?: any[];
   price: number;
-  status: "Confirmed" | "Pending" | "Cancelled" | "In Flight";
+  status: "Confirmed" | "Pending" | "Cancellation Requested" | "Cancelled" | "Refunded" | "In Flight";
   invoiceUrl?: string;
 }
 
@@ -62,6 +62,9 @@ export interface AuthState {
   fetchBookings: () => Promise<void>;
   addBooking: (booking: Omit<Booking, "id" | "status"> & { id?: string; status?: string }) => Promise<string>;
   cancelBooking: (id: string) => Promise<void>;
+  requestCancelBooking: (id: string, cancellationData: any) => Promise<void>;
+  approveRefundBooking: (id: string) => Promise<void>;
+  rejectCancelBooking: (id: string) => Promise<void>;
   fetchTickets: () => Promise<void>;
   addTicket: (subject: string, category: string, initialMsg: string) => Promise<void>;
   addReplyToTicket: (ticketId: string, text: string) => Promise<void>;
@@ -147,6 +150,30 @@ export const useAuthStore = create<AuthState>()(
           await get().fetchBookings();
         } catch (err) {
           console.error("Error cancelling booking:", err);
+        }
+      },
+      requestCancelBooking: async (id, cancellationData) => {
+        try {
+          await API.post(`/bookings/request-cancel/${id}`, { cancellation_data: cancellationData });
+          await get().fetchBookings();
+        } catch (err) {
+          console.error("Error requesting cancellation:", err);
+        }
+      },
+      approveRefundBooking: async (id) => {
+        try {
+          await API.post(`/bookings/approve-refund/${id}`);
+          await get().fetchBookings();
+        } catch (err) {
+          console.error("Error approving refund:", err);
+        }
+      },
+      rejectCancelBooking: async (id) => {
+        try {
+          await API.post(`/bookings/reject-cancel/${id}`);
+          await get().fetchBookings();
+        } catch (err) {
+          console.error("Error rejecting cancellation:", err);
         }
       },
       fetchTickets: async () => {

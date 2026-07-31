@@ -62,13 +62,16 @@ function SuccessPageContent() {
           </div>
 
           <span className="font-space text-xs font-bold text-amber-400 uppercase tracking-widest">
-            BOOKING CONFIRMED &amp; ISSUED
+            {booking.type === "boat" ? "CHARTER CONFIRMED & ISSUED" : "BOOKING CONFIRMED & ISSUED"}
           </span>
           <h1 className="font-space text-3xl md:text-4xl font-bold tracking-tight text-white mt-1">
-            Your Reservation is Complete!
+            {booking.type === "boat" ? "Your Charter is Confirmed!" : "Your Reservation is Complete!"}
           </h1>
           <p className="text-xs text-slate-300 max-w-md mt-1 font-sans">
-            Your official PDF invoice and boarding pass have been generated and dispatched to your email.
+            {booking.type === "boat"
+              ? "Your official charter certificate and boarding confirmation have been sent to your email."
+              : "Your official PDF invoice and boarding pass have been generated and dispatched to your email."
+            }
           </p>
         </div>
       </div>
@@ -242,8 +245,10 @@ function SuccessPageContent() {
                   ))}
 
                   <tr>
-                    <td className="p-3 text-slate-600">Aviation GST Tax (CGST 9% + SGST 9%)</td>
-                    <td className="p-3 text-center">18%</td>
+                    <td className="p-3 text-slate-600">
+                      {booking.type === "boat" ? "Marine Service Tax (CGST 2.5% + SGST 2.5%)" : "Aviation GST Tax (CGST 9% + SGST 9%)"}
+                    </td>
+                    <td className="p-3 text-center">{booking.type === "boat" ? "5%" : "18%"}</td>
                     <td className="p-3 text-right font-mono">-</td>
                     <td className="p-3 text-right font-mono font-bold text-slate-900">₹{Math.round(gstTax).toLocaleString("en-IN")}</td>
                   </tr>
@@ -267,7 +272,12 @@ function SuccessPageContent() {
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6 text-xs text-slate-500 font-sans">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-emerald-600 shrink-0" />
-              <span>DGCA Authorized Operations. Present this official invoice for boarding terminal entry.</span>
+              <span>
+                {booking.type === "boat"
+                  ? "Certified Marine Charter Operators. Present this official invoice for boarding at the marina."
+                  : "DGCA Authorized Operations. Present this official invoice for boarding terminal entry."
+                }
+              </span>
             </div>
             <div className="font-mono text-[10px] text-slate-400">
               STAMP: ROMAN-LUXURY-OFFICIAL-VERIFIED
