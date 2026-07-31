@@ -2,75 +2,75 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
   User, CreditCard, Ticket, Shield, LogOut, Send, Check,
   Bell, Star, FileText, Award, Heart, MapPin, Calendar,
-  ChevronRight, TrendingUp, Plane, Hotel, Anchor, Clock,
+  ChevronRight, Plane, Hotel, Anchor, Clock,
   CheckCircle, AlertCircle, Zap, Globe, Phone, Mail,
-  LayoutDashboard, Upload, Lock,
+  LayoutDashboard, Upload, Lock, Sparkles, Compass, Helicopter
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Tab = "overview" | "bookings" | "favourites" | "documents" | "profile" | "tickets" | "security";
 
-// ── Stat card component ────────────────────────────────────────────────────────
 function StatCard({ icon: Icon, label, value, sub, color = "gold" }: any) {
   const colorMap: Record<string, string> = {
-    gold: "text-gold bg-gold/10 border-gold/25 shadow-gold/5",
-    teal: "text-teal bg-teal/10 border-teal/25 shadow-teal/5",
-    purple: "text-purple-300 bg-purple-500/10 border-purple-500/25 shadow-purple-500/5",
-    blue: "text-blue-300 bg-blue-500/10 border-blue-500/25 shadow-blue-500/5",
+    gold: "text-amber-400 bg-amber-400/10 border-amber-400/30",
+    teal: "text-teal-400 bg-teal-400/10 border-teal-400/30",
+    purple: "text-purple-300 bg-purple-500/10 border-purple-500/30",
+    blue: "text-sky-400 bg-sky-500/10 border-sky-500/30",
   };
   return (
-    <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-6 flex flex-col gap-4 hover:border-gold/30 hover:bg-white/[0.06] transition-all duration-300 shadow-xl backdrop-blur-md">
-      <div className={`h-12 w-12 rounded-xl border flex items-center justify-center shrink-0 shadow-lg ${colorMap[color]}`}>
-        <Icon className="h-5.5 w-5.5" />
+    <div className="bg-[#051433]/80 border border-white/10 rounded-2xl p-5 flex flex-col justify-between hover:border-amber-400/40 hover:bg-[#051433] transition-all duration-300 shadow-xl backdrop-blur-md group">
+      <div className="flex items-center justify-between mb-3">
+        <div className={`h-11 w-11 rounded-xl border flex items-center justify-center shrink-0 shadow-lg ${colorMap[color]}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+        {sub && <span className="text-[10px] font-space uppercase font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full">{sub}</span>}
       </div>
       <div>
         <p className="font-space text-2xl md:text-3xl font-bold text-white tracking-tight">{value}</p>
         <p className="font-space text-xs font-semibold uppercase tracking-wider text-slate-300 mt-1">{label}</p>
-        {sub && <p className="font-luxury text-xs text-slate-400 mt-1.5">{sub}</p>}
       </div>
     </div>
   );
 }
 
-const INPUT_CLS = "w-full bg-[#05070D]/80 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all font-luxury placeholder-white/20 backdrop-blur-sm";
-const LABEL_CLS = "text-xs font-space uppercase tracking-widest text-gold/90 font-bold mb-2 block";
+const INPUT_CLS = "w-full bg-[#020B1E] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/30 transition-all font-sans placeholder-slate-500";
+const LABEL_CLS = "text-[10px] font-space uppercase tracking-widest text-amber-400 font-bold mb-1.5 block";
 
-// ── Main component ─────────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const router = useRouter();
   const {
     isLoggedIn, user, bookings, tickets, notifications,
     logout, fetchBookings, fetchTickets, addTicket,
     addReplyToTicket, updateProfile, markNotificationsAsRead,
-    cancelBooking, requestCancelBooking,
   } = useAuthStore();
 
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
-  // Profile
+  // Profile Form States
   const [profileName, setProfileName] = useState(user?.name || "");
   const [profilePhone, setProfilePhone] = useState(user?.phone || "");
   const [profileEmail] = useState(user?.email || "");
-  const [profileCity, setProfileCity] = useState("");
+  const [profileCity, setProfileCity] = useState("Mumbai");
   const [profileNationality, setProfileNationality] = useState("Indian");
-  const [profileGender, setProfileGender] = useState("Prefer not to say");
-  const [profileDob, setProfileDob] = useState("");
+  const [profileGender, setProfileGender] = useState("Male");
+  const [profileDob, setProfileDob] = useState("1992-08-14");
   const [profileSaved, setProfileSaved] = useState(false);
 
-  // Tickets
+  // Support Tickets States
   const [tckSubject, setTckSubject] = useState("");
-  const [tckCategory, setTckCategory] = useState("Inquiry");
+  const [tckCategory, setTckCategory] = useState("General Inquiry");
   const [tckMsg, setTckMsg] = useState("");
   const [tckCreated, setTckCreated] = useState(false);
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
   const [chatReply, setChatReply] = useState("");
 
-  // Documents
-  const [docUploaded, setDocUploaded] = useState({ passport: false, aadhaar: false, visa: false, medical: false });
+  // Documents Upload States
+  const [docUploaded, setDocUploaded] = useState({ passport: true, aadhaar: true, visa: false, medical: true });
 
   // Cancellation Wizard States
   const [cancellingBooking, setCancellingBooking] = useState<any | null>(null);
@@ -78,19 +78,12 @@ export default function DashboardPage() {
   const [cancelReason, setCancelReason] = useState<string>("Change of Plans");
   const [cancelNotes, setCancelNotes] = useState<string>("");
   const [refundMethod, setRefundMethod] = useState<"original" | "bank">("original");
-  const [bankDetails, setBankDetails] = useState({
-    bankName: "",
-    accountNumber: "",
-    ifscCode: "",
-    accountHolder: ""
-  });
 
-  // Favourites
+  // Saved Favourites
   const [favorites, setFavorites] = useState([
-    { id: "fav-1", name: "Kedarnath Helicopter Darshan", type: "Helicopter Charter", price: "₹4,99,000", img: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=400", tag: "Spiritual" },
-    { id: "fav-2", name: "Goa Beach Luxury Yacht", type: "Boat Charter", price: "₹1,25,000/day", img: "https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=400", tag: "Leisure" },
-    { id: "fav-3", name: "Himalayan Sacred Peaks", type: "Tour Package", price: "₹5,88,820", img: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=400", tag: "VIP Expedition" },
-    { id: "fav-4", name: "The Leela Goa Resort", type: "Hotel", price: "₹32,000/night", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=400", tag: "5-Star" },
+    { id: "fav-1", name: "Kedarnath Helicopter Darshan", type: "Helicopter Package", price: "₹ 49,999", img: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=400", tag: "Spiritual" },
+    { id: "fav-2", name: "Goa Sunset Luxury Yacht", type: "Boat Charter", price: "₹ 25,000", img: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?q=80&w=400", tag: "Leisure" },
+    { id: "fav-3", name: "Taj Lake Palace Luxury Stay", type: "Hotel", price: "₹ 32,000", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=400", tag: "5-Star Resort" },
   ]);
 
   const handleRemoveFavorite = (id: string) => {
@@ -98,7 +91,10 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    if (isLoggedIn) { fetchBookings(); fetchTickets(); }
+    if (isLoggedIn) {
+      fetchBookings();
+      fetchTickets();
+    }
   }, [isLoggedIn]);
 
   const handleProfileSave = async (e: React.FormEvent) => {
@@ -126,15 +122,26 @@ export default function DashboardPage() {
     }
   };
 
-  const handleLogout = () => { logout(); router.push("/"); };
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   if (!isLoggedIn) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-20 text-center flex flex-col gap-4 items-center justify-center min-h-[50vh]">
-        <h2 className="font-space text-lg text-white">Access denied. Please authenticate.</h2>
-        <button onClick={() => router.push("/auth")}
-          className="px-6 py-3 bg-gold text-black rounded font-space text-xs font-bold uppercase tracking-widest">
-          Sign In
+      <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 py-20 text-center bg-[#020B1E]">
+        <div className="h-16 w-16 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 mb-4 shadow-xl">
+          <Lock className="h-8 w-8" />
+        </div>
+        <h2 className="font-serif text-2xl md:text-3xl font-bold text-white mb-2">Access Denied</h2>
+        <p className="text-xs md:text-sm text-slate-400 max-w-md mb-6 font-sans">
+          Please log in to your Roman Aviation account to view your flight reservations and account settings.
+        </p>
+        <button
+          onClick={() => router.push("/auth?mode=login")}
+          className="px-8 py-3.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg transition-all"
+        >
+          Sign In / Register
         </button>
       </div>
     );
@@ -142,1136 +149,557 @@ export default function DashboardPage() {
 
   const selectedTicket = tickets.find((t) => t.id === activeTicketId);
   const unread = notifications.filter((n: any) => !n.read).length;
-
-  // Loyalty points (mock: ₹500 per booking)
-  const loyaltyPoints = bookings.length * 500;
-  const tier = loyaltyPoints >= 5000 ? "Platinum" : loyaltyPoints >= 2000 ? "Gold" : loyaltyPoints >= 500 ? "Silver" : "Bronze";
-  const tierColor = tier === "Platinum" ? "text-purple-300" : tier === "Gold" ? "text-gold" : tier === "Silver" ? "text-slate-300" : "text-amber-700";
+  const loyaltyPoints = bookings.length * 1500 + 3500;
+  const tier = "VIP Platinum Member";
 
   const NAV_ITEMS: { id: Tab; label: string; icon: any; badge?: number }[] = [
-    { id: "overview",   label: "Overview",          icon: LayoutDashboard },
-    { id: "bookings",   label: "Flight Reservations", icon: CreditCard, badge: bookings.length },
-    { id: "favourites", label: "Saved Favourites",  icon: Heart },
-    { id: "documents",  label: "Travel Documents",  icon: FileText },
-    { id: "profile",    label: "Profile Settings",  icon: User },
-    { id: "tickets",    label: "Support Inquiries", icon: Ticket, badge: tickets.filter((t: any) => t.status === "Open").length },
-    { id: "security",   label: "Security Protocols", icon: Shield },
+    { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "bookings", label: "Flight Reservations", icon: CreditCard, badge: bookings.length },
+    { id: "favourites", label: "Saved Wishlist", icon: Heart, badge: favorites.length },
+    { id: "documents", label: "Travel KYC Docs", icon: FileText },
+    { id: "profile", label: "Profile Settings", icon: User },
+    { id: "tickets", label: "Support Tickets", icon: Ticket, badge: tickets.filter((t: any) => t.status === "Open").length },
+    { id: "security", label: "Security & Protocols", icon: Shield },
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div className="min-h-screen bg-[#020B1E] text-white pt-24 pb-16 px-4 md:px-8">
+      <div className="max-w-7xl mx-auto flex flex-col gap-8">
 
-      {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
-      <div className="lg:col-span-3 flex flex-col gap-5 bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl p-6 rounded-2xl shadow-2xl lg:sticky lg:top-28">
-
-        {/* Avatar block */}
-        <div className="flex items-center gap-4 border-b border-white/[0.06] pb-5 mb-1">
-          <div className="h-16 w-16 rounded-full bg-gradient-to-br from-gold/45 to-gold/5 border-2 border-gold/40 flex items-center justify-center text-gold font-space font-bold text-xl shrink-0 shadow-lg shadow-gold/5">
-            {user?.name?.slice(0, 2).toUpperCase() || "VIP"}
-          </div>
-          <div className="min-w-0">
-            <h3 className="font-space text-base font-bold text-white leading-tight truncate tracking-tight">{user?.name || "Guest"}</h3>
-            <div className="flex items-center gap-1.5 mt-1">
-              <Award className={`h-4 w-4 ${tierColor}`} />
-              <span className={`font-space text-xs font-bold uppercase tracking-wider ${tierColor}`}>{tier} Member</span>
+        {/* ─────────────────────────────────────────── */}
+        {/* Top Executive Header Banner                 */}
+        {/* ─────────────────────────────────────────── */}
+        <div className="bg-gradient-to-r from-[#051433] via-[#092254] to-[#051433] border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+          <div className="flex items-center gap-5 relative z-10">
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 border-2 border-amber-300 flex items-center justify-center text-black font-space font-extrabold text-2xl shrink-0 shadow-xl">
+              {user?.name?.slice(0, 2).toUpperCase() || "VIP"}
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/40 font-space text-[9px] uppercase font-bold text-amber-400">
+                  {tier}
+                </span>
+                <span className="text-xs text-slate-400 font-mono">ID: RA-894210</span>
+              </div>
+              <h1 className="font-serif text-2xl md:text-3xl font-bold text-white tracking-tight">
+                Welcome back, {user?.name}
+              </h1>
+              <p className="text-xs text-slate-300 font-sans mt-0.5">
+                {user?.email} · {user?.phone || "+91 98200 12345"}
+              </p>
             </div>
           </div>
-        </div>
 
-        {/* Notification badge */}
-        {unread > 0 && (
-          <button onClick={() => { markNotificationsAsRead(); }}
-            className="flex items-center justify-center gap-2.5 px-4 py-3 bg-gold/10 border border-gold/25 rounded-xl text-xs font-space text-gold font-bold w-full cursor-pointer hover:bg-gold/15 transition-all shadow-md shadow-gold/5 animate-pulse">
-            <Bell className="h-4.5 w-4.5 shrink-0" />
-            <span>{unread} New Notification{unread > 1 ? "s" : ""}</span>
-          </button>
-        )}
-
-        {/* Nav items */}
-        <nav className="flex flex-col gap-1.5 font-space text-sm">
-          {NAV_ITEMS.map(({ id, label, icon: Icon, badge }) => {
-            const isActive = activeTab === id;
-            return (
-              <button key={id} onClick={() => setActiveTab(id)}
-                className={`w-full text-left py-3 px-4 rounded-xl transition-all cursor-pointer flex items-center gap-3.5 border ${
-                  isActive 
-                    ? "bg-gold text-black border-gold font-bold shadow-lg shadow-gold/10" 
-                    : "text-slate-300 border-transparent hover:text-white hover:bg-white/[0.04]"
-                }`}>
-                <Icon className="h-4.5 w-4.5 shrink-0" />
-                <span className="flex-1 truncate">{label}</span>
-                {badge !== undefined && badge > 0 && (
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isActive ? "bg-black/20 text-black" : "bg-gold/15 text-gold border border-gold/20"}`}>
-                    {badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Points mini-display */}
-        <div className="mt-1 px-4 py-3.5 bg-white/[0.01] border border-white/[0.06] rounded-xl flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-space uppercase tracking-widest text-slate-400 block font-bold">Loyalty Points</span>
-            <span className="font-space font-bold text-gold text-base tracking-tight mt-0.5 block">{loyaltyPoints.toLocaleString("en-IN")}</span>
+          <div className="flex flex-wrap items-center gap-4 relative z-10 w-full md:w-auto border-t md:border-t-0 border-white/10 pt-4 md:pt-0">
+            <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-center flex-1 md:flex-initial">
+              <span className="text-[9px] text-slate-400 font-space uppercase block font-bold">Loyalty Points</span>
+              <span className="font-space text-lg font-bold text-amber-400">{loyaltyPoints.toLocaleString()} PTS</span>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-center flex-1 md:flex-initial">
+              <span className="text-[9px] text-slate-400 font-space uppercase block font-bold">Active Bookings</span>
+              <span className="font-space text-lg font-bold text-white">{bookings.length} TRIPS</span>
+            </div>
+            <button
+              onClick={() => router.push("/booking")}
+              className="px-5 py-3 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg transition-all shrink-0 flex items-center gap-2 cursor-pointer"
+            >
+              <Helicopter className="h-4 w-4" />
+              <span>Book Flight</span>
+            </button>
           </div>
-          <Zap className="h-6 w-6 text-gold/30" />
         </div>
 
-        {/* Logout */}
-        <button onClick={handleLogout}
-          className="w-full text-left py-3 px-4 rounded-xl border border-red-500/20 text-red-400 hover:text-red-300 hover:bg-red-500/10 hover:border-red-500/30 transition-all font-space text-sm flex items-center gap-3.5 cursor-pointer mt-1">
-          <LogOut className="h-4.5 w-4.5 shrink-0" />
-          <span>Exit Workspace</span>
-        </button>
-      </div>
+        {/* ─────────────────────────────────────────── */}
+        {/* Main Workspace Layout (Sidebar + Main Panel) */}
+        {/* ─────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-      {/* ── Main Panel ───────────────────────────────────────────────────────── */}
-      <div className="lg:col-span-9 flex flex-col gap-6">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl rounded-2xl p-8 md:p-10 shadow-2xl min-h-[50vh]"
-          >
+          {/* Left Sidebar Menu */}
+          <div className="lg:col-span-3 bg-[#051433]/80 border border-white/10 backdrop-blur-xl p-4 rounded-2xl shadow-xl flex flex-col gap-2 lg:sticky lg:top-24">
+            <span className="text-[10px] font-space uppercase tracking-widest text-amber-400 font-bold px-3 pt-2 pb-1">
+              Account Menu
+            </span>
 
-            {/* ── 1. OVERVIEW ─────────────────────────────────────────────── */}
-            {activeTab === "overview" && (
-              <div className="flex flex-col gap-8">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-white/[0.06] pb-6">
-                  <div>
-                    <span className="text-xs font-space uppercase tracking-widest text-gold font-bold">Welcome back</span>
-                    <h2 className="font-space text-2xl md:text-3xl font-bold text-white mt-1 tracking-tight">
-                      Good {new Date().getHours() < 12 ? "Morning" : new Date().getHours() < 17 ? "Afternoon" : "Evening"}, {user?.name?.split(" ")[0]} ✦
-                    </h2>
-                    <p className="font-luxury text-sm text-slate-400 mt-1">Your flight operations dashboard is ready.</p>
-                  </div>
-                  {/* Dest weather widget */}
-                  <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl px-4 py-2.5 flex items-center gap-3 shrink-0 backdrop-blur-md">
-                    <div className="h-2 w-2 rounded-full bg-teal animate-pulse" />
-                    <div>
-                      <span className="text-[10px] font-space uppercase text-slate-400 font-bold block">Aviation Weather</span>
-                      <span className="text-xs font-space text-slate-200 font-bold">
-                        {bookings.length > 0 && bookings[0].name.includes("Kedarnath") 
-                          ? "Kedarnath Pad: 12°C · Caution Fog" 
-                          : bookings.length > 0 && bookings[0].name.includes("Goa")
-                          ? "Goa Heliport: 29°C · Clear Sky VFR"
-                          : "Visual Flight Rules (VFR) Active"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Stat cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
-                  <StatCard icon={Plane} label="Total Flights" value={bookings.length} sub="Booked" color="gold" />
-                  <StatCard icon={Zap} label="Loyalty Points" value={loyaltyPoints.toLocaleString()} sub={`${tier} Tier`} color="purple" />
-                  <StatCard icon={Ticket} label="Open Tickets" value={tickets.filter((t: any) => t.status === "Open").length} sub="Awaiting reply" color="teal" />
-                  <StatCard icon={Bell} label="Notifications" value={unread} sub="Unread" color="blue" />
-                </div>
-
-                {/* Boarding Pass Preview / Next Trip */}
-                {bookings.length > 0 && (
-                  <div className="flex flex-col gap-4">
-                    <h3 className="font-space text-sm uppercase tracking-wider font-bold text-gold/90">Upcoming Flight Boarding Pass</h3>
-                    <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-r from-slate-950 via-[#0a0f1d] to-slate-950 p-6 md:p-8 flex flex-col md:flex-row items-stretch gap-6 shadow-2xl">
-                      {/* Left half - details */}
-                      <div className="flex-1 flex flex-col gap-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-space bg-gold/10 border border-gold/30 text-gold px-2 py-0.5 rounded uppercase font-bold tracking-wider">Boarding Soon</span>
-                            <span className="text-xs text-slate-400 font-mono">BK-{bookings[0].id.slice(0, 5).toUpperCase()}</span>
-                          </div>
-                          <Plane className="h-5 w-5 text-gold animate-pulse" />
-                        </div>
-                        <div className="flex items-center justify-between gap-4">
-                          <div>
-                            <span className="text-[10px] font-space uppercase text-slate-400 block font-bold">DEPARTURE</span>
-                            <span className="font-space text-lg font-bold text-white tracking-tight">DELHI PAD</span>
-                          </div>
-                          <div className="flex-1 border-t border-dashed border-white/20 relative flex items-center justify-center">
-                            <div className="absolute -top-1 bg-[#0a0f1d] px-2 text-[10px] font-space text-gold tracking-widest font-bold">SHUTTLE</div>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-[10px] font-space uppercase text-slate-400 block font-bold">DESTINATION</span>
-                            <span className="font-space text-lg font-bold text-gold tracking-tight">{bookings[0].name.split(" ")[0].toUpperCase()}</span>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4 border-t border-white/[0.06] pt-4 text-xs font-space">
-                          <div>
-                            <span className="text-[10px] text-slate-400 block font-semibold">PASSENGER</span>
-                            <span className="font-bold text-slate-100 truncate block">{user?.name}</span>
-                          </div>
-                          <div>
-                            <span className="text-[10px] text-slate-400 block font-semibold">PAD / GATE</span>
-                            <span className="font-bold text-slate-100 block">HELIPAD ALPHA</span>
-                          </div>
-                          <div>
-                            <span className="text-[10px] text-slate-400 block font-semibold">DATE / TIME</span>
-                            <span className="font-bold text-slate-100 block">{bookings[0].date}</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Ticket dotted separator */}
-                      <div className="hidden md:flex flex-col items-center justify-center relative px-2">
-                        <div className="w-[1px] h-full border-l border-dashed border-white/20" />
-                        <div className="absolute -top-1.5 h-3 w-3 bg-[#030712] rounded-full border border-white/10" />
-                        <div className="absolute -bottom-1.5 h-3 w-3 bg-[#030712] rounded-full border border-white/10" />
-                      </div>
-
-                      {/* Right half - stub & barcode */}
-                      <div className="md:w-56 flex flex-col justify-between items-center md:items-end gap-6 text-center md:text-right">
-                        <div>
-                          <span className="text-[10px] font-space uppercase text-slate-400 block font-bold">SEAT SELECTION</span>
-                          <span className="font-space text-2xl font-bold text-white">1A <span className="text-xs text-gold">(VIP)</span></span>
-                        </div>
-                        <div className="flex flex-col items-center md:items-end gap-1.5 w-full">
-                          {/* Mock Barcode */}
-                          <div className="h-10 w-full bg-white/10 border border-white/20 rounded flex items-center justify-around px-2 opacity-65">
-                            {[1, 2, 4, 1, 3, 2, 1, 4, 1, 2, 3, 1, 2, 4, 2].map((w, idx) => (
-                              <div key={idx} className="h-7 bg-white rounded-sm" style={{ width: `${w}px` }} />
-                            ))}
-                          </div>
-                          <span className="text-[9px] font-mono text-slate-400">BOARDING PASS VERIFICATION</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Recent bookings preview */}
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-space text-sm uppercase tracking-wider font-bold text-gold/90">Recent Reservations</h3>
-                    <button onClick={() => setActiveTab("bookings")}
-                      className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-gold font-space font-bold uppercase tracking-wider transition-colors cursor-pointer">
-                      View All <ChevronRight className="h-4 w-4" />
-                    </button>
-                  </div>
-                  {bookings.length === 0 ? (
-                    <div className="text-center py-12 text-slate-400 font-luxury text-sm border border-white/[0.06] rounded-2xl bg-white/[0.01] backdrop-blur-md">
-                      No reservations yet.{" "}
-                      <button onClick={() => router.push("/tours")} className="text-gold underline cursor-pointer hover:text-gold-hover transition-colors">Browse Tours →</button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-3">
-                      {bookings.slice(0, 3).map((b: any) => (
-                        <div key={b.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 bg-white/[0.02] border border-white/[0.06] rounded-2xl hover:border-white/15 transition-all shadow-md">
-                          <div className="h-12 w-12 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center shrink-0">
-                            <Plane className="h-5 w-5 text-gold" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-space text-sm md:text-base font-bold text-white truncate">{b.name}</p>
-                            <p className="text-xs text-slate-400 font-luxury mt-0.5">{b.date} · {b.details}</p>
-                          </div>
-                          <span className="font-space text-base md:text-lg font-bold text-gold shrink-0">₹{Number(b.price).toLocaleString("en-IN")}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Quick Actions */}
-                <div className="flex flex-col gap-4">
-                  <h3 className="font-space text-sm uppercase tracking-wider font-bold text-gold/90">Quick Actions</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[
-                      { label: "Book Helicopter", icon: Plane, path: "/booking" },
-                      { label: "Browse Tours", icon: MapPin, path: "/tours" },
-                      { label: "Find Hotels", icon: Hotel, path: "/hotels" },
-                      { label: "Boat Charter", icon: Anchor, path: "/boats" },
-                    ].map((a) => (
-                      <button key={a.label} onClick={() => router.push(a.path)}
-                        className="flex flex-col items-center justify-center gap-3 p-5 bg-white/[0.02] border border-white/[0.06] rounded-2xl hover:border-gold/30 hover:bg-gold/5 hover:shadow-lg hover:shadow-gold/5 transition-all cursor-pointer group">
-                        <div className="h-10 w-10 rounded-xl bg-white/[0.04] group-hover:bg-gold/10 flex items-center justify-center transition-all">
-                          <a.icon className="h-5 w-5 text-slate-400 group-hover:text-gold transition-colors" />
-                        </div>
-                        <span className="font-space text-xs font-bold uppercase tracking-wider text-slate-300 group-hover:text-white transition-colors text-center">{a.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ── 2. FLIGHT RESERVATIONS ──────────────────────────────────── */}
-            {activeTab === "bookings" && (
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-5">
-                  <div>
-                    <h2 className="font-space text-xl md:text-2xl font-bold text-white">Flight Reservations Log</h2>
-                    <p className="font-luxury text-xs text-slate-400 mt-1">{bookings.length} total booking{bookings.length !== 1 ? "s" : ""} on record</p>
-                  </div>
-                  <button onClick={() => router.push("/booking")}
-                    className="py-3 px-5 bg-gold text-black rounded-xl font-space text-xs font-bold uppercase tracking-widest cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-gold/15 hover:bg-gold-hover transition-all">
-                    <Plane className="h-4 w-4" /> <span>New Booking</span>
-                  </button>
-                </div>
-
-                {bookings.length === 0 ? (
-                  <div className="text-center py-16 text-slate-400 font-luxury text-base flex flex-col items-center gap-4 border border-white/[0.06] rounded-2xl bg-white/[0.01]">
-                    <Plane className="h-12 w-12 text-white/20" />
-                    <p>No reservations found.</p>
-                    <button onClick={() => router.push("/tours")} className="text-gold text-sm font-space font-bold underline cursor-pointer hover:text-gold-hover transition-colors">Explore Packages →</button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-5">
-                    {bookings.map((booking: any) => (
-                      <div key={booking.id} className="border border-white/[0.06] rounded-2xl p-6 bg-white/[0.02] hover:border-white/15 transition-all shadow-md flex flex-col gap-5">
-                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 w-full">
-                          <div className="flex gap-4 items-start">
-                            <div className="h-12 w-12 rounded-xl bg-gold/10 border border-gold/25 flex items-center justify-center shrink-0 shadow-md">
-                              <Plane className="h-5 w-5 text-gold" />
-                            </div>
-                            <div className="flex flex-col gap-2 font-luxury text-sm text-slate-300">
-                              <div className="flex items-center gap-2.5 flex-wrap">
-                                <span className="font-space font-bold text-white text-base md:text-lg tracking-tight">{booking.name}</span>
-                                <span className="text-xs uppercase tracking-wider bg-white/[0.04] border border-white/10 text-slate-300 px-2 py-0.5 rounded font-mono font-bold">
-                                  {booking.id}
-                                </span>
-                                <span className={`text-[10px] uppercase border px-2 py-0.5 rounded-full font-space font-bold tracking-wider ${
-                                  booking.status === 'Cancelled' 
-                                    ? 'bg-red-500/10 border-red-500/25 text-red-400 shadow-md shadow-red-500/5' 
-                                    : booking.status === 'Cancellation Requested'
-                                    ? 'bg-amber-500/10 border-amber-500/25 text-amber-400 shadow-md shadow-amber-500/5'
-                                    : booking.status === 'Refunded'
-                                    ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400 shadow-md shadow-emerald-500/5'
-                                    : 'bg-teal/10 border-teal/25 text-teal shadow-md shadow-teal/5'
-                                }`}>
-                                  {booking.status || 'Confirmed'}
-                                </span>
-                              </div>
-                              <p className="text-slate-400 text-sm leading-relaxed">{booking.details}</p>
-                              <div className="flex flex-wrap gap-4 mt-1 text-xs text-slate-400">
-                                <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-gold/80" /> {booking.date}</span>
-                                {booking.passengers && <span className="flex items-center gap-1.5"><User className="h-4 w-4 text-gold/80" /> {booking.passengers} Guest{booking.passengers > 1 ? "s" : ""}</span>}
-                                {booking.type && <span className="flex items-center gap-1.5"><Globe className="h-4 w-4 text-gold/80" /> {booking.type}</span>}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex lg:flex-col items-start lg:items-end justify-between w-full lg:w-auto border-t lg:border-t-0 border-white/[0.06] pt-4 lg:pt-0 gap-4">
-                            <div>
-                              <span className="text-[10px] font-space uppercase text-slate-400 tracking-wider font-bold block">Final Cost</span>
-                              <span className="font-space font-extrabold text-gold text-lg md:text-xl tracking-tight block mt-0.5">₹{Number(booking.price).toLocaleString("en-IN")}</span>
-                            </div>
-                            <div className="flex gap-2.5 flex-wrap">
-                              <button onClick={() => router.push(`/success?id=${booking.id}`)}
-                                className="px-4 py-2 border border-white/10 hover:border-gold rounded-xl font-space text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-gold bg-white/[0.02] hover:bg-gold/5 transition-all cursor-pointer">
-                                Invoice
-                              </button>
-                              <button onClick={() => setActiveTab("tickets")}
-                                className="px-4 py-2 border border-white/10 hover:border-teal/50 rounded-xl font-space text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-teal bg-white/[0.02] hover:bg-teal/5 transition-all cursor-pointer">
-                                Support
-                              </button>
-                              {(booking.status === 'Confirmed' || booking.status === 'Pending') && (
-                                <button onClick={() => {
-                                  setCancellingBooking(booking);
-                                  setCancelStep(1);
-                                  setCancelReason("Change of Plans");
-                                  setCancelNotes("");
-                                  setRefundMethod("original");
-                                  setBankDetails({ bankName: "", accountNumber: "", ifscCode: "", accountHolder: "" });
-                                }}
-                                  className="px-4 py-2 border border-red-500/20 hover:border-red-500/60 rounded-xl font-space text-xs font-bold uppercase tracking-wider text-red-400 hover:text-red-300 bg-white/[0.02] hover:bg-red-500/10 transition-all cursor-pointer">
-                                  Cancel Booking
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Refund Processing Timeline */}
-                        {(booking.status === 'Cancelled' || booking.status === 'Cancellation Requested' || booking.status === 'Refunded') && (
-                          <div className="border-t border-white/[0.06] pt-5 flex flex-col gap-4">
-                            <div className="flex items-center justify-between text-xs font-space uppercase tracking-widest">
-                              <span className="font-bold text-slate-400">Return &amp; Refund Progress Pipeline</span>
-                              <span className={`font-bold px-2 py-0.5 rounded ${
-                                booking.status === 'Refunded'
-                                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                                  : booking.status === 'Cancelled'
-                                  ? 'bg-red-500/10 border border-red-500/20 text-red-400'
-                                  : 'bg-amber-500/10 border border-amber-500/20 text-amber-400 animate-pulse'
-                              }`}>
-                                {booking.status === 'Refunded' ? 'Refund Credited' : booking.status === 'Cancelled' ? 'Corridor Released' : 'Reviewing Request'}
-                              </span>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs font-space uppercase tracking-wider">
-                              {/* Step 1: Cancellation Requested */}
-                              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/15">
-                                <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/35 flex items-center justify-center font-bold text-xs">✓</div>
-                                <span className="text-white font-semibold">Requested</span>
-                              </div>
-
-                              {/* Step 2: Under Review */}
-                              <div className={`flex items-center gap-2.5 p-3 rounded-xl ${
-                                booking.status === 'Cancellation Requested'
-                                  ? 'bg-amber-500/5 border border-amber-500/15'
-                                  : 'bg-emerald-500/5 border border-emerald-500/15'
-                              }`}>
-                                <div className={`h-6 w-6 rounded-full flex items-center justify-center font-bold text-xs ${
-                                  booking.status === 'Cancellation Requested'
-                                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/35 animate-pulse'
-                                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/35'
-                                }`}>
-                                  {booking.status === 'Cancellation Requested' ? '/' : '✓'}
-                                </div>
-                                <span className={booking.status === 'Cancellation Requested' ? 'text-amber-400 font-bold' : 'text-white font-semibold'}>
-                                  Admin Review
-                                </span>
-                              </div>
-
-                              {/* Step 3: Corridor Released */}
-                              <div className={`flex items-center gap-2.5 p-3 rounded-xl ${
-                                booking.status === 'Cancellation Requested'
-                                  ? 'opacity-40 bg-white/[0.01] border border-white/[0.06]'
-                                  : booking.status === 'Cancelled'
-                                  ? 'bg-emerald-500/5 border border-emerald-500/15'
-                                  : 'bg-emerald-500/5 border border-emerald-500/15'
-                              }`}>
-                                <div className={`h-6 w-6 rounded-full flex items-center justify-center font-bold text-xs ${
-                                  booking.status === 'Cancellation Requested'
-                                    ? 'bg-white/5 text-slate-400 border border-white/10'
-                                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/35'
-                                }`}>
-                                  {booking.status === 'Cancellation Requested' ? '3' : '✓'}
-                                </div>
-                                <span className="text-white font-semibold">Corridor Released</span>
-                              </div>
-
-                              {/* Step 4: Credited / Refunded */}
-                              <div className={`flex items-center gap-2.5 p-3 rounded-xl ${
-                                booking.status === 'Cancellation Requested'
-                                  ? 'opacity-40 bg-white/[0.01] border border-white/[0.06]'
-                                  : booking.status === 'Cancelled'
-                                  ? 'bg-red-500/5 border border-red-500/15'
-                                  : 'bg-emerald-500/5 border border-emerald-500/15'
-                              }`}>
-                                <div className={`h-6 w-6 rounded-full flex items-center justify-center font-bold text-xs ${
-                                  booking.status === 'Cancellation Requested'
-                                    ? 'bg-white/5 text-slate-400 border border-white/10'
-                                    : booking.status === 'Cancelled'
-                                    ? 'bg-red-500/20 text-red-400 border border-red-500/35'
-                                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/35'
-                                }`}>
-                                  {booking.status === 'Cancellation Requested' ? '4' : booking.status === 'Cancelled' ? '✗' : '✓'}
-                                </div>
-                                <span className={
-                                  booking.status === 'Cancelled' ? 'text-red-400 font-bold' : booking.status === 'Refunded' ? 'text-emerald-400 font-bold' : 'text-slate-400 font-medium'
-                                }>
-                                  {booking.status === 'Cancelled' ? 'Void / Reverted' : booking.status === 'Refunded' ? 'Refund Credited' : 'Pending Return'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ── 3. FAVOURITES ────────────────────────────────────────────── */}
-            {activeTab === "favourites" && (
-              <div className="flex flex-col gap-6">
-                <h2 className="font-space text-xl md:text-2xl font-bold text-white border-b border-white/[0.06] pb-4">Saved Favourites</h2>
-                
-                {favorites.length === 0 ? (
-                  <div className="text-center py-16 text-slate-400 font-luxury text-base flex flex-col items-center gap-4 border border-white/[0.06] rounded-2xl bg-white/[0.01]">
-                    <Heart className="h-12 w-12 text-white/20" />
-                    <p>You haven't saved any favourites yet.</p>
-                    <button onClick={() => router.push("/tours")} className="text-gold text-sm font-space font-bold underline cursor-pointer hover:text-gold-hover transition-colors">Explore Packages →</button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {favorites.map((fav) => (
-                      <div key={fav.id} className="border border-white/[0.06] rounded-2xl overflow-hidden flex flex-col bg-white/[0.02] hover:border-white/20 transition-all shadow-md">
-                        <div className="h-36 relative overflow-hidden">
-                          <img src={fav.img} alt={fav.name} className="w-full h-full object-cover opacity-70 hover:scale-105 transition-all duration-500" />
-                          <span className="absolute top-3 left-3 text-[10px] font-space font-bold uppercase tracking-wider bg-gold/90 text-black px-2.5 py-1 rounded-md shadow-md">
-                            {fav.tag}
-                          </span>
-                          <button 
-                            onClick={() => handleRemoveFavorite(fav.id)}
-                            className="absolute top-3 right-3 p-2 bg-black/50 rounded-full hover:bg-red-500/20 hover:text-red-400 transition-colors cursor-pointer text-red-400"
-                          >
-                            <Heart className="h-4.5 w-4.5 fill-red-400 text-red-400" />
-                          </button>
-                        </div>
-                        <div className="p-5 flex items-center justify-between gap-3">
-                          <div>
-                            <p className="font-space text-sm md:text-base font-bold text-white tracking-tight">{fav.name}</p>
-                            <p className="text-xs text-slate-400 font-luxury mt-1">{fav.type}</p>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <p className="font-space text-sm md:text-base font-bold text-gold tracking-tight">{fav.price}</p>
-                            <button onClick={() => router.push("/booking")}
-                              className="text-xs font-space font-bold text-teal uppercase tracking-wider hover:text-white transition-colors cursor-pointer mt-1.5 block">
-                              Book Now →
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <p className="text-xs text-slate-400 font-luxury text-center mt-3">
-                  These are your curated favourites. Heart any service during browsing to save it here.
-                </p>
-              </div>
-            )}
-
-
-
-            {/* ── 5. TRAVEL DOCUMENTS ──────────────────────────────────────── */}
-            {activeTab === "documents" && (
-              <div className="flex flex-col gap-6">
-                <div className="border-b border-white/[0.06] pb-4">
-                  <h2 className="font-space text-xl md:text-2xl font-bold text-white">Travel Documents</h2>
-                  <p className="font-luxury text-sm text-slate-400 mt-1">Upload and manage your KYC and travel documents for expedited boarding.</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[
-                    { key: "passport", label: "Passport", desc: "Valid passport for international travel clearance", icon: Globe },
-                    { key: "aadhaar", label: "Aadhaar Card", desc: "Government-issued ID for domestic KYC verification", icon: User },
-                    { key: "visa", label: "Visa Documents", desc: "Active visa for international charter destinations", icon: FileText },
-                    { key: "medical", label: "Medical Fitness", desc: "High-altitude medical clearance certificate", icon: Shield },
-                  ].map((doc) => {
-                    const uploaded = docUploaded[doc.key as keyof typeof docUploaded];
-                    return (
-                      <div key={doc.key} className={`p-6 rounded-2xl border flex flex-col gap-5 transition-all shadow-md ${
-                        uploaded ? "border-teal/30 bg-teal/5 shadow-teal/5" : "border-white/[0.06] bg-white/[0.02]"
+            <nav className="flex flex-col gap-1.5 font-space text-xs">
+              {NAV_ITEMS.map(({ id, label, icon: Icon, badge }) => {
+                const isActive = activeTab === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setActiveTab(id)}
+                    className={`w-full text-left py-3 px-3.5 rounded-xl transition-all cursor-pointer flex items-center gap-3 border ${
+                      isActive 
+                        ? "bg-gradient-to-r from-[#F5A623] to-[#D68B3E] text-black border-amber-400 font-bold shadow-md shadow-amber-500/20" 
+                        : "text-slate-300 border-transparent hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <Icon className="h-4.5 w-4.5 shrink-0" />
+                    <span className="flex-1 truncate">{label}</span>
+                    {badge !== undefined && badge > 0 && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        isActive ? "bg-black/20 text-black" : "bg-amber-400/20 text-amber-400 border border-amber-400/30"
                       }`}>
-                        <div className="flex items-start justify-between">
-                          <div className="flex gap-4">
-                            <div className={`h-12 w-12 rounded-xl border flex items-center justify-center shrink-0 ${
-                              uploaded ? "bg-teal/10 border-teal/25 text-teal" : "bg-white/[0.04] border-white/10 text-slate-400"
-                            }`}>
-                              <doc.icon className="h-5.5 w-5.5" />
-                            </div>
+                        {badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className="border-t border-white/10 pt-3 mt-2">
+              <button
+                onClick={handleLogout}
+                className="w-full text-left py-3 px-3.5 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all font-space text-xs font-bold flex items-center gap-3 cursor-pointer"
+              >
+                <LogOut className="h-4.5 w-4.5 shrink-0" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Right Main Panel */}
+          <div className="lg:col-span-9">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="bg-[#051433]/60 border border-white/10 backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl min-h-[600px]"
+              >
+
+                {/* ── 1. OVERVIEW TAB ────────────────────────────────────────── */}
+                {activeTab === "overview" && (
+                  <div className="flex flex-col gap-8">
+                    
+                    {/* Welcome Banner */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
+                      <div>
+                        <span className="text-xs font-space uppercase tracking-widest text-amber-400 font-bold">Flight Dispatch Portal</span>
+                        <h2 className="font-serif text-2xl md:text-3xl font-bold text-white mt-1">
+                          Operational Overview
+                        </h2>
+                        <p className="text-xs text-slate-300 font-sans mt-0.5">
+                          Track active helicopter charters, loyalty tier status, and VIP support tickets
+                        </p>
+                      </div>
+
+                      {/* Aviation Weather Alert Badge */}
+                      <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 flex items-center gap-3 shrink-0">
+                        <div className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <div>
+                          <span className="text-[9px] font-space uppercase text-slate-400 font-bold block">Aviation Weather Status</span>
+                          <span className="text-xs font-space text-emerald-400 font-bold">VFR Active · Clear Skies</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Stat Cards Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                      <StatCard icon={Helicopter} label="Total Charters" value={bookings.length} sub="Booked Trips" color="gold" />
+                      <StatCard icon={Zap} label="Loyalty Points" value={loyaltyPoints.toLocaleString()} sub="Platinum Tier" color="purple" />
+                      <StatCard icon={Ticket} label="Open Tickets" value={tickets.filter((t: any) => t.status === "Open").length} sub="VIP Support" color="teal" />
+                      <StatCard icon={Bell} label="Notifications" value={unread} sub="Active Alerts" color="blue" />
+                    </div>
+
+                    {/* Boarding Pass Card */}
+                    <div className="flex flex-col gap-4">
+                      <h3 className="font-space text-xs font-bold uppercase tracking-wider text-amber-400">Boarding Pass Preview</h3>
+                      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-[#020B1E] via-[#051433] to-[#020B1E] p-6 shadow-xl flex flex-col md:flex-row items-stretch gap-6">
+                        <div className="flex-1 flex flex-col justify-between gap-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-space uppercase bg-amber-400/20 text-amber-400 border border-amber-400/40 px-2.5 py-0.5 rounded font-bold">
+                              Confirmed Flight
+                            </span>
+                            <Helicopter className="h-5 w-5 text-amber-400 animate-pulse" />
+                          </div>
+
+                          <div className="flex items-center justify-between gap-4">
                             <div>
-                              <p className="font-space text-sm md:text-base font-bold text-white tracking-tight">{doc.label}</p>
-                              <p className="font-luxury text-xs text-slate-400 mt-1 leading-relaxed max-w-[200px]">{doc.desc}</p>
+                              <span className="text-[9px] font-space uppercase text-slate-400 block font-bold">DEPARTURE</span>
+                              <span className="font-space text-base md:text-lg font-bold text-white">Dehradun Helipad</span>
+                            </div>
+                            <div className="flex-1 border-t border-dashed border-white/20 relative flex items-center justify-center">
+                              <span className="absolute -top-2 bg-[#051433] px-2 text-[9px] font-space text-amber-400 font-bold">AIRBUS H145</span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[9px] font-space uppercase text-slate-400 block font-bold">DESTINATION</span>
+                              <span className="font-space text-base md:text-lg font-bold text-amber-400">Kedarnath Dham</span>
                             </div>
                           </div>
-                          {uploaded ? (
-                            <CheckCircle className="h-6 w-6 text-teal shrink-0" />
-                          ) : (
-                            <AlertCircle className="h-6 w-6 text-slate-500 shrink-0" />
-                          )}
+
+                          <div className="grid grid-cols-3 gap-2 border-t border-white/10 pt-3 text-xs font-space">
+                            <div>
+                              <span className="text-[9px] text-slate-400 block font-semibold">PASSENGER</span>
+                              <span className="font-bold text-white truncate block">{user?.name}</span>
+                            </div>
+                            <div>
+                              <span className="text-[9px] text-slate-400 block font-semibold">STAGING GATE</span>
+                              <span className="font-bold text-white block">GATE ALPHA</span>
+                            </div>
+                            <div>
+                              <span className="text-[9px] text-slate-400 block font-semibold">STATUS</span>
+                              <span className="font-bold text-emerald-400 block">SLOT VERIFIED</span>
+                            </div>
+                          </div>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Recent Reservations */}
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-space text-xs font-bold uppercase tracking-wider text-amber-400">Recent Reservations</h3>
                         <button
-                          onClick={() => setDocUploaded((p) => ({ ...p, [doc.key]: !p[doc.key as keyof typeof docUploaded] }))}
-                          className={`w-full py-3 rounded-xl border font-space text-xs font-bold uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                            uploaded
-                              ? "border-teal/30 bg-teal/10 text-teal hover:bg-teal/15 shadow-md shadow-teal/5"
-                              : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-gold/40 hover:text-gold"
-                          }`}>
-                          <Upload className="h-4 w-4" />
-                          <span>{uploaded ? "Re-upload Document" : "Upload Document"}</span>
+                          onClick={() => setActiveTab("bookings")}
+                          className="text-xs font-space text-slate-300 hover:text-amber-400 flex items-center gap-1 font-bold transition-colors cursor-pointer"
+                        >
+                          <span>View All</span>
+                          <ChevronRight className="h-4 w-4" />
                         </button>
                       </div>
-                    );
-                  })}
-                </div>
 
-                <div className="flex gap-3.5 p-5 bg-gold/5 border border-gold/25 rounded-2xl text-sm font-luxury text-slate-300 leading-relaxed shadow-lg">
-                  <Lock className="h-5 w-5 text-gold shrink-0 mt-0.5" />
-                  <p>All documents are encrypted and stored securely. They are only accessed by our compliance team for DGCA permit verification and customs clearance.</p>
-                </div>
-              </div>
-            )}
-
-            {/* ── 6. PROFILE SETTINGS ──────────────────────────────────────── */}
-            {activeTab === "profile" && (
-              <form onSubmit={handleProfileSave} className="flex flex-col gap-6">
-                <h2 className="font-space text-xl md:text-2xl font-bold text-white border-b border-white/[0.06] pb-4">Profile Configuration</h2>
-
-                {profileSaved && (
-                  <div className="bg-teal/10 border border-teal/25 text-teal text-sm px-5 py-3.5 rounded-xl flex items-center gap-2.5 shadow-md shadow-teal/5">
-                    <Check className="h-4.5 w-4.5" /> <span>Profile updated successfully.</span>
-                  </div>
-                )}
-
-                {/* Avatar section */}
-                <div className="flex items-center gap-5 p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl shadow-md">
-                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-gold/30 to-gold/5 border-2 border-gold/45 flex items-center justify-center text-gold font-space font-bold text-2xl shrink-0 shadow-lg">
-                    {user?.name?.slice(0, 2).toUpperCase() || "VIP"}
-                  </div>
-                  <div>
-                    <p className="font-space text-base md:text-lg font-bold text-white tracking-tight">{user?.name}</p>
-                    <p className={`font-space text-xs font-semibold mt-1 ${tierColor}`}>{tier} Member · {loyaltyPoints} pts</p>
-                    <button type="button" className="text-xs font-space text-gold/80 hover:text-gold mt-2 cursor-pointer transition-colors uppercase tracking-wider flex items-center gap-1.5 font-bold">
-                      <Upload className="h-3.5 w-3.5" /> <span>Change Avatar</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="flex flex-col">
-                    <label className={LABEL_CLS}>Full Name</label>
-                    <input type="text" required value={profileName}
-                      onChange={(e) => setProfileName(e.target.value)} className={INPUT_CLS} />
-                  </div>
-                  <div className="flex flex-col">
-                    <label className={LABEL_CLS}>Email (read-only)</label>
-                    <input type="email" disabled value={profileEmail} className={INPUT_CLS + " opacity-50 cursor-not-allowed border-dashed"} />
-                  </div>
-                  <div className="flex flex-col">
-                    <label className={LABEL_CLS}>Phone Number</label>
-                    <input type="tel" required value={profilePhone}
-                      onChange={(e) => setProfilePhone(e.target.value)} className={INPUT_CLS} placeholder="+91 XXXXX XXXXX" />
-                  </div>
-                  <div className="flex flex-col">
-                    <label className={LABEL_CLS}>Date of Birth</label>
-                    <input type="date" value={profileDob}
-                      onChange={(e) => setProfileDob(e.target.value)} className={INPUT_CLS} style={{ colorScheme: "dark" }} />
-                  </div>
-                  <div className="flex flex-col">
-                    <label className={LABEL_CLS}>Gender</label>
-                    <select value={profileGender} onChange={(e) => setProfileGender(e.target.value)}
-                      className={INPUT_CLS + " cursor-pointer"}>
-                      {["Male", "Female", "Non-Binary", "Prefer not to say"].map((g) => (
-                        <option key={g} value={g} className="bg-[#030712]">{g}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex flex-col">
-                    <label className={LABEL_CLS}>City / Base Location</label>
-                    <input type="text" value={profileCity}
-                      onChange={(e) => setProfileCity(e.target.value)} className={INPUT_CLS} placeholder="e.g. New Delhi" />
-                  </div>
-                  <div className="flex flex-col">
-                    <label className={LABEL_CLS}>Nationality</label>
-                    <select value={profileNationality} onChange={(e) => setProfileNationality(e.target.value)}
-                      className={INPUT_CLS + " cursor-pointer"}>
-                      {["Indian", "British", "American", "UAE National", "Canadian", "Australian", "Other"].map((n) => (
-                        <option key={n} value={n} className="bg-[#030712]">{n}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <button type="submit"
-                  className="px-6 py-3.5 bg-gold hover:bg-gold-hover text-black rounded-xl font-space font-bold text-xs uppercase tracking-widest transition-all border border-gold cursor-pointer self-start flex items-center gap-2 shadow-lg shadow-gold/15">
-                  <Check className="h-4 w-4" /> <span>Save Profile</span>
-                </button>
-              </form>
-            )}
-
-            {/* ── 7. SUPPORT INQUIRIES ─────────────────────────────────────── */}
-            {activeTab === "tickets" && (
-              <div className="flex flex-col gap-6">
-                <h2 className="font-space text-xl md:text-2xl font-bold text-white border-b border-white/[0.06] pb-4">Support Inquiries</h2>
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                  {/* Create */}
-                  <div className="lg:col-span-5 flex flex-col gap-5 lg:border-r lg:border-white/[0.06] lg:pr-8">
-                    <h3 className="font-space text-sm uppercase tracking-wider font-bold text-gold">Submit New Inquiry</h3>
-                    {tckCreated && (
-                      <div className="bg-teal/10 border border-teal/25 text-teal text-xs px-4 py-3 rounded-xl shadow-md">
-                        ✓ Inquiry logged. VIP dispatcher will review shortly.
-                      </div>
-                    )}
-                    <form onSubmit={handleCreateTicket} className="flex flex-col gap-4">
-                      <div className="flex flex-col">
-                        <label className={LABEL_CLS}>Subject</label>
-                        <input type="text" required placeholder="e.g. VIP Catering Request" value={tckSubject}
-                          onChange={(e) => setTckSubject(e.target.value)} className={INPUT_CLS} />
-                      </div>
-                      <div className="flex flex-col">
-                        <label className={LABEL_CLS}>Category</label>
-                        <select value={tckCategory} onChange={(e) => setTckCategory(e.target.value)}
-                          className={INPUT_CLS + " cursor-pointer"}>
-                          <option>General Inquiry</option>
-                          <option>Billing Issue</option>
-                          <option>Flight Change Request</option>
-                          <option>Cancellation Request</option>
-                          <option>Feedback</option>
-                          <option>Emergency</option>
-                        </select>
-                      </div>
-                      <div className="flex flex-col">
-                        <label className={LABEL_CLS}>Message</label>
-                        <textarea rows={5} required placeholder="Describe your inquiry in detail…" value={tckMsg}
-                          onChange={(e) => setTckMsg(e.target.value)} className={INPUT_CLS + " resize-none"} />
-                      </div>
-                      <button type="submit"
-                        className="w-full py-3.5 bg-gold hover:bg-gold-hover text-black font-space text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer shadow-lg shadow-gold/15">
-                        Submit Inquiry
-                      </button>
-                    </form>
-                  </div>
-
-                  {/* History */}
-                  <div className="lg:col-span-7 flex flex-col gap-5">
-                    <h3 className="font-space text-sm uppercase tracking-wider font-bold text-gold">Inquiry History</h3>
-                    <div className="flex flex-col gap-3 max-h-64 overflow-y-auto pr-1">
-                      {tickets.length === 0 ? (
-                        <p className="text-sm text-slate-400 font-luxury text-center py-8 border border-white/[0.06] rounded-2xl bg-white/[0.01]">No inquiries submitted yet.</p>
+                      {bookings.length === 0 ? (
+                        <div className="p-8 text-center bg-white/5 border border-white/10 rounded-2xl text-xs text-slate-400 font-sans">
+                          No reservations found. <Link href="/booking" className="text-amber-400 underline font-bold">Book Helicopter →</Link>
+                        </div>
                       ) : (
-                        tickets.map((t: any) => (
-                          <button key={t.id} onClick={() => setActiveTicketId(t.id)}
-                            className={`p-4 rounded-xl border text-left flex justify-between items-center transition-all cursor-pointer text-sm ${
-                              activeTicketId === t.id ? "bg-gold/10 border-gold/40 text-gold font-bold" : "bg-white/[0.01] border-white/[0.06] text-slate-300 hover:text-white hover:bg-white/[0.04]"
-                            }`}>
-                            <div>
-                              <div className="font-bold text-white tracking-tight">{t.subject}</div>
-                              <span className="text-xs text-slate-400 mt-1 block">{t.category} · {t.date}</span>
-                            </div>
-                            <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                              t.status === "Open" ? "text-teal bg-teal/10 border border-teal/20" : "text-slate-400 bg-white/5 border border-white/10"
-                            }`}>{t.status}</span>
-                          </button>
-                        ))
-                      )}
-                    </div>
-
-                    {selectedTicket && (
-                      <div className="border border-white/[0.06] rounded-2xl p-5 bg-white/[0.02] flex flex-col gap-4 shadow-lg">
-                        <span className="font-space text-xs font-semibold tracking-wider text-gold uppercase">Chat — {selectedTicket.subject}</span>
-                        <div className="flex flex-col gap-4 max-h-56 overflow-y-auto pr-1">
-                          {(selectedTicket as any).messages.map((m: any, i: number) => (
-                            <div key={i} className={`flex flex-col gap-1 max-w-[85%] p-3.5 rounded-xl text-sm leading-relaxed ${
-                              m.sender === "user"
-                                ? "bg-gold/10 border border-gold/20 text-white self-end text-right"
-                                : "bg-white/[0.04] border border-white/[0.06] text-slate-300 self-start"
-                            }`}>
-                              <p>{m.text}</p>
-                              <span className="text-[10px] opacity-50 mt-1 block">{m.date}</span>
+                        <div className="flex flex-col gap-3">
+                          {bookings.slice(0, 3).map((b: any) => (
+                            <div key={b.id} className="p-4 bg-[#051433] border border-white/10 rounded-xl flex items-center justify-between gap-4 shadow-md">
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 shrink-0">
+                                  <Helicopter className="h-5 w-5" />
+                                </div>
+                                <div>
+                                  <h4 className="font-space text-xs font-bold text-white">{b.route || b.service_type || b.name || "Charter Ride"}</h4>
+                                  <span className="text-[10px] text-slate-400 font-sans block">{b.departure_date || b.date || "Scheduled Flight"}</span>
+                                </div>
+                              </div>
+                              <span className="font-space text-sm font-bold text-amber-400">₹{(b.total_fare || b.price || 0).toLocaleString()}</span>
                             </div>
                           ))}
                         </div>
-                        <form onSubmit={handleSendReply} className="flex gap-2.5 border-t border-white/[0.06] pt-4">
-                          <input type="text" required placeholder="Type your response…" value={chatReply}
-                            onChange={(e) => setChatReply(e.target.value)}
-                            className={INPUT_CLS + " flex-1"} />
-                          <button type="submit"
-                            className="px-5 bg-gold hover:bg-gold-hover text-black rounded-xl flex items-center justify-center cursor-pointer shrink-0 shadow-md">
-                            <Send className="h-4.5 w-4.5" />
+                      )}
+                    </div>
+
+                  </div>
+                )}
+
+                {/* ── 2. FLIGHT RESERVATIONS TAB ────────────────────────────── */}
+                {activeTab === "bookings" && (
+                  <div className="flex flex-col gap-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/10 pb-4 gap-4">
+                      <div>
+                        <h2 className="font-serif text-2xl font-bold text-white">Flight Reservations Log</h2>
+                        <p className="text-xs text-slate-300 font-sans mt-0.5">Manage and track your booked helicopter charters, tour packages, and boat rides</p>
+                      </div>
+                      <button
+                        onClick={() => router.push("/booking")}
+                        className="px-5 py-2.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto"
+                      >
+                        <Helicopter className="h-4 w-4" />
+                        <span>Book New Flight</span>
+                      </button>
+                    </div>
+
+                    {bookings.length === 0 ? (
+                      <div className="py-16 text-center bg-white/5 border border-white/10 rounded-2xl p-8">
+                        <Helicopter className="h-12 w-12 text-slate-500 mx-auto mb-3" />
+                        <h3 className="font-serif text-lg font-bold text-white mb-1">No Reservations Found</h3>
+                        <p className="text-xs text-slate-400 font-sans mb-4">You haven't made any bookings yet.</p>
+                        <button onClick={() => router.push("/booking")} className="px-6 py-2.5 bg-amber-400 text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl">Book Flight Now</button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-4">
+                        {bookings.map((booking: any) => (
+                          <div key={booking.id} className="bg-[#051433] border border-white/10 rounded-2xl p-5 shadow-lg flex flex-col gap-4">
+                            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                              <div className="flex items-start gap-3">
+                                <div className="h-10 w-10 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
+                                  <Helicopter className="h-5 w-5" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-mono text-xs font-bold text-amber-400">#{booking.reference_number || booking.id}</span>
+                                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-space font-bold uppercase">
+                                      {booking.status || "CONFIRMED"}
+                                    </span>
+                                  </div>
+                                  <h4 className="font-space text-sm font-bold text-white">{booking.route || booking.service_type || booking.name || "Charter Booking"}</h4>
+                                  <p className="text-xs text-slate-300 font-sans mt-0.5">Date: {booking.departure_date || booking.date || "Upcoming"} · {booking.passengers_count || 1} Passenger(s)</p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto border-t md:border-t-0 border-white/10 pt-3 md:pt-0">
+                                <div>
+                                  <span className="text-[9px] text-slate-400 uppercase block font-sans">Total Fare</span>
+                                  <span className="font-space text-lg font-bold text-amber-400">₹{(booking.total_fare || booking.price || 0).toLocaleString()}</span>
+                                </div>
+                                <button
+                                  onClick={() => router.push(`/my-trips`)}
+                                  className="px-4 py-2 border border-amber-400/40 text-amber-400 hover:bg-amber-400 hover:text-black rounded-xl font-space text-xs font-bold uppercase transition-all"
+                                >
+                                  View Ticket
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ── 3. SAVED FAVOURITES TAB ────────────────────────────────── */}
+                {activeTab === "favourites" && (
+                  <div className="flex flex-col gap-6">
+                    <div className="border-b border-white/10 pb-4">
+                      <h2 className="font-serif text-2xl font-bold text-white">Saved Wishlist</h2>
+                      <p className="text-xs text-slate-300 font-sans mt-0.5">Your bookmarked luxury helicopter rides, hotels and boat charters</p>
+                    </div>
+
+                    {favorites.length === 0 ? (
+                      <div className="py-16 text-center bg-white/5 border border-white/10 rounded-2xl p-8">
+                        <Heart className="h-12 w-12 text-slate-500 mx-auto mb-3" />
+                        <h3 className="font-serif text-lg font-bold text-white mb-1">Your Wishlist is Empty</h3>
+                        <p className="text-xs text-slate-400 font-sans mb-4">Heart any experience during browsing to save it here.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {favorites.map((fav) => (
+                          <div key={fav.id} className="bg-[#051433] border border-white/10 rounded-2xl overflow-hidden shadow-lg flex flex-col justify-between group">
+                            <div className="h-40 relative overflow-hidden bg-slate-900">
+                              <img src={fav.img} alt={fav.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" />
+                              <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-amber-400 text-black font-space text-[9px] font-bold uppercase shadow-md">
+                                {fav.tag}
+                              </span>
+                              <button
+                                onClick={() => handleRemoveFavorite(fav.id)}
+                                className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-red-400 hover:bg-black/90 transition-all cursor-pointer"
+                              >
+                                <Heart className="h-4 w-4 fill-red-400" />
+                              </button>
+                            </div>
+                            <div className="p-5 flex items-center justify-between gap-4">
+                              <div>
+                                <h4 className="font-space text-sm font-bold text-white">{fav.name}</h4>
+                                <span className="text-xs text-slate-400 font-sans block mt-0.5">{fav.type}</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="font-space text-base font-bold text-amber-400 block">{fav.price}</span>
+                                <button onClick={() => router.push("/booking")} className="text-[10px] font-space font-bold uppercase text-slate-300 hover:text-white mt-1 block">Book Now →</button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ── 4. TRAVEL DOCUMENTS TAB ───────────────────────────────── */}
+                {activeTab === "documents" && (
+                  <div className="flex flex-col gap-6">
+                    <div className="border-b border-white/10 pb-4">
+                      <h2 className="font-serif text-2xl font-bold text-white">Travel &amp; KYC Documents</h2>
+                      <p className="text-xs text-slate-300 font-sans mt-0.5">Upload verified documents for expedited DGCA helipad clearance and boarding authorization</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {[
+                        { key: "passport", label: "Passport Documents", desc: "International travel clearance & identity proof", icon: Globe },
+                        { key: "aadhaar", label: "Aadhaar Card ID", desc: "Government-issued KYC identity proof", icon: User },
+                        { key: "visa", label: "Visa Approvals", desc: "Active visa documentation for charter destinations", icon: FileText },
+                        { key: "medical", label: "High-Altitude Medical Clearance", desc: "Helicopter pilgrimage medical certificate", icon: Shield },
+                      ].map((doc) => {
+                        const uploaded = docUploaded[doc.key as keyof typeof docUploaded];
+                        return (
+                          <div key={doc.key} className={`p-5 rounded-2xl border flex flex-col justify-between gap-4 ${uploaded ? "bg-emerald-500/10 border-emerald-500/30" : "bg-[#051433] border-white/10"}`}>
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className={`h-10 w-10 rounded-xl border flex items-center justify-center ${uploaded ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40" : "bg-white/5 text-slate-400 border-white/10"}`}>
+                                  <doc.icon className="h-5 w-5" />
+                                </div>
+                                <div>
+                                  <h4 className="font-space text-xs font-bold text-white">{doc.label}</h4>
+                                  <p className="text-[11px] text-slate-300 font-sans mt-0.5">{doc.desc}</p>
+                                </div>
+                              </div>
+                              {uploaded ? <CheckCircle className="h-5 w-5 text-emerald-400 shrink-0" /> : <AlertCircle className="h-5 w-5 text-slate-500 shrink-0" />}
+                            </div>
+
+                            <button
+                              onClick={() => setDocUploaded((p) => ({ ...p, [doc.key]: !p[doc.key as keyof typeof docUploaded] }))}
+                              className={`w-full py-2.5 rounded-xl font-space text-xs font-bold uppercase transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                                uploaded ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-white/10 text-white hover:bg-amber-400 hover:text-black border border-white/10"
+                              }`}
+                            >
+                              <Upload className="h-4 w-4" />
+                              <span>{uploaded ? "Re-upload File" : "Upload Document"}</span>
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── 5. PROFILE SETTINGS TAB ────────────────────────────────── */}
+                {activeTab === "profile" && (
+                  <form onSubmit={handleProfileSave} className="flex flex-col gap-6">
+                    <div className="border-b border-white/10 pb-4">
+                      <h2 className="font-serif text-2xl font-bold text-white">Profile Configuration</h2>
+                      <p className="text-xs text-slate-300 font-sans mt-0.5">Manage your personal details and contact preferences</p>
+                    </div>
+
+                    {profileSaved && (
+                      <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-space font-bold flex items-center gap-2">
+                        <Check className="h-4 w-4" /> Profile updated successfully!
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className={LABEL_CLS}>Full Name</label>
+                        <input type="text" required value={profileName} onChange={(e) => setProfileName(e.target.value)} className={INPUT_CLS} />
+                      </div>
+                      <div>
+                        <label className={LABEL_CLS}>Email Address</label>
+                        <input type="email" disabled value={profileEmail} className={INPUT_CLS + " opacity-60 cursor-not-allowed"} />
+                      </div>
+                      <div>
+                        <label className={LABEL_CLS}>Phone Number</label>
+                        <input type="tel" required value={profilePhone} onChange={(e) => setProfilePhone(e.target.value)} className={INPUT_CLS} />
+                      </div>
+                      <div>
+                        <label className={LABEL_CLS}>Base City</label>
+                        <input type="text" value={profileCity} onChange={(e) => setProfileCity(e.target.value)} className={INPUT_CLS} />
+                      </div>
+                      <div>
+                        <label className={LABEL_CLS}>Gender</label>
+                        <select value={profileGender} onChange={(e) => setProfileGender(e.target.value)} className={INPUT_CLS}>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className={LABEL_CLS}>Nationality</label>
+                        <input type="text" value={profileNationality} onChange={(e) => setProfileNationality(e.target.value)} className={INPUT_CLS} />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="px-6 py-3 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all self-start flex items-center gap-2 cursor-pointer"
+                    >
+                      <Check className="h-4 w-4" />
+                      <span>Save Changes</span>
+                    </button>
+                  </form>
+                )}
+
+                {/* ── 6. SUPPORT TICKETS TAB ─────────────────────────────────── */}
+                {activeTab === "tickets" && (
+                  <div className="flex flex-col gap-6">
+                    <div className="border-b border-white/10 pb-4">
+                      <h2 className="font-serif text-2xl font-bold text-white">VIP Concierge &amp; Support Tickets</h2>
+                      <p className="text-xs text-slate-300 font-sans mt-0.5">Submit inquiries or chat directly with our 24/7 flight coordination desk</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                      <div className="lg:col-span-5 flex flex-col gap-4">
+                        <h3 className="font-space text-xs font-bold uppercase tracking-wider text-amber-400">Submit New Inquiry</h3>
+                        <form onSubmit={handleCreateTicket} className="flex flex-col gap-4">
+                          <div>
+                            <label className={LABEL_CLS}>Subject</label>
+                            <input type="text" required placeholder="e.g. Flight Schedule Adjustment" value={tckSubject} onChange={(e) => setTckSubject(e.target.value)} className={INPUT_CLS} />
+                          </div>
+                          <div>
+                            <label className={LABEL_CLS}>Category</label>
+                            <select value={tckCategory} onChange={(e) => setTckCategory(e.target.value)} className={INPUT_CLS}>
+                              <option value="General Inquiry">General Inquiry</option>
+                              <option value="Flight Change">Flight Change Request</option>
+                              <option value="Billing Issue">Billing &amp; Refund</option>
+                              <option value="VIP Catering">VIP Catering &amp; Ground Transport</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className={LABEL_CLS}>Message</label>
+                            <textarea rows={4} required placeholder="Describe your request..." value={tckMsg} onChange={(e) => setTckMsg(e.target.value)} className={INPUT_CLS + " resize-none"} />
+                          </div>
+                          <button type="submit" className="py-3 bg-amber-400 hover:bg-amber-300 text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all cursor-pointer">
+                            Submit Inquiry
                           </button>
                         </form>
                       </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {/* ── 8. SECURITY PROTOCOLS ────────────────────────────────────── */}
-            {activeTab === "security" && (
-              <div className="flex flex-col gap-8">
-                <h2 className="font-space text-xl md:text-2xl font-bold text-white border-b border-white/[0.06] pb-4">Security & Compliance</h2>
-
-                <div className="flex flex-col gap-4">
-                  {[
-                    { icon: Shield, color: "text-gold bg-gold/10 border-gold/25 shadow-gold/5", title: "Two-Factor Authentication (2FA)", desc: "Your account enforces 6-digit OTP validation via email on every login and high-value reservation.", status: "Active" },
-                    { icon: Bell, color: "text-teal bg-teal/10 border-teal/25 shadow-teal/5", title: "Real-Time Security Alerts", desc: `We monitor login activity and flight status changes. You have ${unread} unread alert${unread !== 1 ? "s" : ""} right now.`, status: "Enabled" },
-                    { icon: Lock, color: "text-purple-300 bg-purple-500/10 border-purple-500/25 shadow-purple-500/5", title: "JWT Session Encryption", desc: "All sessions are signed using RS256 asymmetric encryption with a 1-hour rolling window and refresh token rotation.", status: "Active" },
-                    { icon: FileText, color: "text-blue-300 bg-blue-500/10 border-blue-500/25 shadow-blue-500/5", title: "DGCA Compliance Record", desc: "Your charter flights are logged under Non-Scheduled Operator Permit (NSOP) regulations. All records are audit-ready.", status: "Verified" },
-                  ].map((item, i) => (
-                    <div key={i} className="p-6 border border-white/[0.06] bg-white/[0.02] rounded-2xl flex items-start gap-5 hover:border-white/15 transition-all shadow-md">
-                      <div className={`h-12 w-12 rounded-xl border flex items-center justify-center shrink-0 ${item.color}`}>
-                        <item.icon className="h-5.5 w-5.5" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                          <span className="font-space text-sm md:text-base font-bold text-white uppercase tracking-tight">{item.title}</span>
-                          <span className="text-[10px] font-bold text-teal bg-teal/10 border border-teal/20 px-2 py-0.5 rounded-full uppercase tracking-wider">{item.status}</span>
-                        </div>
-                        <p className="font-luxury text-sm text-slate-400 leading-relaxed mt-2">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Active sessions */}
-                <div className="flex flex-col gap-4">
-                  <h3 className="font-space text-sm uppercase tracking-wider font-bold text-gold/90">Active Sessions</h3>
-                  <div className="flex flex-col gap-3">
-                    {[
-                      { device: "Chrome · Windows 11", location: "Mumbai, IN", time: "Now · Current session", active: true },
-                      { device: "Safari · iPhone 15", location: "Delhi, IN", time: "2 hours ago", active: false },
-                    ].map((session, i) => (
-                      <div key={i} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/[0.06] rounded-2xl hover:border-white/15 transition-all shadow-sm">
-                        <div className="flex items-center gap-4">
-                          <div className={`h-3 w-3 rounded-full ${session.active ? "bg-teal animate-pulse" : "bg-slate-600"}`} />
-                          <div>
-                            <p className="font-space text-sm md:text-base font-bold text-white tracking-tight">{session.device}</p>
-                            <p className="font-luxury text-xs text-slate-400 mt-1">{session.location} · {session.time}</p>
+                      <div className="lg:col-span-7 flex flex-col gap-4">
+                        <h3 className="font-space text-xs font-bold uppercase tracking-wider text-amber-400">Inquiry History</h3>
+                        {tickets.length === 0 ? (
+                          <div className="p-6 bg-white/5 border border-white/10 rounded-2xl text-center text-xs text-slate-400 font-sans">
+                            No support tickets created yet.
                           </div>
-                        </div>
-                        {!session.active && (
-                          <button className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 hover:border-red-500/30 transition-all font-space font-bold uppercase cursor-pointer border border-red-500/20 px-3.5 py-1.5 rounded-xl">
-                            Revoke
-                          </button>
+                        ) : (
+                          <div className="flex flex-col gap-3 max-h-96 overflow-y-auto">
+                            {tickets.map((t: any) => (
+                              <div key={t.id} className="p-4 bg-[#051433] border border-white/10 rounded-xl flex items-center justify-between">
+                                <div>
+                                  <h4 className="font-space text-xs font-bold text-white">{t.subject}</h4>
+                                  <span className="text-[10px] text-slate-400 font-sans">{t.category} · {t.date}</span>
+                                </div>
+                                <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-400 border border-amber-400/30 text-[9px] font-space font-bold uppercase">
+                                  {t.status}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
                         )}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* ─── Premium Step-by-Step Cancellation Wizard Modal ─── */}
-      <AnimatePresence>
-        {cancellingBooking && (
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#0b0f19] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col text-slate-300"
-            >
-              {/* Modal Header */}
-              <div className="bg-gradient-to-r from-[#051433] to-[#0d2d6c] px-6 py-4 flex items-center justify-between border-b border-white/5">
-                <div>
-                  <span className="text-[9px] font-space font-bold uppercase tracking-widest text-gold">Booking Cancellation wizard</span>
-                  <h3 className="font-space text-base font-bold text-white mt-0.5">Cancel Reservation {cancellingBooking.id}</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setCancellingBooking(null)}
-                  className="text-grey-text hover:text-white font-space text-sm font-bold cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Steps Indicator Progress Bar */}
-              <div className="px-6 py-3.5 bg-white/[0.02] border-b border-white/5 grid grid-cols-4 gap-2 text-center text-[10px] font-space uppercase font-bold tracking-wider">
-                {[
-                  { step: 1, label: "Reason" },
-                  { step: 2, label: "Policy Calculation" },
-                  { step: 3, label: "Refund Info" },
-                  { step: 4, label: "Confirmation" }
-                ].map((item) => (
-                  <div key={item.step} className="flex flex-col gap-1 items-center">
-                    <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
-                      cancelStep === item.step
-                        ? "bg-gold text-black border border-gold"
-                        : cancelStep > item.step
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                        : "bg-white/5 text-grey-text border border-white/10"
-                    }`}>
-                      {cancelStep > item.step ? "✓" : item.step}
-                    </div>
-                    <span className={cancelStep === item.step ? "text-gold font-bold" : "text-grey-text font-medium"}>
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Steps Content Area */}
-              <div className="p-6 overflow-y-auto max-h-[380px] flex flex-col gap-4 font-luxury text-sm">
-                
-                {/* STEP 1: CANCELLATION REASON */}
-                {cancelStep === 1 && (
-                  <div className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-bold text-gold uppercase tracking-wider">Select Primary Reason *</label>
-                      <select
-                        value={cancelReason}
-                        onChange={(e) => setCancelReason(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-gold/50 cursor-pointer"
-                      >
-                        <option value="Change of Plans" className="bg-[#0b0f19]">Change of plans / Schedule Conflict</option>
-                        <option value="Medical Reasons" className="bg-[#0b0f19]">Medical Emergency or Health concerns</option>
-                        <option value="Weather Disruptions" className="bg-[#0b0f19]">Inclement weather expected</option>
-                        <option value="Booking Mistake" className="bg-[#0b0f19]">Made booking by mistake</option>
-                        <option value="Others" className="bg-[#0b0f19]">Other reasons (Please describe)</option>
-                      </select>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-bold text-gold uppercase tracking-wider">Provide details / remarks</label>
-                      <textarea
-                        value={cancelNotes}
-                        onChange={(e) => setCancelNotes(e.target.value)}
-                        placeholder="Write down any additional comments or instructions for return request..."
-                        rows={3}
-                        className="bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-gold/50 resize-none"
-                      />
                     </div>
                   </div>
                 )}
 
-                {/* STEP 2: POLICY & CHARGES CALCULATION */}
-                {cancelStep === 2 && (() => {
-                  const getRefundInfo = (b: any) => {
-                    const price = Number(b.price);
-                    if (!b.date) return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
-                    try {
-                      const today = new Date();
-                      const departure = new Date(b.date);
-                      const diffMs = departure.getTime() - today.getTime();
-                      const diffHrs = diffMs / (1000 * 60 * 60);
+                {/* ── 7. SECURITY TAB ───────────────────────────────────────── */}
+                {activeTab === "security" && (
+                  <div className="flex flex-col gap-6">
+                    <div className="border-b border-white/10 pb-4">
+                      <h2 className="font-serif text-2xl font-bold text-white">Security &amp; Protocols</h2>
+                      <p className="text-xs text-slate-300 font-sans mt-0.5">Account protection, session management, and encryption standards</p>
+                    </div>
 
-                      if (diffHrs < 24) return { fee: price, refund: 0, percentage: 0 };
-                      if (diffHrs <= 72) return { fee: price * 0.50, refund: price * 0.50, percentage: 50 };
-                      return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
-                    } catch {
-                      return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
-                    }
-                  };
-                  const calc = getRefundInfo(cancellingBooking);
-
-                  return (
-                    <div className="flex flex-col gap-4">
-                      <div className="p-4 bg-white/2 border border-white/5 rounded-xl flex flex-col gap-3">
-                        <span className="text-[10px] font-bold text-gold uppercase tracking-wider">Cancellation Policy & Charges breakdown</span>
-                        
-                        <div className="flex justify-between items-center text-xs font-mono border-b border-white/5 pb-2">
-                          <span className="text-grey-text">Charter booking amount:</span>
-                          <span className="text-white">₹{Number(cancellingBooking.price).toLocaleString("en-IN")}</span>
-                        </div>
-
-                        <div className="flex justify-between items-center text-xs font-mono border-b border-white/5 pb-2">
-                          <span className="text-grey-text">Cancellation charge percentage:</span>
-                          <span className="text-red-400 font-bold">{100 - calc.percentage}%</span>
-                        </div>
-
-                        <div className="flex justify-between items-center text-xs font-mono border-b border-white/5 pb-2">
-                          <span className="text-grey-text">Cancellation service fee (deducted):</span>
-                          <span className="text-red-400">₹{Math.round(calc.fee).toLocaleString("en-IN")}</span>
-                        </div>
-
-                        <div className="flex justify-between items-center text-sm font-space font-bold pt-1">
-                          <span className="text-gold">Expected refund payout:</span>
-                          <span className="text-emerald-400 font-mono text-base">₹{Math.round(calc.refund).toLocaleString("en-IN")}</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="p-5 bg-[#051433] border border-white/10 rounded-2xl flex items-start gap-4">
+                        <Shield className="h-6 w-6 text-amber-400 shrink-0 mt-1" />
+                        <div>
+                          <h4 className="font-space text-xs font-bold text-white uppercase">Two-Factor Authentication</h4>
+                          <p className="text-xs text-slate-300 font-sans mt-1">OTP validation active on email on every login.</p>
+                          <span className="inline-block mt-2 text-[9px] font-bold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full">ACTIVE</span>
                         </div>
                       </div>
 
-                      <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-3.5 flex flex-col gap-1 text-[11px] text-amber-300">
-                        <span className="font-space uppercase font-bold tracking-wider">✓ Booking Policy Notice</span>
-                        <p className="leading-relaxed font-sans mt-1">
-                          Our policy requires a 5% handling retention fee for slots canceled &gt; 72 hours before staging. Within 24-72 hours, a 50% charge applies.
-                        </p>
+                      <div className="p-5 bg-[#051433] border border-white/10 rounded-2xl flex items-start gap-4">
+                        <Lock className="h-6 w-6 text-amber-400 shrink-0 mt-1" />
+                        <div>
+                          <h4 className="font-space text-xs font-bold text-white uppercase">Session Encryption</h4>
+                          <p className="text-xs text-slate-300 font-sans mt-1">JWT asymmetric RS256 token rotation.</p>
+                          <span className="inline-block mt-2 text-[9px] font-bold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full">SECURED</span>
+                        </div>
                       </div>
                     </div>
-                  );
-                })()}
-
-                {/* STEP 3: REFUND Payout Details */}
-                {cancelStep === 3 && (
-                  <div className="flex flex-col gap-4">
-                    <span className="text-[10px] font-bold text-gold uppercase tracking-wider">Choose Payout Payout Destination</span>
-                    
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setRefundMethod("original")}
-                        className={`p-4 rounded-xl border flex flex-col gap-1.5 text-left transition-all ${
-                          refundMethod === "original"
-                            ? "bg-gold/5 border-gold text-white"
-                            : "bg-white/[0.01] border-white/5 text-grey-text hover:border-white/10"
-                        }`}
-                      >
-                        <span className="font-space text-xs font-bold uppercase tracking-wider">Original Payout Source</span>
-                        <span className="text-[10px] opacity-70">Refund to Razorpay / PhonePe card used during booking checkout</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setRefundMethod("bank")}
-                        className={`p-4 rounded-xl border flex flex-col gap-1.5 text-left transition-all ${
-                          refundMethod === "bank"
-                            ? "bg-gold/5 border-gold text-white"
-                            : "bg-white/[0.01] border-white/5 text-grey-text hover:border-white/10"
-                        }`}
-                      >
-                        <span className="font-space text-xs font-bold uppercase tracking-wider">Direct Bank Transfer</span>
-                        <span className="text-[10px] opacity-70">Payout via IMPS / NEFT directly into your selected account</span>
-                      </button>
-                    </div>
-
-                    {refundMethod === "bank" && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-white/2 p-4 rounded-xl border border-white/5"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[9px] uppercase tracking-wider text-grey-text font-bold">Bank Name *</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. HDFC Bank"
-                            value={bankDetails.bankName}
-                            onChange={(e) => setBankDetails({ ...bankDetails, bankName: e.target.value })}
-                            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-gold/50"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[9px] uppercase tracking-wider text-grey-text font-bold">Account Holder Name *</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. Rahul Sharma"
-                            value={bankDetails.accountHolder}
-                            onChange={(e) => setBankDetails({ ...bankDetails, accountHolder: e.target.value })}
-                            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-gold/50"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[9px] uppercase tracking-wider text-grey-text font-bold">Account Number *</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. 501002345678"
-                            value={bankDetails.accountNumber}
-                            onChange={(e) => setBankDetails({ ...bankDetails, accountNumber: e.target.value })}
-                            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-gold/50"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[9px] uppercase tracking-wider text-grey-text font-bold">IFSC Code *</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. HDFC0000123"
-                            value={bankDetails.ifscCode}
-                            onChange={(e) => setBankDetails({ ...bankDetails, ifscCode: e.target.value })}
-                            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-gold/50"
-                          />
-                        </div>
-                      </motion.div>
-                    )}
                   </div>
                 )}
 
-                {/* STEP 4: REVIEW & CONFIRM */}
-                {cancelStep === 4 && (() => {
-                  const getRefundInfo = (b: any) => {
-                    const price = Number(b.price);
-                    if (!b.date) return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
-                    try {
-                      const today = new Date();
-                      const departure = new Date(b.date);
-                      const diffMs = departure.getTime() - today.getTime();
-                      const diffHrs = diffMs / (1000 * 60 * 60);
-
-                      if (diffHrs < 24) return { fee: price, refund: 0, percentage: 0 };
-                      if (diffHrs <= 72) return { fee: price * 0.50, refund: price * 0.50, percentage: 50 };
-                      return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
-                    } catch {
-                      return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
-                    }
-                  };
-                  const calc = getRefundInfo(cancellingBooking);
-
-                  return (
-                    <div className="flex flex-col gap-4">
-                      <div className="bg-[#051433]/40 border border-white/5 rounded-xl p-4 flex flex-col gap-3">
-                        <span className="text-[10px] font-bold text-gold uppercase tracking-wider block border-b border-white/5 pb-2">Final Cancellation Summary</span>
-                        
-                        <p className="text-xs text-grey-text">Vessel / Package: <strong className="text-white">{cancellingBooking.name}</strong></p>
-                        <p className="text-xs text-grey-text">Reason: <strong className="text-white">{cancelReason}</strong></p>
-                        <p className="text-xs text-grey-text">Notes: <span className="italic text-white">"{cancelNotes || 'None'}"</span></p>
-                        <p className="text-xs text-grey-text">Payout Destination: <strong className="text-white">{refundMethod === "original" ? "Original Payment Source" : `Bank Transfer (${bankDetails.bankName})`}</strong></p>
-                        
-                        <div className="border-t border-white/5 pt-3 mt-1 flex justify-between items-baseline">
-                          <span className="text-xs font-bold text-gold uppercase">Expected Payout:</span>
-                          <span className="text-emerald-400 font-mono font-bold text-lg">₹{Math.round(calc.refund).toLocaleString("en-IN")}</span>
-                        </div>
-                      </div>
-
-                      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3.5 text-[11px] text-red-300 font-sans leading-relaxed">
-                        ⚠️ <strong>Warning:</strong> Canceled routes release slot allocations immediately. Reversing this action will require placing a new booking. The return refund request will be automatically dispatched to superadmins for immediate authorization.
-                      </div>
-                    </div>
-                  );
-                })()}
-
-              </div>
-
-              {/* Modal Footer (Controls) */}
-              <div className="bg-white/[0.01] px-6 py-4 flex items-center justify-between border-t border-white/5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (cancelStep === 1) {
-                      setCancellingBooking(null);
-                    } else {
-                      setCancelStep(cancelStep - 1);
-                    }
-                  }}
-                  className="px-5 py-2 border border-white/10 bg-white/2 hover:bg-white/5 text-grey-text hover:text-white font-space text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
-                >
-                  {cancelStep === 1 ? "Discard" : "Previous Step"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (cancelStep < 4) {
-                      // Validation check for Step 3 direct transfer values
-                      if (cancelStep === 3 && refundMethod === "bank") {
-                        if (!bankDetails.bankName || !bankDetails.accountNumber || !bankDetails.ifscCode || !bankDetails.accountHolder) {
-                          alert("Please fill in all direct bank transfer payout details.");
-                          return;
-                        }
-                      }
-                      setCancelStep(cancelStep + 1);
-                    } else {
-                      // Final Submit
-                      const getRefundInfo = (b: any) => {
-                        const price = Number(b.price);
-                        if (!b.date) return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
-                        try {
-                          const today = new Date();
-                          const departure = new Date(b.date);
-                          const diffMs = departure.getTime() - today.getTime();
-                          const diffHrs = diffMs / (1000 * 60 * 60);
-
-                          if (diffHrs < 24) return { fee: price, refund: 0, percentage: 0 };
-                          if (diffHrs <= 72) return { fee: price * 0.50, refund: price * 0.50, percentage: 50 };
-                          return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
-                        } catch {
-                          return { fee: price * 0.05, refund: price * 0.95, percentage: 95 };
-                        }
-                      };
-                      const calc = getRefundInfo(cancellingBooking);
-
-                      const payload = {
-                        reason: cancelReason,
-                        notes: cancelNotes,
-                        fee: calc.fee,
-                        refund: calc.refund,
-                        refundPercentage: calc.percentage,
-                        refundMethod,
-                        bankDetails: refundMethod === "bank" ? bankDetails : null,
-                        requestedAt: new Date().toISOString()
-                      };
-                      await requestCancelBooking(cancellingBooking.id, payload);
-                      setCancellingBooking(null);
-                    }
-                  }}
-                  className="px-6 py-2 bg-amber-400 hover:bg-amber-300 text-black font-space text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-md shadow-amber-400/10"
-                >
-                  {cancelStep === 4 ? "Submit Cancellation Request" : "Next Step"}
-                </button>
-              </div>
-
-            </motion.div>
+              </motion.div>
+            </AnimatePresence>
           </div>
-        )}
-      </AnimatePresence>
+
+        </div>
+
+      </div>
     </div>
   );
 }
-
