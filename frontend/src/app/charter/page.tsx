@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
 import { Plus, Trash2, ShieldCheck, Weight, Info, Calendar, Users, ChevronRight, Helicopter, Plane, Award, MapPin, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import SearchBox from "@/components/booking/SearchBox";
 
 interface Leg {
   source: string;
@@ -35,25 +36,47 @@ const HELI_MODELS = [
   { id: "h-3", name: "AgustaWestland AW109", capacity: 600, ratePerLeg: 150000, desc: "Executive shuttle · Max 600 kg payload" }
 ];
 
-export default function CharterPage() {
+function CharterContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const setItem = useCartStore((state) => state.setItem);
 
+  const today = new Date().toISOString().split("T")[0];
+
+  const paramSource = searchParams.get("source") || "New Delhi Hub (DEL)";
+  const paramDest = searchParams.get("destination") || "Dehradun Terminal (DED)";
+  const paramDate = searchParams.get("date") || today;
+  const paramPassengers = Number(searchParams.get("passengers")) || 2;
+
   const [legs, setLegs] = useState<Leg[]>([
-    { source: "New Delhi Hub (DEL)", destination: "Dehradun Terminal (DED)" }
+    { source: paramSource, destination: paramDest }
   ]);
 
   const [selectedHeliId, setSelectedHeliId] = useState("h-1");
   const activeHeli = HELI_MODELS.find((h) => h.id === selectedHeliId) || HELI_MODELS[0];
 
-  const today = new Date().toISOString().split("T")[0];
-  const [departureDate, setDepartureDate] = useState(today);
+  const [departureDate, setDepartureDate] = useState(paramDate);
 
-  const [passengers, setPassengers] = useState<PassengerWeight[]>([
-    { name: "Primary Charterer", weight: 78 },
-    { name: "Guest #2", weight: 70 }
-  ]);
+  const [passengers, setPassengers] = useState<PassengerWeight[]>(() => {
+    const list: PassengerWeight[] = [{ name: "Primary Charterer", weight: 78 }];
+    for (let i = 2; i <= paramPassengers; i++) {
+      list.push({ name: `Guest #${i}`, weight: 70 });
+    }
+    return list;
+  });
   const [luggageCount, setLuggageCount] = useState(2);
+
+  // Sync state when search parameters change
+  useEffect(() => {
+    setDepartureDate(paramDate);
+    setLegs([{ source: paramSource, destination: paramDest }]);
+    
+    const list: PassengerWeight[] = [{ name: "Primary Charterer", weight: 78 }];
+    for (let i = 2; i <= paramPassengers; i++) {
+      list.push({ name: `Guest #${i}`, weight: 70 });
+    }
+    setPassengers(list);
+  }, [paramSource, paramDest, paramDate, paramPassengers]);
 
   const totalPassengerWeight = passengers.reduce((sum, p) => sum + p.weight, 0);
   const totalLuggageWeight = luggageCount * 15;
@@ -110,6 +133,8 @@ export default function CharterPage() {
     }
 
     const routeStr = legs.map((l) => MAP_COORDINATES[l.source]?.label + " ➔ " + MAP_COORDINATES[l.destination]?.label).join(" | ");
+    const paramFareType = searchParams.get("fare_type") || "Regular";
+    const paramGstNumber = searchParams.get("gst_number") || "";
 
     setItem({
       type: "helicopter",
@@ -119,7 +144,9 @@ export default function CharterPage() {
       date: departureDate,
       passengers: passengers.length,
       details: `Multi-Leg Charter: ${routeStr} · Total Payload: ${totalPayload}kg / ${activeHeli.capacity}kg`,
-      image: "https://images.unsplash.com/photo-1540962351504-03099e0a754b?q=80&w=800&auto=format&fit=crop"
+      image: "https://images.unsplash.com/photo-1540962351504-03099e0a754b?q=80&w=800&auto=format&fit=crop",
+      fare_type: paramFareType,
+      gst_number: paramGstNumber,
     });
 
     router.push("/checkout");
@@ -129,7 +156,7 @@ export default function CharterPage() {
     <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
       
       {/* MakeMyTrip Style Hero Header */}
-      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-8 pb-16 px-4 md:px-8 text-white relative shadow-lg">
+      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-8 pb-20 px-4 md:px-8 text-white relative shadow-lg">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/10 pb-6 mb-6 gap-4">
             <div>
@@ -144,6 +171,11 @@ export default function CharterPage() {
             <div className="flex items-center gap-2 text-xs font-mono text-[#F5A623] px-3.5 py-1.5 rounded-full border border-[#F5A623]/30 bg-[#F5A623]/10 font-bold">
               <ShieldCheck className="h-4 w-4 text-[#F5A623]" /> Real-Time Payload Verification
             </div>
+          </div>
+
+          {/* Unified MakeMyTrip Search Widget for Bespoke Charters */}
+          <div className="mt-8">
+            <SearchBox />
           </div>
         </div>
       </div>
@@ -493,5 +525,13 @@ export default function CharterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CharterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F2F5F8] flex items-center justify-center">Loading Charters...</div>}>
+      <CharterContent />
+    </Suspense>
   );
 }

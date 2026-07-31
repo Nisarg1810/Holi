@@ -37,6 +37,8 @@ class Booking(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Confirmed')
     cancellation_data = models.JSONField(default=dict, blank=True)
+    fare_type = models.CharField(max_length=50, default='Regular')
+    gst_number = models.CharField(max_length=50, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

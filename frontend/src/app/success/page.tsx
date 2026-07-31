@@ -49,6 +49,19 @@ function SuccessPageContent() {
   const basePrice = Number(booking.price) / 1.18; // approx pre-tax base
   const gstTax = Number(booking.price) - basePrice;
 
+  let discountAmount = 0;
+  if (booking.fare_type === "Student") {
+    discountAmount = (basePrice / 0.9) * 0.10;
+  } else if (booking.fare_type === "Armed Forces") {
+    discountAmount = (basePrice / 0.85) * 0.15;
+  } else if (booking.fare_type === "Senior Citizen") {
+    discountAmount = (basePrice / 0.88) * 0.12;
+  } else if (booking.fare_type === "Doctor & Nurses") {
+    discountAmount = (basePrice / 0.9) * 0.10;
+  }
+
+  const originalBasePrice = basePrice + discountAmount;
+
   return (
     <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
       
@@ -148,6 +161,16 @@ function SuccessPageContent() {
               <span className="text-xs text-slate-700 font-medium">
                 Transaction Status: <strong className="text-emerald-700 uppercase">SUCCESS (256-Bit SSL Encrypted)</strong>
               </span>
+              {booking.fare_type && booking.fare_type !== "Regular" && (
+                <span className="text-xs text-slate-700 font-medium">
+                  Fare Class: <strong className="text-blue-600 uppercase">{booking.fare_type}</strong>
+                </span>
+              )}
+              {booking.gst_number && (
+                <span className="text-xs text-slate-700 font-medium">
+                  GSTIN ID: <strong className="text-slate-900 font-mono">{booking.gst_number}</strong>
+                </span>
+              )}
             </div>
           </div>
 
@@ -231,9 +254,18 @@ function SuccessPageContent() {
                   <tr>
                     <td className="p-3 font-bold text-slate-900">{booking.name} (Base Fare)</td>
                     <td className="p-3 text-center">{booking.passengers} Guest(s)</td>
-                    <td className="p-3 text-right font-mono">₹{Math.round(basePrice).toLocaleString("en-IN")}</td>
-                    <td className="p-3 text-right font-mono font-bold text-slate-900">₹{Math.round(basePrice).toLocaleString("en-IN")}</td>
+                    <td className="p-3 text-right font-mono">₹{Math.round(originalBasePrice).toLocaleString("en-IN")}</td>
+                    <td className="p-3 text-right font-mono font-bold text-slate-900">₹{Math.round(originalBasePrice).toLocaleString("en-IN")}</td>
                   </tr>
+
+                  {booking.fare_type && booking.fare_type !== "Regular" && discountAmount > 0 && (
+                    <tr className="text-emerald-700">
+                      <td className="p-3 font-medium">• {booking.fare_type} Special Discount</td>
+                      <td className="p-3 text-center">-</td>
+                      <td className="p-3 text-right font-mono">-₹{Math.round(discountAmount).toLocaleString("en-IN")}</td>
+                      <td className="p-3 text-right font-mono font-bold">-₹{Math.round(discountAmount).toLocaleString("en-IN")}</td>
+                    </tr>
+                  )}
 
                   {booking.addons && booking.addons.length > 0 && booking.addons.map((ao: any) => (
                     <tr key={ao.id}>

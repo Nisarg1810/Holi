@@ -3,12 +3,15 @@
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import API from "@/utils/api";
 import { TourPackage } from "@/utils/mockData";
 import { Check, Star, RefreshCw, Compass, ArrowRight, ShieldCheck, MapPin, Calendar, SlidersHorizontal, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import SearchBox from "@/components/booking/SearchBox";
 
 function ToursListingContent() {
+  const searchParams = useSearchParams();
   const [tourPackages, setTourPackages] = useState<any[]>([]);
   const [filteredTours, setFilteredTours] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +41,14 @@ function ToursListingContent() {
 
   useEffect(() => {
     let result = [...tourPackages];
-    if (searchQuery) {
+    const destQuery = searchParams.get("destination") || "";
+    
+    if (destQuery) {
+      const q = destQuery.toLowerCase();
+      result = result.filter(
+        (t) => t.name?.toLowerCase().includes(q) || t.tagline?.toLowerCase().includes(q)
+      );
+    } else if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
         (t) => t.name?.toLowerCase().includes(q) || t.tagline?.toLowerCase().includes(q)
@@ -48,7 +58,7 @@ function ToursListingContent() {
       result = result.filter((t) => t.duration?.toLowerCase().includes(durationFilter));
     }
     setFilteredTours(result);
-  }, [searchQuery, durationFilter, tourPackages]);
+  }, [searchParams, searchQuery, durationFilter, tourPackages]);
 
   const toggleCompare = (pkg: TourPackage) => {
     const isSelected = selectedForCompare.find((p) => p.id === pkg.id);
@@ -96,45 +106,9 @@ function ToursListingContent() {
             </div>
           </div>
 
-          {/* MakeMyTrip Search & Filter Bar */}
-          <div className="bg-white rounded-2xl p-4 shadow-2xl text-slate-800 border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-            <div className="md:col-span-6 bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center gap-2">
-              <Search className="h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search by package name or destination (e.g. Kedarnath, Goa, Dwarka)..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent text-xs font-bold text-slate-900 focus:outline-none placeholder-slate-400 font-sans"
-              />
-            </div>
-
-            <div className="md:col-span-4 bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-slate-400" />
-              <select
-                value={durationFilter}
-                onChange={(e) => setDurationFilter(e.target.value)}
-                className="w-full bg-transparent text-xs font-bold text-slate-900 focus:outline-none cursor-pointer"
-              >
-                <option value="all">All Durations</option>
-                <option value="3 days">3 Days / 2 Nights</option>
-                <option value="4 days">4 Days / 3 Nights</option>
-                <option value="5 days">5 Days / 4 Nights</option>
-              </select>
-            </div>
-
-            <div className="md:col-span-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setDurationFilter("all");
-                }}
-                className="w-full py-2.5 bg-[#051433] hover:bg-[#092254] text-white font-space font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer"
-              >
-                Reset Filters
-              </button>
-            </div>
+          {/* Unified MakeMyTrip Search Widget for Holiday Packages */}
+          <div className="mt-8">
+            <SearchBox />
           </div>
         </div>
       </div>

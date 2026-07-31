@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import SearchBox from "@/components/booking/SearchBox";
 
 const DESTINATIONS = [
   "Goa Harbor, Panaji, Goa",
@@ -92,6 +93,8 @@ function BoatsListingContent() {
   const handleBookBoat = (boat: BoatListing) => {
     const hours = getHours(boat.id);
     const finalPrice = Number(boat.price) * hours;
+    const paramFareType = searchParams.get("fare_type") || "Regular";
+    const paramGstNumber = searchParams.get("gst_number") || "";
     setItem({
       type: "boat",
       id: boat.id,
@@ -102,6 +105,8 @@ function BoatsListingContent() {
       details: `${boat.location} — ${boat.type || "Luxury Charter"} · ${hours} Hours`,
       duration: `${hours} Hours Charter`,
       image: boat.image,
+      fare_type: paramFareType,
+      gst_number: paramGstNumber,
     });
     router.push("/checkout");
   };
@@ -163,8 +168,7 @@ function BoatsListingContent() {
 
   return (
     <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
-
-      {/* ── Navy Hero Header ─────────────────────────────────────── */}
+      {/* MakeMyTrip Style Navy Hero Header */}
       <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-8 pb-20 px-4 md:px-8 text-white relative shadow-lg">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/10 pb-6 mb-6 gap-4">
@@ -188,6 +192,11 @@ function BoatsListingContent() {
             <div className="flex items-center gap-2 text-xs font-mono text-amber-400 px-3.5 py-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 font-bold">
               <ShieldCheck className="h-4 w-4" /> Certified Marine Operators
             </div>
+          </div>
+
+          {/* Unified MakeMyTrip Search Widget for Yachts & Boats */}
+          <div className="mt-8">
+            <SearchBox />
           </div>
         </div>
       </div>

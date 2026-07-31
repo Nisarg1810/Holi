@@ -6,6 +6,7 @@ import API from "@/utils/api";
 import { useCartStore } from "@/store/useCartStore";
 import { Star, Calendar, Users, Building, ArrowLeft, RefreshCw, MapPin, Check, ShieldAlert, ArrowRight, SlidersHorizontal, Image as ImageIcon, Sparkles, Award } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import SearchBox from "@/components/booking/SearchBox";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const plusDays = (d: string, n: number) => {
@@ -19,9 +20,9 @@ function HotelsListingContent() {
   const searchParams = useSearchParams();
   const setItem = useCartStore((state) => state.setItem);
 
-  const initialCity = searchParams.get("cityName") || searchParams.get("destination") || "All";
-  const initialCheckin = searchParams.get("checkin") || searchParams.get("date") || plusDays(today(), 2);
-  const initialCheckout = searchParams.get("checkout") || plusDays(initialCheckin, 2);
+  const initialCity = searchParams.get("destination") || searchParams.get("source") || "All";
+  const initialCheckin = searchParams.get("date") || searchParams.get("checkin") || today();
+  const initialCheckout = searchParams.get("return_date") || searchParams.get("checkout") || plusDays(initialCheckin, 2);
   const initialAdults = Number(searchParams.get("adults")) || Number(searchParams.get("passengers")) || 2;
   const initialRooms = Number(searchParams.get("rooms")) || 1;
 
@@ -127,6 +128,8 @@ function HotelsListingContent() {
   const handleBookHotel = (hotel: any) => {
     const nights = getNights();
     const totalPrice = Number(hotel.price) * nights * rooms;
+    const paramFareType = searchParams.get("fare_type") || "Regular";
+    const paramGstNumber = searchParams.get("gst_number") || "";
 
     setItem({
       type: "hotel",
@@ -138,6 +141,8 @@ function HotelsListingContent() {
       details: `${hotel.location} (${nights} Night${nights > 1 ? "s" : ""}, ${rooms} Room${rooms > 1 ? "s" : ""})`,
       duration: `${nights} Night Stay`,
       image: hotel.image,
+      fare_type: paramFareType,
+      gst_number: paramGstNumber,
     });
     router.push("/checkout");
   };
@@ -177,109 +182,9 @@ function HotelsListingContent() {
             </div>
           </div>
 
-          {/* Goibibo Hotel Search Box Widget */}
-          <div className="bg-white rounded-2xl p-6 shadow-2xl text-slate-800 border border-slate-200">
-            <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-              
-              {/* WHERE TO / CITY Input */}
-              <div className="md:col-span-3 bg-slate-50 p-3 rounded-xl border border-slate-200 hover:border-[#051433] transition-colors">
-                <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Destination / City</label>
-                <select
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer"
-                >
-                  {cityOptions.map((opt) => (
-                    <option key={opt.code} value={opt.code}>
-                      {opt.name}
-                    </option>
-                  ))}
-                </select>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Where do you want to stay?</span>
-              </div>
-
-              {/* CHECK-IN DATE */}
-              <div className="md:col-span-2 bg-slate-50 p-3 rounded-xl border border-slate-200 hover:border-[#051433] transition-colors">
-                <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Check-in</label>
-                <input
-                  type="date"
-                  required
-                  value={checkin}
-                  min={today()}
-                  onChange={(e) => setCheckin(e.target.value)}
-                  className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer"
-                />
-                <span className="text-[10px] text-slate-400 block mt-0.5">Check-in Date</span>
-              </div>
-
-              {/* CHECK-OUT DATE */}
-              <div className="md:col-span-2 bg-slate-50 p-3 rounded-xl border border-slate-200 hover:border-[#051433] transition-colors">
-                <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Check-out</label>
-                <input
-                  type="date"
-                  required
-                  value={checkout}
-                  min={checkin || today()}
-                  onChange={(e) => setCheckout(e.target.value)}
-                  className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer"
-                />
-                <span className="text-[10px] text-slate-400 block mt-0.5">{getNights()} Night(s) Stay</span>
-              </div>
-
-              {/* GUESTS & ROOMS */}
-              <div className="md:col-span-3 bg-slate-50 p-3 rounded-xl border border-slate-200 hover:border-[#051433] transition-colors relative">
-                <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Guests & Rooms</label>
-                <button
-                  type="button"
-                  onClick={() => setShowPaxModal(!showPaxModal)}
-                  className="w-full text-left font-bold text-slate-900 text-sm focus:outline-none flex items-center justify-between"
-                >
-                  <span className="truncate">{adults} Guests, {rooms} Room</span>
-                  <span className="text-[9px] text-slate-400">▼</span>
-                </button>
-                <span className="text-[10px] text-slate-400 block mt-0.5">2 Adults / Room</span>
-
-                {/* Dropdown Modal */}
-                {showPaxModal && (
-                  <div className="absolute top-full right-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl p-4 shadow-2xl z-50 text-slate-800">
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                      <span className="text-xs font-bold">Adults</span>
-                      <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => setAdults(Math.max(1, adults - 1))} className="px-2 py-0.5 bg-slate-100 rounded font-bold">-</button>
-                        <span className="text-xs font-bold">{adults}</span>
-                        <button type="button" onClick={() => setAdults(adults + 1)} className="px-2 py-0.5 bg-slate-100 rounded font-bold">+</button>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between py-3 border-b border-slate-100">
-                      <span className="text-xs font-bold">Rooms</span>
-                      <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => setRooms(Math.max(1, rooms - 1))} className="px-2 py-0.5 bg-slate-100 rounded font-bold">-</button>
-                        <span className="text-xs font-bold">{rooms}</span>
-                        <button type="button" onClick={() => setRooms(rooms + 1)} className="px-2 py-0.5 bg-slate-100 rounded font-bold">+</button>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowPaxModal(false)}
-                      className="w-full py-2 bg-[#051433] text-white font-bold text-xs rounded-xl mt-3 uppercase"
-                    >
-                      Done
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* SEARCH BUTTON */}
-              <div className="md:col-span-2">
-                <button
-                  type="submit"
-                  className="w-full py-3.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] hover:to-[#C57A2D] text-black font-space font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <span>SEARCH HOTELS</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            </form>
+          {/* Unified MakeMyTrip Search Widget for Hotels */}
+          <div className="mt-8">
+            <SearchBox />
           </div>
         </div>
       </div>
