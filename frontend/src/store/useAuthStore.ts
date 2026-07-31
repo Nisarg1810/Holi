@@ -78,6 +78,7 @@ export interface AuthState {
   addTicket: (subject: string, category: string, initialMsg: string) => Promise<void>;
   addReplyToTicket: (ticketId: string, text: string) => Promise<void>;
   updateProfile: (profileDataOrName: string | Record<string, any>, phone?: string) => Promise<void>;
+  fetchProfile: () => Promise<void>;
   markNotificationsAsRead: () => void;
 }
 
@@ -236,6 +237,18 @@ export const useAuthStore = create<AuthState>()(
           set({ user: res.data });
         } catch (err) {
           console.error("Error updating profile:", err);
+        }
+      },
+      fetchProfile: async () => {
+        const user = get().user;
+        if (!user?.email) return;
+        try {
+          const res = await API.get(`/auth/profile?email=${encodeURIComponent(user.email)}`);
+          if (res.data) {
+            set({ user: res.data });
+          }
+        } catch (err) {
+          console.error("Error auto-fetching user profile from DB:", err);
         }
       },
       markNotificationsAsRead: () =>

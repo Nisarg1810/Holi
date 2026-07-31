@@ -598,10 +598,12 @@ def login_user(request):
     }, status=status.HTTP_200_OK)
 
 
-@api_view(['POST'])
+@api_view(['GET', 'POST', 'PUT'])
 def update_profile(request):
-    """POST /api/auth/profile — Update user profile fields."""
-    email = request.data.get('email')
+    """GET/POST/PUT /api/auth/profile — Retrieve or update user profile fields."""
+    email = request.data.get('email') or request.query_params.get('email')
+    if not email and request.user.is_authenticated:
+        email = request.user.email
     if not email:
         return Response({"error": "Email is required to verify identity."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -609,6 +611,9 @@ def update_profile(request):
         user = User.objects.get(email=email)
     except User.DoesNotExist:
         return Response({"error": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
 
     serializer = ProfileSerializer(user, data=request.data, partial=True)
     if serializer.is_valid():
@@ -813,6 +818,7 @@ def password_register(request):
         except ValueError:
             pass
     user.is_active = True
+    user.save()
     tokens = get_tokens_for_user(user)
     return Response({
         'message': 'Account created.',

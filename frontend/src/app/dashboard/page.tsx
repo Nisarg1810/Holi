@@ -48,7 +48,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const {
     isLoggedIn, user, bookings, tickets, notifications,
-    logout, fetchBookings, fetchTickets, addTicket,
+    logout, fetchBookings, fetchTickets, fetchProfile, addTicket,
     addReplyToTicket, updateProfile, markNotificationsAsRead,
   } = useAuthStore();
   const { items: favorites, removeItem: handleRemoveFavorite } = useWishlistStore();
@@ -213,6 +213,7 @@ export default function DashboardPage() {
     if (isLoggedIn) {
       fetchBookings();
       fetchTickets();
+      fetchProfile();
     }
   }, [isLoggedIn]);
 
