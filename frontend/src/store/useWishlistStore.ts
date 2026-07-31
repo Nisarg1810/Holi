@@ -8,6 +8,9 @@ export interface WishlistItem {
   price: string | number;
   location?: string;
   image?: string;
+  img?: string;
+  tag?: string;
+  type?: string;
   rating?: number;
   href: string;
 }

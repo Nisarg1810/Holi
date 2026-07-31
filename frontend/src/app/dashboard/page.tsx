@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { useWishlistStore } from "@/store/useWishlistStore";
+
 type Tab = "overview" | "bookings" | "favourites" | "documents" | "profile" | "tickets" | "security";
 
 function StatCard({ icon: Icon, label, value, sub, color = "gold" }: any) {
@@ -48,17 +50,18 @@ export default function DashboardPage() {
     logout, fetchBookings, fetchTickets, addTicket,
     addReplyToTicket, updateProfile, markNotificationsAsRead,
   } = useAuthStore();
+  const { items: favorites, removeItem: handleRemoveFavorite } = useWishlistStore();
 
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
-  // Profile Form States
+  // Profile Form States (strictly bound to database user object)
   const [profileName, setProfileName] = useState(user?.name || "");
   const [profilePhone, setProfilePhone] = useState(user?.phone || "");
   const [profileEmail] = useState(user?.email || "");
-  const [profileCity, setProfileCity] = useState("Mumbai");
-  const [profileNationality, setProfileNationality] = useState("Indian");
-  const [profileGender, setProfileGender] = useState("Male");
-  const [profileDob, setProfileDob] = useState("1992-08-14");
+  const [profileCity, setProfileCity] = useState(user?.city_of_residence || "");
+  const [profileNationality, setProfileNationality] = useState(user?.nationality || "Indian");
+  const [profileGender, setProfileGender] = useState(user?.gender || "Male");
+  const [profileDob, setProfileDob] = useState(user?.date_of_birth || "");
   const [profileSaved, setProfileSaved] = useState(false);
 
   // Support Tickets States
@@ -69,8 +72,8 @@ export default function DashboardPage() {
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
   const [chatReply, setChatReply] = useState("");
 
-  // Documents Upload States
-  const [docUploaded, setDocUploaded] = useState({ passport: true, aadhaar: true, visa: false, medical: true });
+  // Documents Upload States (real user action status)
+  const [docUploaded, setDocUploaded] = useState({ passport: false, aadhaar: false, visa: false, medical: false });
 
   // Cancellation Wizard States
   const [cancellingBooking, setCancellingBooking] = useState<any | null>(null);
@@ -78,17 +81,6 @@ export default function DashboardPage() {
   const [cancelReason, setCancelReason] = useState<string>("Change of Plans");
   const [cancelNotes, setCancelNotes] = useState<string>("");
   const [refundMethod, setRefundMethod] = useState<"original" | "bank">("original");
-
-  // Saved Favourites
-  const [favorites, setFavorites] = useState([
-    { id: "fav-1", name: "Kedarnath Helicopter Darshan", type: "Helicopter Package", price: "₹ 49,999", img: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=400", tag: "Spiritual" },
-    { id: "fav-2", name: "Goa Sunset Luxury Yacht", type: "Boat Charter", price: "₹ 25,000", img: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?q=80&w=400", tag: "Leisure" },
-    { id: "fav-3", name: "Taj Lake Palace Luxury Stay", type: "Hotel", price: "₹ 32,000", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=400", tag: "5-Star Resort" },
-  ]);
-
-  const handleRemoveFavorite = (id: string) => {
-    setFavorites((prev) => prev.filter((f) => f.id !== id));
-  };
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -101,10 +93,10 @@ export default function DashboardPage() {
     if (user) {
       setProfileName(user.name || "");
       setProfilePhone(user.phone || "");
-      setProfileCity(user.city_of_residence || "Mumbai");
+      setProfileCity(user.city_of_residence || "");
       setProfileNationality(user.nationality || "Indian");
       setProfileGender(user.gender || "Male");
-      setProfileDob(user.date_of_birth || "1992-08-14");
+      setProfileDob(user.date_of_birth || "");
     }
   }, [user]);
 
@@ -167,8 +159,8 @@ export default function DashboardPage() {
 
   const selectedTicket = tickets.find((t) => t.id === activeTicketId);
   const unread = notifications.filter((n: any) => !n.read).length;
-  const loyaltyPoints = bookings.length * 1500 + 3500;
-  const tier = "VIP Platinum Member";
+  const loyaltyPoints = bookings.length * 500;
+  const tier = loyaltyPoints >= 2000 ? "VIP Gold Member" : loyaltyPoints >= 500 ? "Silver Member" : "Standard Member";
 
   const NAV_ITEMS: { id: Tab; label: string; icon: any; badge?: number }[] = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -197,13 +189,13 @@ export default function DashboardPage() {
                 <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/40 font-space text-[9px] uppercase font-bold text-amber-400">
                   {tier}
                 </span>
-                <span className="text-xs text-slate-400 font-mono">ID: RA-894210</span>
+                <span className="text-xs text-slate-400 font-mono">ID: #{user?.id || "USR-ACCOUNT"}</span>
               </div>
               <h1 className="font-serif text-2xl md:text-3xl font-bold text-white tracking-tight">
                 Welcome back, {user?.name}
               </h1>
               <p className="text-xs text-slate-300 font-sans mt-0.5">
-                {user?.email} · {user?.phone || "+91 98200 12345"}
+                {user?.email} {user?.phone ? `· ${user.phone}` : ""}
               </p>
             </div>
           </div>
@@ -322,49 +314,53 @@ export default function DashboardPage() {
                       <StatCard icon={Bell} label="Notifications" value={unread} sub="Active Alerts" color="blue" />
                     </div>
 
-                    {/* Boarding Pass Card */}
-                    <div className="flex flex-col gap-4">
-                      <h3 className="font-space text-xs font-bold uppercase tracking-wider text-amber-400">Boarding Pass Preview</h3>
-                      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-[#020B1E] via-[#051433] to-[#020B1E] p-6 shadow-xl flex flex-col md:flex-row items-stretch gap-6">
-                        <div className="flex-1 flex flex-col justify-between gap-4">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-space uppercase bg-amber-400/20 text-amber-400 border border-amber-400/40 px-2.5 py-0.5 rounded font-bold">
-                              Confirmed Flight
-                            </span>
-                            <Helicopter className="h-5 w-5 text-amber-400 animate-pulse" />
-                          </div>
+                    {/* Boarding Pass Card (Live Database Booking) */}
+                    {bookings.length > 0 && (
+                      <div className="flex flex-col gap-4">
+                        <h3 className="font-space text-xs font-bold uppercase tracking-wider text-amber-400">Boarding Pass Preview</h3>
+                        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-[#020B1E] via-[#051433] to-[#020B1E] p-6 shadow-xl flex flex-col md:flex-row items-stretch gap-6">
+                          <div className="flex-1 flex flex-col justify-between gap-4">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-space uppercase bg-amber-400/20 text-amber-400 border border-amber-400/40 px-2.5 py-0.5 rounded font-bold">
+                                {bookings[0].status || "CONFIRMED FLIGHT"}
+                              </span>
+                              <Helicopter className="h-5 w-5 text-amber-400 animate-pulse" />
+                            </div>
 
-                          <div className="flex items-center justify-between gap-4">
-                            <div>
-                              <span className="text-[9px] font-space uppercase text-slate-400 block font-bold">DEPARTURE</span>
-                              <span className="font-space text-base md:text-lg font-bold text-white">Dehradun Helipad</span>
+                            <div className="flex items-center justify-between gap-4">
+                              <div>
+                                <span className="text-[9px] font-space uppercase text-slate-400 block font-bold">BOOKING REF</span>
+                                <span className="font-space text-base md:text-lg font-bold text-white">#{bookings[0].reference_number || bookings[0].id}</span>
+                              </div>
+                              <div className="flex-1 border-t border-dashed border-white/20 relative flex items-center justify-center">
+                                <span className="absolute -top-2 bg-[#051433] px-2 text-[9px] font-space text-amber-400 font-bold">
+                                  {bookings[0].service_type || "LUXURY TRIP"}
+                                </span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-[9px] font-space uppercase text-slate-400 block font-bold">ROUTE / SERVICE</span>
+                                <span className="font-space text-base md:text-lg font-bold text-amber-400">{bookings[0].route || bookings[0].name || "Helicopter Flight"}</span>
+                              </div>
                             </div>
-                            <div className="flex-1 border-t border-dashed border-white/20 relative flex items-center justify-center">
-                              <span className="absolute -top-2 bg-[#051433] px-2 text-[9px] font-space text-amber-400 font-bold">AIRBUS H145</span>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-[9px] font-space uppercase text-slate-400 block font-bold">DESTINATION</span>
-                              <span className="font-space text-base md:text-lg font-bold text-amber-400">Kedarnath Dham</span>
-                            </div>
-                          </div>
 
-                          <div className="grid grid-cols-3 gap-2 border-t border-white/10 pt-3 text-xs font-space">
-                            <div>
-                              <span className="text-[9px] text-slate-400 block font-semibold">PASSENGER</span>
-                              <span className="font-bold text-white truncate block">{user?.name}</span>
-                            </div>
-                            <div>
-                              <span className="text-[9px] text-slate-400 block font-semibold">STAGING GATE</span>
-                              <span className="font-bold text-white block">GATE ALPHA</span>
-                            </div>
-                            <div>
-                              <span className="text-[9px] text-slate-400 block font-semibold">STATUS</span>
-                              <span className="font-bold text-emerald-400 block">SLOT VERIFIED</span>
+                            <div className="grid grid-cols-3 gap-2 border-t border-white/10 pt-3 text-xs font-space">
+                              <div>
+                                <span className="text-[9px] text-slate-400 block font-semibold">PASSENGER</span>
+                                <span className="font-bold text-white truncate block">{user?.name}</span>
+                              </div>
+                              <div>
+                                <span className="text-[9px] text-slate-400 block font-semibold">DEPARTURE DATE</span>
+                                <span className="font-bold text-white block">{bookings[0].departure_date || bookings[0].date || "Upcoming"}</span>
+                              </div>
+                              <div>
+                                <span className="text-[9px] text-slate-400 block font-semibold">STATUS</span>
+                                <span className="font-bold text-emerald-400 block">SLOT VERIFIED</span>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Recent Reservations */}
                     <div className="flex flex-col gap-4">
@@ -490,9 +486,9 @@ export default function DashboardPage() {
                         {favorites.map((fav) => (
                           <div key={fav.id} className="bg-[#051433] border border-white/10 rounded-2xl overflow-hidden shadow-lg flex flex-col justify-between group">
                             <div className="h-40 relative overflow-hidden bg-slate-900">
-                              <img src={fav.img} alt={fav.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" />
+                              <img src={fav.image || fav.img || "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=400"} alt={fav.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" />
                               <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-amber-400 text-black font-space text-[9px] font-bold uppercase shadow-md">
-                                {fav.tag}
+                                {fav.tag || fav.category || "Luxury"}
                               </span>
                               <button
                                 onClick={() => handleRemoveFavorite(fav.id)}
@@ -504,11 +500,13 @@ export default function DashboardPage() {
                             <div className="p-5 flex items-center justify-between gap-4">
                               <div>
                                 <h4 className="font-space text-sm font-bold text-white">{fav.name}</h4>
-                                <span className="text-xs text-slate-400 font-sans block mt-0.5">{fav.type}</span>
+                                <span className="text-xs text-slate-400 font-sans block mt-0.5">{fav.category || fav.type || "Service"}</span>
                               </div>
                               <div className="text-right">
-                                <span className="font-space text-base font-bold text-amber-400 block">{fav.price}</span>
-                                <button onClick={() => router.push("/booking")} className="text-[10px] font-space font-bold uppercase text-slate-300 hover:text-white mt-1 block">Book Now →</button>
+                                <span className="font-space text-base font-bold text-amber-400 block">
+                                  {typeof fav.price === "number" ? `₹${fav.price.toLocaleString("en-IN")}` : fav.price}
+                                </span>
+                                <button onClick={() => router.push(fav.href || "/booking")} className="text-[10px] font-space font-bold uppercase text-slate-300 hover:text-white mt-1 block">Book Now →</button>
                               </div>
                             </div>
                           </div>
