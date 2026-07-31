@@ -5,30 +5,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCartStore } from "@/store/useCartStore";
-import { 
-  Compass, Menu, X, User, ShoppingCart, Phone, ChevronDown,
-  Helicopter, Building, Plane, Anchor
-} from "lucide-react";
+import { Compass, Menu, X, User, ShoppingCart, Phone, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [servicesHovered, setServicesHovered] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const pathname = usePathname();
   const { isLoggedIn, user, logout } = useAuthStore();
   const { item } = useCartStore();
 
-  const categories = [
-    { id: "helicopter", name: "Helicopters", icon: Helicopter, href: "/booking" },
-    { id: "hotel", name: "Hotels", icon: Building, href: "/hotels" },
-    { id: "package", name: "Tours", icon: Compass, href: "/tours" },
-    { id: "charter", name: "Charters", icon: Plane, href: "/charter" },
-    { id: "boat", name: "Yachts", icon: Anchor, href: "/boats" }
+  const serviceOptions = [
+    { name: "Helicopter Booking", href: "/booking" },
+    { name: "Bespoke Charters", href: "/charter" },
+    { name: "Tour Packages", href: "/tours" },
+    { name: "Hotels", href: "/hotels" },
+    { name: "Boat Services", href: "/boats" },
   ];
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 80) {
+      if (window.scrollY > 30) {
         setScrolled(true);
       } else {
         setScrolled(false);
@@ -51,95 +50,101 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ${
           scrolled
-            ? "bg-[#051433]/95 border-b border-white/10 py-2.5 shadow-lg backdrop-blur-md"
-            : "bg-transparent border-none py-4 shadow-none backdrop-blur-none"
+            ? "bg-white/95 backdrop-blur-md border-b border-slate-200 py-3 shadow-md"
+            : "bg-white border-b border-slate-100 py-4.5 shadow-sm"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group shrink-0">
+          <Link href="/" className="flex items-center gap-2 group">
             <img 
               src="/logo.png" 
               alt="Roman Aviation & Tourism" 
-              className="h-12 w-auto object-contain brightness-100 contrast-125" 
+              className="h-14 w-auto object-contain brightness-100 contrast-125" 
             />
           </Link>
 
-          {/* Desktop Menu - MMT transitions */}
-          <div className="hidden lg:flex items-center justify-center flex-grow mx-8">
-            <AnimatePresence mode="wait">
-              {scrolled ? (
-                <motion.div
-                  key="scrolled-tabs"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex items-center bg-white/5 border border-white/10 rounded-full p-1 divide-x divide-white/10 shadow-inner"
+          {/* Desktop Menu links */}
+          <div className="hidden lg:flex items-center gap-5 xl:gap-8">
+            {navLinks.map((link) => {
+              if (link.name === "Services") {
+                const isServicesActive = pathname.startsWith("/services") || serviceOptions.some(opt => pathname === opt.href);
+                return (
+                  <div
+                    key={link.name}
+                    className="relative py-1"
+                    onMouseEnter={() => setServicesHovered(true)}
+                    onMouseLeave={() => setServicesHovered(false)}
+                  >
+                    <Link
+                      href="/services"
+                      className={`font-space text-[10px] uppercase tracking-widest hover:text-gold transition-colors flex items-center gap-1 cursor-pointer py-1 ${
+                        isServicesActive ? "text-gold font-bold" : "text-slate-800"
+                      }`}
+                    >
+                      <span>Services</span>
+                      <ChevronDown className="h-3 w-3 text-gold" />
+                    </Link>
+
+                    {/* Dropdown menu */}
+                    <AnimatePresence>
+                      {servicesHovered && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute left-0 top-full mt-2 w-48 bg-white border border-slate-150 rounded-lg p-1.5 shadow-2xl flex flex-col gap-0.5 z-50"
+                        >
+                          {serviceOptions.map((opt) => (
+                            <Link
+                              key={opt.name}
+                              href={opt.href}
+                              className={`font-space text-[9px] uppercase tracking-widest px-3 py-2.5 rounded hover:bg-slate-50 hover:text-gold transition-all duration-200 block text-left ${
+                                pathname === opt.href ? "text-gold font-bold bg-slate-50" : "text-slate-700"
+                              }`}
+                            >
+                              {opt.name}
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              }
+
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`font-space text-[10px] uppercase tracking-widest hover:text-gold transition-colors relative py-1 ${
+                    isActive ? "text-gold font-bold" : "text-slate-800"
+                  }`}
                 >
-                  {categories.map((cat) => {
-                    const isActive = pathname === cat.href;
-                    const Icon = cat.icon;
-                    return (
-                      <Link
-                        key={cat.id}
-                        href={cat.href}
-                        className={`flex items-center gap-2.5 px-5 py-2 text-[10px] font-space font-bold uppercase tracking-widest transition-all cursor-pointer ${
-                          isActive
-                            ? "text-[#F5A623] bg-white/10 rounded-full"
-                            : "text-slate-300 hover:text-white"
-                        }`}
-                      >
-                        <Icon className={`h-3.5 w-3.5 ${isActive ? "text-[#F5A623]" : "text-slate-400"}`} />
-                        <span>{cat.name}</span>
-                      </Link>
-                    );
-                  })}
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="top-links"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex items-center gap-6"
-                >
-                  {navLinks.map((link) => {
-                    const isActive = pathname === link.href;
-                    return (
-                      <Link
-                        key={link.name}
-                        href={link.href}
-                        className={`font-space text-[10px] uppercase tracking-widest hover:text-gold transition-colors relative py-1 ${
-                          isActive ? "text-gold font-bold" : "text-slate-300"
-                        }`}
-                      >
-                        {link.name}
-                        {isActive && (
-                          <motion.div
-                            layoutId="activeNavIndicator"
-                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold"
-                            transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                          />
-                        )}
-                      </Link>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  {link.name}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNavIndicator"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right Action buttons */}
-          <div className="hidden lg:flex items-center gap-4 shrink-0">
+          <div className="hidden lg:flex items-center gap-6">
             {/* Dashboard / Login */}
             {isLoggedIn ? (
               <Link
                 href="/dashboard"
-                className="flex items-center gap-2 font-space text-[10px] uppercase tracking-widest text-slate-300 hover:text-gold transition-colors py-1.5 px-4 border border-gold/45 rounded-full bg-white/5 hover:bg-gold hover:text-black"
+                className="flex items-center gap-2 font-space text-[10px] uppercase tracking-widest text-slate-800 hover:text-gold transition-colors py-1.5 px-4 border border-gold/40 rounded-full bg-slate-50 hover:bg-gold hover:text-black"
               >
                 <User className="h-3.5 w-3.5 text-gold" />
                 <span>{user?.name.split(" ")[0]}</span>
@@ -147,7 +152,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/auth"
-                className="flex items-center gap-2 font-space text-[10px] uppercase tracking-widest text-slate-300 hover:text-white transition-colors py-2 px-5 border border-white/20 hover:border-gold rounded-full bg-white/5 hover:bg-white/10 transition-all duration-300"
+                className="flex items-center gap-2 font-space text-[10px] uppercase tracking-widest text-slate-800 hover:text-black transition-colors py-2 px-5 border border-gold/40 rounded-full bg-transparent hover:bg-gold hover:border-gold transition-all duration-300"
               >
                 <User className="h-3.5 w-3.5 text-gold" />
                 <span>Login / Register</span>
@@ -157,17 +162,17 @@ export default function Navbar() {
             {/* Book Now Primary CTA Button */}
             <Link
               href="/booking"
-              className="flex items-center gap-2 font-space text-[10px] uppercase tracking-widest text-black transition-colors py-2 px-5 border border-gold rounded-full bg-gold hover:bg-[#E3C69D] transition-all duration-300 font-bold shadow-lg shadow-gold/20"
+              className="flex items-center gap-2 font-space text-[10px] uppercase tracking-widest text-black transition-colors py-2 px-5 border border-gold rounded-full bg-gold hover:bg-gold-hover transition-all duration-300 font-bold shadow-lg shadow-gold/20"
             >
               <span>Book Now</span>
             </Link>
           </div>
 
-          {/* Mobile Nav Triggers */}
-          <div className="flex items-center gap-4 lg:hidden shrink-0">
+          {/* Tablet & Mobile Nav Triggers */}
+          <div className="flex items-center gap-4 lg:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 text-white hover:text-gold transition-colors"
+              className="p-2 text-slate-800 hover:text-gold transition-colors"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -183,54 +188,68 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-45 pt-24 px-6 bg-[#020B1E] flex flex-col justify-between pb-12 lg:hidden"
+            className="fixed inset-0 z-30 pt-24 px-6 bg-[#020B1E] flex flex-col justify-between pb-12 lg:hidden"
           >
-            <div>
-              {/* Mobile Quick Category Switcher */}
-              <div className="grid grid-cols-5 gap-1.5 border-b border-white/10 pb-5 mb-3 mt-4">
-                {categories.map((cat) => {
-                  const isActive = pathname === cat.href;
-                  const Icon = cat.icon;
+            <div className="flex flex-col gap-5 mt-8">
+              {navLinks.map((link) => {
+                if (link.name === "Services") {
                   return (
-                    <Link
-                      key={cat.id}
-                      href={cat.href}
-                      onClick={() => setIsOpen(false)}
-                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all ${
-                        isActive
-                          ? "bg-white/10 border-gold/45 text-gold"
-                          : "bg-white/2 border-white/5 text-slate-300"
-                      }`}
-                    >
-                      <Icon className="h-5 w-5 mb-1 text-inherit" />
-                      <span className="text-[8px] font-space font-bold uppercase tracking-wider text-center">{cat.name}</span>
-                    </Link>
+                    <div key={link.name} className="flex flex-col border-b border-white/5">
+                      <button
+                        onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+                        className={`font-space text-lg uppercase tracking-wider hover:text-gold transition-colors py-2 flex justify-between items-center w-full cursor-pointer ${
+                          mobileServicesOpen ? "text-gold" : "text-white"
+                        }`}
+                      >
+                        <span>Services</span>
+                        <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${mobileServicesOpen ? "rotate-180 text-gold" : "text-white/50"}`} />
+                      </button>
+                      
+                      <AnimatePresence>
+                        {mobileServicesOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden flex flex-col pl-4 gap-1 pb-3 pt-1"
+                          >
+                            {serviceOptions.map((opt) => (
+                              <Link
+                                key={opt.name}
+                                href={opt.href}
+                                onClick={() => setIsOpen(false)}
+                                className={`font-space text-sm uppercase tracking-wide hover:text-gold transition-colors py-2 ${
+                                  pathname === opt.href ? "text-gold font-semibold" : "text-white/80"
+                                }`}
+                              >
+                                {opt.name}
+                              </Link>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   );
-                })}
-              </div>
+                }
 
-              {/* Standard Links */}
-              <div className="flex flex-col gap-4 mt-6">
-                {navLinks.map((link) => {
-                  const isActive = pathname === link.href;
-                  return (
-                    <Link
-                      key={link.name}
-                      href={link.href}
-                      onClick={() => setIsOpen(false)}
-                      className={`font-space text-base uppercase tracking-wider hover:text-gold transition-colors py-2 border-b border-white/5 flex justify-between items-center ${
-                        isActive ? "text-gold" : "text-white"
-                      }`}
-                    >
-                      <span>{link.name}</span>
-                      <Compass className="h-4 w-4 text-gold/30" />
-                    </Link>
-                  );
-                })}
-              </div>
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`font-space text-lg uppercase tracking-wider hover:text-gold transition-colors py-2 border-b border-white/5 flex justify-between items-center ${
+                      isActive ? "text-gold" : "text-white"
+                    }`}
+                  >
+                    <span>{link.name}</span>
+                    <Compass className="h-4 w-4 text-gold/30" />
+                  </Link>
+                );
+              })}
             </div>
 
-            <div className="flex flex-col gap-4 mt-auto">
+            <div className="flex flex-col gap-4">
               {isLoggedIn ? (
                 <div className="flex items-center justify-between border-t border-white/10 pt-6 mb-4">
                   <Link
