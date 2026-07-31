@@ -617,6 +617,75 @@ def update_profile(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+from .models import UserKYCDocument
+from .serializers import UserKYCDocumentSerializer
+
+@api_view(['GET', 'POST'])
+def kyc_documents_view(request):
+    """GET/POST /api/auth/kyc-documents — List or upload user KYC documents."""
+    email = request.data.get('email') or request.query_params.get('email')
+    if not email and request.user.is_authenticated:
+        email = request.user.email
+    if not email:
+        return Response({"error": "Email is required to verify identity."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        docs = UserKYCDocument.objects.filter(user=user)
+        return Response(UserKYCDocumentSerializer(docs, many=True).data, status=status.HTTP_200_OK)
+
+    if request.method == 'POST':
+        doc_type = request.data.get('document_type')
+        uploaded_file = request.FILES.get('file')
+        file_name = request.data.get('file_name', uploaded_file.name if uploaded_file else 'Document')
+        file_size = request.data.get('file_size', '')
+
+        if not doc_type:
+            return Response({"error": "Document type is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        doc, created = UserKYCDocument.objects.update_or_create(
+            user=user,
+            document_type=doc_type,
+            defaults={
+                'file': uploaded_file,
+                'file_name': file_name,
+                'file_size': file_size,
+                'status': 'Verified'
+            }
+        )
+        return Response(UserKYCDocumentSerializer(doc).data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def change_password(request):
+    """POST /api/auth/change-password — Securely update user password."""
+    email = request.data.get('email')
+    current_password = request.data.get('current_password')
+    new_password = request.data.get('new_password')
+
+    if not email or not current_password or not new_password:
+        return Response({"error": "Email, current password, and new password are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if not user.check_password(current_password):
+        return Response({"error": "Current password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if len(new_password) < 8:
+        return Response({"error": "New password must be at least 8 characters long."}, status=status.HTTP_400_BAD_REQUEST)
+
+    user.set_password(new_password)
+    user.save()
+    return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
+
+
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """Read-only viewset for listing/retrieving users (admin use)."""
     queryset = User.objects.all().order_by('-created_at')

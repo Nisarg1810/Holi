@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import API from "@/utils/api";
 import { useWishlistStore } from "@/store/useWishlistStore";
 
 type Tab = "overview" | "bookings" | "favourites" | "documents" | "profile" | "tickets" | "security";
@@ -54,7 +55,7 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
-  // Profile Form States (strictly bound to database user object)
+  // Profile Form States
   const [profileName, setProfileName] = useState(user?.name || "");
   const [profilePhone, setProfilePhone] = useState(user?.phone || "");
   const [profileEmail] = useState(user?.email || "");
@@ -72,7 +73,7 @@ export default function DashboardPage() {
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
   const [chatReply, setChatReply] = useState("");
 
-  // Documents Upload States (real file handling)
+  // Documents Upload States (real file handling & database sync)
   const [docFiles, setDocFiles] = useState<Record<string, { fileName: string; fileSize: string; uploadedAt: string }>>({});
   const fileInputRefs: Record<string, React.RefObject<HTMLInputElement | null>> = {
     passport: React.useRef<HTMLInputElement>(null),
@@ -81,7 +82,27 @@ export default function DashboardPage() {
     medical: React.useRef<HTMLInputElement>(null),
   };
 
-  const handleFileUpload = (docKey: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    if (user?.email) {
+      API.get(`/auth/kyc-documents?email=${encodeURIComponent(user.email)}`)
+        .then((res) => {
+          if (Array.isArray(res.data)) {
+            const docsMap: Record<string, any> = {};
+            res.data.forEach((d: any) => {
+              docsMap[d.document_type] = {
+                fileName: d.file_name,
+                fileSize: d.file_size || "Verified",
+                uploadedAt: `Uploaded on ${new Date(d.uploaded_at).toLocaleDateString()}`,
+              };
+            });
+            setDocFiles(docsMap);
+          }
+        })
+        .catch((err) => console.error("Error fetching KYC docs:", err));
+    }
+  }, [user]);
+
+  const handleFileUpload = async (docKey: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
@@ -94,6 +115,21 @@ export default function DashboardPage() {
           uploadedAt: `Uploaded today at ${timeStr}`,
         },
       }));
+
+      try {
+        const formData = new FormData();
+        formData.append('document_type', docKey);
+        formData.append('file', file);
+        formData.append('file_name', file.name);
+        formData.append('file_size', `${sizeMb} MB`);
+        if (user?.email) formData.append('email', user.email);
+
+        await API.post('/auth/kyc-documents', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } catch (err) {
+        console.error('Error saving KYC doc to DB:', err);
+      }
     }
   };
 
@@ -122,7 +158,7 @@ export default function DashboardPage() {
     { id: "l-3", event: "JWT Token Issued", device: "OAuth RS256 Engine", date: "Today at 21:40" },
   ]);
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currPassword) {
       setPwdStatus({ type: "error", msg: "Please enter your current password." });
@@ -136,15 +172,26 @@ export default function DashboardPage() {
       setPwdStatus({ type: "error", msg: "New passwords do not match." });
       return;
     }
-    setPwdStatus({ type: "success", msg: "Password updated successfully!" });
-    setCurrPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setSecurityLogs((prev) => [
-      { id: `l-${Date.now()}`, event: "Account Password Updated", device: "User Profile Panel", date: "Just now" },
-      ...prev,
-    ]);
-    setTimeout(() => setPwdStatus(null), 3500);
+
+    try {
+      await API.post('/auth/change-password', {
+        email: user?.email,
+        current_password: currPassword,
+        new_password: newPassword,
+      });
+      setPwdStatus({ type: "success", msg: "Password updated and secured in database!" });
+      setCurrPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setSecurityLogs((prev) => [
+        { id: `l-${Date.now()}`, event: "Password Updated in Database", device: "Security Panel", date: "Just now" },
+        ...prev,
+      ]);
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || "Failed to update password. Check current password.";
+      setPwdStatus({ type: "error", msg: errorMsg });
+    }
+    setTimeout(() => setPwdStatus(null), 4000);
   };
 
   const handleRevokeSession = (sessionId: string) => {

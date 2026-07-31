@@ -94,3 +94,26 @@ class OTPVerification(models.Model):
 
     def is_locked(self):
         return self.attempts >= self.MAX_ATTEMPTS
+
+
+class UserKYCDocument(models.Model):
+    DOCUMENT_TYPES = (
+        ('passport', 'Passport'),
+        ('aadhaar', 'Aadhaar Card'),
+        ('visa', 'Visa Document'),
+        ('medical', 'Medical Clearance'),
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='kyc_documents')
+    document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPES)
+    file = models.FileField(upload_to='kyc_documents/', blank=True, null=True)
+    file_name = models.CharField(max_length=255)
+    file_size = models.CharField(max_length=50, blank=True, null=True)
+    status = models.CharField(max_length=20, default='Verified')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'user_kyc_documents'
+        unique_together = ('user', 'document_type')
+
+    def __str__(self):
+        return f"{self.user.email} - {self.document_type} ({self.file_name})"
