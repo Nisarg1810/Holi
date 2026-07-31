@@ -97,9 +97,27 @@ export default function DashboardPage() {
     }
   }, [isLoggedIn]);
 
+  useEffect(() => {
+    if (user) {
+      setProfileName(user.name || "");
+      setProfilePhone(user.phone || "");
+      setProfileCity(user.city_of_residence || "Mumbai");
+      setProfileNationality(user.nationality || "Indian");
+      setProfileGender(user.gender || "Male");
+      setProfileDob(user.date_of_birth || "1992-08-14");
+    }
+  }, [user]);
+
   const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateProfile(profileName, profilePhone);
+    await updateProfile({
+      name: profileName,
+      phone: profilePhone,
+      city_of_residence: profileCity,
+      nationality: profileNationality,
+      gender: profileGender,
+      date_of_birth: profileDob || null,
+    });
     setProfileSaved(true);
     setTimeout(() => setProfileSaved(false), 2500);
   };
