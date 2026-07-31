@@ -26,6 +26,8 @@ export interface Booking {
   price: number;
   status: "Confirmed" | "Pending" | "Cancelled" | "In Flight";
   invoiceUrl?: string;
+  fare_type?: string;
+  gst_number?: string;
 }
 
 export interface SupportTicket {

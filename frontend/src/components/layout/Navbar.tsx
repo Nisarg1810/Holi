@@ -42,7 +42,6 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { name: "Services", href: "/services" },
     { name: "Guides", href: "/blog" },
     { name: "Careers", href: "/careers" },
     { name: "About Us", href: "/about" },

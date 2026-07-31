@@ -19,6 +19,8 @@ export interface CartItem {
   details: string;
   duration?: string;
   image?: string;
+  fare_type?: string;
+  gst_number?: string;
 }
 
 export interface Passenger {

@@ -27,7 +27,13 @@ import {
   Check,
   CheckCircle2,
   Helicopter,
-  Award
+  Award,
+  Building,
+  Home,
+  Shield,
+  DollarSign,
+  FileText,
+  Anchor
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "@/utils/api";
@@ -72,6 +78,8 @@ function BookingSearchContent() {
   const paramAdults = Number(searchParams.get("adults")) || 2;
   const paramChildren = Number(searchParams.get("children")) || 0;
   const paramInfants = Number(searchParams.get("infants")) || 0;
+  const paramFareType = searchParams.get("fare_type") || "Regular";
+  const paramGstNumber = searchParams.get("gst_number") || "";
 
   const [tripType, setTripType] = useState<"One Way" | "Round Trip" | "Multi-City">(paramTripType);
   const [localSource, setLocalSource] = useState(paramSource);
@@ -81,6 +89,9 @@ function BookingSearchContent() {
   const [adults, setAdults] = useState(paramAdults);
   const [children, setChildren] = useState(paramChildren);
   const [infants, setInfants] = useState(paramInfants);
+  const [fareType, setFareType] = useState<string>(paramFareType);
+  const [gstNumber, setGstNumber] = useState<string>(paramGstNumber);
+  const [gstCompanyName, setGstCompanyName] = useState<string>("");
   const [showPaxDropdown, setShowPaxDropdown] = useState(false);
 
   const [multiCityLegs, setMultiCityLegs] = useState<{ source: string; destination: string; date: string }[]>([
@@ -106,7 +117,9 @@ function BookingSearchContent() {
     setAdults(paramAdults);
     setChildren(paramChildren);
     setInfants(paramInfants);
-  }, [paramTripType, paramSource, paramDest, paramDate, paramReturnDate, paramAdults, paramChildren, paramInfants]);
+    setFareType(paramFareType);
+    setGstNumber(paramGstNumber);
+  }, [paramTripType, paramSource, paramDest, paramDate, paramReturnDate, paramAdults, paramChildren, paramInfants, paramFareType, paramGstNumber]);
 
   useEffect(() => {
     const fetchFleet = async () => {
@@ -178,6 +191,10 @@ function BookingSearchContent() {
     query.set("children", children.toString());
     query.set("infants", infants.toString());
     query.set("passengers", totalPassengers.toString());
+    query.set("fare_type", fareType);
+    if (gstNumber) {
+      query.set("gst_number", gstNumber);
+    }
     
     router.push(`/booking?${query.toString()}`);
   };
@@ -211,250 +228,359 @@ function BookingSearchContent() {
       details: detailsStr,
       duration: heli.speed.includes("240") ? "45 Mins" : "35 Mins",
       image: heli.image,
+      fare_type: fareType,
+      gst_number: gstNumber,
     });
     router.push("/checkout");
+  };
+
+  // Date formatter for MakeMyTrip style
+  const getFormattedDate = (dateStr: string) => {
+    if (!dateStr) return { day: "--", monthYear: "Select Date", weekday: "" };
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return { day: "--", monthYear: "Select Date", weekday: "" };
+      const day = date.getDate();
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const month = monthNames[date.getMonth()];
+      const year = date.getFullYear().toString().slice(-2);
+      const weekdayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const weekday = weekdayNames[date.getDay()];
+      return {
+        day: day.toString().padStart(2, "0"),
+        monthYear: `${month}'${year}`,
+        weekday
+      };
+    } catch {
+      return { day: "--", monthYear: "Select Date", weekday: "" };
+    }
+  };
+
+  const departDateObj = getFormattedDate(localDate);
+  const returnDateObj = getFormattedDate(localReturnDate);
+
+  const categories = [
+    { name: "Helicopters", icon: Helicopter, href: "/booking", active: true },
+    { name: "Hotels", icon: Building, href: "/hotels" },
+    { name: "Holiday Packages", icon: Compass, href: "/tours" },
+    { name: "Bespoke Charters", icon: Plane, href: "/charter" },
+    { name: "Yacht Service", icon: Anchor, href: "/boats" }
+  ];
+
+  const handleSwapLocations = () => {
+    const temp = localSource;
+    setLocalSource(localDest);
+    setLocalDest(temp);
   };
 
   return (
     <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
       {/* MakeMyTrip Signature Navy Hero Banner */}
-      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-6 pb-20 px-4 md:px-8 text-white relative shadow-lg">
-        <div className="max-w-7xl mx-auto">
+      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-6 pb-24 px-4 md:px-8 text-white relative shadow-lg">
+        <div className="max-w-7xl mx-auto relative">
           <BookingProgressTracker currentStep={2} />
 
+          {/* MakeMyTrip Centered Top Navigation Tabs - Overlapping the Hero Grid */}
+          <div className="flex justify-center -mb-8 mt-6 relative z-30">
+            <div className="bg-white rounded-xl shadow-xl border border-slate-200/80 px-6 py-3 flex items-center justify-start gap-8 overflow-x-auto max-w-full no-scrollbar">
+              {categories.map((cat, i) => {
+                const Icon = cat.icon;
+                return (
+                  <Link
+                    key={i}
+                    href={cat.href || "#"}
+                    className={`flex flex-col items-center gap-1 min-w-[70px] transition-all relative ${
+                      cat.active 
+                        ? "text-blue-600 font-bold" 
+                        : "text-slate-500 hover:text-blue-500 font-medium"
+                    }`}
+                  >
+                    <Icon className={`h-5 w-5 ${cat.active ? "text-blue-600 animate-pulse" : "text-slate-400"}`} />
+                    <span className="text-[11px] whitespace-nowrap">{cat.name}</span>
+                    {cat.active && (
+                      <span className="absolute -bottom-3 left-0 right-0 h-[3px] bg-blue-600 rounded-t-full" />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
           {/* MakeMyTrip Style Main Search Card */}
-          <div className="bg-white rounded-2xl shadow-2xl p-6 text-slate-800 border border-slate-200 mt-4">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 pt-14 text-slate-800 border border-slate-200/60 mt-12 relative z-20">
             
-            {/* Trip Type Selector Pills */}
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-5">
-              <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl">
-                <button
-                  type="button"
-                  onClick={() => setTripType("One Way")}
-                  className={`px-4 py-2 text-xs font-bold font-space uppercase tracking-wider rounded-lg transition-all flex items-center gap-2 ${
-                    tripType === "One Way"
-                      ? "bg-[#051433] text-white shadow-md"
-                      : "text-slate-600 hover:text-black"
-                  }`}
-                >
-                  <Plane className="h-3.5 w-3.5" />
-                  One Way
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTripType("Round Trip")}
-                  className={`px-4 py-2 text-xs font-bold font-space uppercase tracking-wider rounded-lg transition-all flex items-center gap-2 ${
-                    tripType === "Round Trip"
-                      ? "bg-[#051433] text-white shadow-md"
-                      : "text-slate-600 hover:text-black"
-                  }`}
-                >
-                  <ArrowRightLeft className="h-3.5 w-3.5" />
-                  Round Trip
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTripType("Multi-City")}
-                  className={`px-4 py-2 text-xs font-bold font-space uppercase tracking-wider rounded-lg transition-all flex items-center gap-2 ${
-                    tripType === "Multi-City"
-                      ? "bg-[#051433] text-white shadow-md"
-                      : "text-slate-600 hover:text-black"
-                  }`}
-                >
-                  <Compass className="h-3.5 w-3.5" />
-                  Multi-City
-                </button>
+            {/* Trip Type Selector & Headline */}
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-3 mb-6">
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-bold text-slate-700">
+                  <input
+                    type="radio"
+                    name="triptype"
+                    checked={tripType === "One Way"}
+                    onChange={() => setTripType("One Way")}
+                    className="accent-blue-600 h-4 w-4"
+                  />
+                  <span>One Way</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-bold text-slate-700">
+                  <input
+                    type="radio"
+                    name="triptype"
+                    checked={tripType === "Round Trip"}
+                    onChange={() => setTripType("Round Trip")}
+                    className="accent-blue-600 h-4 w-4"
+                  />
+                  <span>Round Trip</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-bold text-slate-700">
+                  <input
+                    type="radio"
+                    name="triptype"
+                    checked={tripType === "Multi-City"}
+                    onChange={() => setTripType("Multi-City")}
+                    className="accent-blue-600 h-4 w-4"
+                  />
+                  <span>Multi-City</span>
+                </label>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-                <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                <span>DGCA Authorized Operators Only</span>
+              <div className="text-xs text-slate-400 font-bold font-sans">
+                Book Private Helicopter & Jet Charters
               </div>
             </div>
 
-            {/* MakeMyTrip Flight Input Grid */}
-            <form onSubmit={handleUpdateSearch}>
+            {/* MakeMyTrip Styled Input Grid */}
+            <form onSubmit={handleUpdateSearch} className="relative pb-6">
               {tripType !== "Multi-City" ? (
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                  {/* FROM Input Box */}
-                  <div className="md:col-span-3 bg-white p-3 rounded-xl border border-slate-200 hover:border-[#051433] transition-colors cursor-pointer group">
-                    <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">From</label>
-                    <select
-                      value={localSource}
-                      onChange={(e) => setLocalSource(e.target.value)}
-                      className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer"
+                <div className="relative">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 border border-slate-300 rounded-xl overflow-hidden divide-y lg:divide-y-0 lg:divide-x divide-slate-200 bg-white">
+                    
+                    {/* FROM Section */}
+                    <div className="lg:col-span-3 p-4 hover:bg-slate-50 transition-all cursor-pointer relative group">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">From</span>
+                      <select
+                        value={localSource}
+                        onChange={(e) => setLocalSource(e.target.value)}
+                        className="w-full bg-transparent font-space text-lg font-bold text-slate-900 focus:outline-none cursor-pointer appearance-none"
+                      >
+                        {sourceOptions.map((opt) => (
+                          <option key={opt.code} value={`${opt.name} (${opt.code})`}>
+                            {opt.name} ({opt.code})
+                          </option>
+                        ))}
+                      </select>
+                      <span className="text-xs text-slate-500 block truncate mt-1">
+                        {sourceOptions.find(o => localSource.includes(o.name))?.desc || "VIP Departure Heliport"}
+                      </span>
+                    </div>
+
+                    {/* Swap Circle Button */}
+                    <div className="absolute left-[25%] top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 hidden lg:block">
+                      <button
+                        type="button"
+                        onClick={handleSwapLocations}
+                        className="h-8 w-8 rounded-full border border-slate-300 bg-white hover:bg-slate-50 shadow-md flex items-center justify-center text-blue-600 hover:text-blue-700 transition-all active:scale-95"
+                      >
+                        <ArrowRightLeft className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {/* TO Section */}
+                    <div className="lg:col-span-3 p-4 hover:bg-slate-50 transition-all cursor-pointer group">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">To</span>
+                      <select
+                        value={localDest}
+                        onChange={(e) => setLocalDest(e.target.value)}
+                        className="w-full bg-transparent font-space text-lg font-bold text-slate-900 focus:outline-none cursor-pointer appearance-none"
+                      >
+                        {destOptions.map((opt) => (
+                          <option key={opt.code} value={opt.name}>
+                            {opt.name}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="text-xs text-slate-500 block truncate mt-1">
+                        {destOptions.find(o => localDest.includes(o.name))?.desc || "Arrival Sanctuary / Shrine"}
+                      </span>
+                    </div>
+
+                    {/* DEPARTURE Section */}
+                    <div className="lg:col-span-2 p-4 hover:bg-slate-50 transition-all cursor-pointer relative">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Departure</span>
+                      <div className="relative">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="font-space text-2xl font-bold text-slate-900">{departDateObj.day}</span>
+                          <span className="font-space text-sm font-bold text-slate-800">{departDateObj.monthYear}</span>
+                        </div>
+                        <span className="text-xs text-slate-500 block mt-0.5">{departDateObj.weekday || "Select Date"}</span>
+                        <input
+                          type="date"
+                          required
+                          value={localDate}
+                          min={new Date().toISOString().split("T")[0]}
+                          onChange={(e) => setLocalDate(e.target.value)}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                      </div>
+                    </div>
+
+                    {/* RETURN Section */}
+                    <div 
+                      className={`lg:col-span-2 p-4 hover:bg-slate-50 transition-all cursor-pointer relative ${
+                        tripType === "One Way" ? "bg-slate-50/50" : ""
+                      }`}
                     >
-                      {sourceOptions.map((opt) => (
-                        <option key={opt.code} value={`${opt.name} (${opt.code})`}>
-                          {opt.name} ({opt.code}) - {opt.desc}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="text-[10px] text-slate-400 block truncate mt-0.5">Primary Departure Heliport</span>
-                  </div>
-
-                  {/* TO Input Box */}
-                  <div className="md:col-span-3 bg-white p-3 rounded-xl border border-slate-200 hover:border-[#051433] transition-colors cursor-pointer group">
-                    <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">To</label>
-                    <select
-                      value={localDest}
-                      onChange={(e) => setLocalDest(e.target.value)}
-                      className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer"
-                    >
-                      {destOptions.map((opt) => (
-                        <option key={opt.code} value={opt.name}>
-                          {opt.name} - {opt.desc}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="text-[10px] text-slate-400 block truncate mt-0.5">Arrival Sanctuary / Shrine</span>
-                  </div>
-
-                  {/* DEPARTURE DATE Box */}
-                  <div className="md:col-span-2 bg-white p-3 rounded-xl border border-slate-200 hover:border-[#051433] transition-colors cursor-pointer">
-                    <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">Departure</label>
-                    <input
-                      type="date"
-                      required
-                      value={localDate}
-                      min={new Date().toISOString().split("T")[0]}
-                      onChange={(e) => setLocalDate(e.target.value)}
-                      className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer"
-                    />
-                    <span className="text-[10px] text-slate-400 block mt-0.5">Travel Date</span>
-                  </div>
-
-                  {/* RETURN DATE Box */}
-                  <div className={`md:col-span-2 bg-white p-3 rounded-xl border transition-colors cursor-pointer ${
-                    tripType === "Round Trip" ? "border-slate-200 hover:border-[#051433]" : "border-slate-100 opacity-50 bg-slate-50"
-                  }`}>
-                    <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">
-                      Return {tripType === "One Way" && "(Optional)"}
-                    </label>
-                    <input
-                      type="date"
-                      disabled={tripType === "One Way"}
-                      required={tripType === "Round Trip"}
-                      value={localReturnDate}
-                      min={localDate || new Date().toISOString().split("T")[0]}
-                      onChange={(e) => setLocalReturnDate(e.target.value)}
-                      className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer disabled:cursor-not-allowed"
-                    />
-                    <span className="text-[10px] text-slate-400 block mt-0.5">
-                      {tripType === "Round Trip" ? "Return Flight Date" : "Tap for Round Trip"}
-                    </span>
-                  </div>
-
-                  {/* TRAVELLERS & CLASS Box */}
-                  <div className="md:col-span-2 bg-white p-3 rounded-xl border border-slate-200 hover:border-[#051433] transition-colors relative">
-                    <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">Travellers</label>
-                    <button
-                      type="button"
-                      onClick={() => setShowPaxDropdown(!showPaxDropdown)}
-                      className="w-full text-left font-bold text-slate-900 text-sm focus:outline-none flex items-center justify-between"
-                    >
-                      <span className="truncate">{totalPassengers} Pax ({adults}A, {children}C)</span>
-                      <ChevronDown className="h-4 w-4 text-slate-400" />
-                    </button>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">Executive Charter Class</span>
-
-                    {/* MMT Pax Counter Dropdown */}
-                    <AnimatePresence>
-                      {showPaxDropdown && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 5 }}
-                          className="absolute top-full right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl p-4 shadow-2xl z-50 text-slate-800"
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Return</span>
+                      {tripType === "One Way" ? (
+                        <div 
+                          onClick={() => {
+                            setTripType("Round Trip");
+                            // Default return date is 2 days from departure
+                            if (localDate) {
+                              const d = new Date(localDate);
+                              d.setDate(d.getDate() + 2);
+                              setLocalReturnDate(d.toISOString().split("T")[0]);
+                            }
+                          }}
+                          className="flex flex-col justify-center h-full min-h-[36px]"
                         >
-                          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                            <div>
-                              <div className="text-xs font-bold text-slate-900">Adults</div>
-                              <div className="text-[10px] text-slate-400">12+ Years</div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <button
-                                type="button"
-                                disabled={adults <= 1}
-                                onClick={() => setAdults(adults - 1)}
-                                className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
-                              >
-                                <Minus className="h-3 w-3" />
-                              </button>
-                              <span className="text-xs font-bold w-4 text-center">{adults}</span>
-                              <button
-                                type="button"
-                                disabled={adults >= 8}
-                                onClick={() => setAdults(adults + 1)}
-                                className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
-                              >
-                                <Plus className="h-3 w-3" />
-                              </button>
-                            </div>
+                          <span className="text-[11px] text-slate-400 font-bold font-sans hover:text-blue-600 transition-colors">
+                            Tap to add return date for bigger discounts
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="font-space text-2xl font-bold text-slate-900">{returnDateObj.day}</span>
+                            <span className="font-space text-sm font-bold text-slate-800">{returnDateObj.monthYear}</span>
                           </div>
-
-                          <div className="flex items-center justify-between py-3 border-b border-slate-100">
-                            <div>
-                              <div className="text-xs font-bold text-slate-900">Children</div>
-                              <div className="text-[10px] text-slate-400">2-12 Years</div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <button
-                                type="button"
-                                disabled={children <= 0}
-                                onClick={() => setChildren(children - 1)}
-                                className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
-                              >
-                                <Minus className="h-3 w-3" />
-                              </button>
-                              <span className="text-xs font-bold w-4 text-center">{children}</span>
-                              <button
-                                type="button"
-                                disabled={children >= 6}
-                                onClick={() => setChildren(children + 1)}
-                                className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
-                              >
-                                <Plus className="h-3 w-3" />
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between pt-3">
-                            <div>
-                              <div className="text-xs font-bold text-slate-900">Infants</div>
-                              <div className="text-[10px] text-slate-400">Below 2 Years</div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <button
-                                type="button"
-                                disabled={infants <= 0}
-                                onClick={() => setInfants(infants - 1)}
-                                className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
-                              >
-                                <Minus className="h-3 w-3" />
-                              </button>
-                              <span className="text-xs font-bold w-4 text-center">{infants}</span>
-                              <button
-                                type="button"
-                                disabled={infants >= 4}
-                                onClick={() => setInfants(infants + 1)}
-                                className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
-                              >
-                                <Plus className="h-3 w-3" />
-                              </button>
-                            </div>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => setShowPaxDropdown(false)}
-                            className="w-full py-2 bg-[#051433] text-white rounded-xl font-bold text-xs uppercase mt-3 hover:bg-[#092254] transition-colors"
-                          >
-                            Apply
-                          </button>
-                        </motion.div>
+                          <span className="text-xs text-slate-500 block mt-0.5">{returnDateObj.weekday || "Select Date"}</span>
+                          <input
+                            type="date"
+                            required={tripType === "Round Trip"}
+                            value={localReturnDate}
+                            min={localDate || new Date().toISOString().split("T")[0]}
+                            onChange={(e) => setLocalReturnDate(e.target.value)}
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                          />
+                        </div>
                       )}
-                    </AnimatePresence>
+                    </div>
+
+                    {/* TRAVELLERS & CLASS Section */}
+                    <div className="lg:col-span-2 p-4 hover:bg-slate-50 transition-all cursor-pointer relative">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Travellers &amp; Class</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowPaxDropdown(!showPaxDropdown)}
+                        className="w-full text-left focus:outline-none"
+                      >
+                        <div className="flex items-baseline gap-1">
+                          <span className="font-space text-xl font-bold text-slate-900">{totalPassengers}</span>
+                          <span className="font-space text-sm font-bold text-slate-800">Guest{totalPassengers > 1 ? "s" : ""}</span>
+                        </div>
+                        <span className="text-xs text-slate-500 block truncate mt-0.5">Executive Charter Class</span>
+                      </button>
+
+                      {/* MakeMyTrip Passenger Counter Dropdown */}
+                      <AnimatePresence>
+                        {showPaxDropdown && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 5 }}
+                            className="absolute top-full right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl p-5 shadow-2xl z-50 text-slate-800"
+                          >
+                            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                              <div>
+                                <div className="text-xs font-bold text-slate-900">Adults</div>
+                                <div className="text-[10px] text-slate-400">12+ Years</div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  type="button"
+                                  disabled={adults <= 1}
+                                  onClick={() => setAdults(adults - 1)}
+                                  className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
+                                >
+                                  <Minus className="h-3 w-3" />
+                                </button>
+                                <span className="text-xs font-bold w-4 text-center">{adults}</span>
+                                <button
+                                  type="button"
+                                  disabled={adults >= 8}
+                                  onClick={() => setAdults(adults + 1)}
+                                  className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                              <div>
+                                <div className="text-xs font-bold text-slate-900">Children</div>
+                                <div className="text-[10px] text-slate-400">2-12 Years</div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  type="button"
+                                  disabled={children <= 0}
+                                  onClick={() => setChildren(children - 1)}
+                                  className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
+                                >
+                                  <Minus className="h-3 w-3" />
+                                </button>
+                                <span className="text-xs font-bold w-4 text-center">{children}</span>
+                                <button
+                                  type="button"
+                                  disabled={children >= 6}
+                                  onClick={() => setChildren(children + 1)}
+                                  className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-3">
+                              <div>
+                                <div className="text-xs font-bold text-slate-900">Infants</div>
+                                <div className="text-[10px] text-slate-400">Below 2 Years</div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  type="button"
+                                  disabled={infants <= 0}
+                                  onClick={() => setInfants(infants - 1)}
+                                  className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
+                                >
+                                  <Minus className="h-3 w-3" />
+                                </button>
+                                <span className="text-xs font-bold w-4 text-center">{infants}</span>
+                                <button
+                                  type="button"
+                                  disabled={infants >= 4}
+                                  onClick={() => setInfants(infants + 1)}
+                                  className="h-7 w-7 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-30 font-bold flex items-center justify-center"
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => setShowPaxDropdown(false)}
+                              className="w-full py-2 bg-blue-600 text-white rounded-xl font-bold text-xs uppercase mt-4 hover:bg-blue-700 transition-colors font-space"
+                            >
+                              Apply Selection
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
                   </div>
                 </div>
               ) : (
@@ -471,7 +597,7 @@ function BookingSearchContent() {
                             updated[idx].source = e.target.value;
                             setMultiCityLegs(updated);
                           }}
-                          className="w-full bg-transparent font-bold text-xs text-slate-900"
+                          className="w-full bg-transparent font-bold text-xs text-slate-900 focus:outline-none"
                         >
                           {sourceOptions.map((opt) => (
                             <option key={opt.code} value={`${opt.name} (${opt.code})`}>{opt.name} ({opt.code})</option>
@@ -488,7 +614,7 @@ function BookingSearchContent() {
                             updated[idx].destination = e.target.value;
                             setMultiCityLegs(updated);
                           }}
-                          className="w-full bg-transparent font-bold text-xs text-slate-900"
+                          className="w-full bg-transparent font-bold text-xs text-slate-900 focus:outline-none"
                         >
                           {destOptions.map((opt) => (
                             <option key={opt.code} value={opt.name}>{opt.name}</option>
@@ -506,7 +632,7 @@ function BookingSearchContent() {
                             updated[idx].date = e.target.value;
                             setMultiCityLegs(updated);
                           }}
-                          className="w-full bg-transparent font-bold text-xs text-slate-900"
+                          className="w-full bg-transparent font-bold text-xs text-slate-900 focus:outline-none cursor-pointer"
                         />
                       </div>
 
@@ -526,14 +652,84 @@ function BookingSearchContent() {
                 </div>
               )}
 
-              {/* Big MakeMyTrip Search Button */}
-              <div className="flex justify-center mt-5">
+              {/* Special Fare Selection Section */}
+              <div className="mt-6">
+                <span className="text-xs font-bold text-slate-600 block mb-2.5 uppercase tracking-wide">
+                  Select a Special Fare
+                </span>
+                
+                <div className="flex flex-wrap gap-2.5">
+                  {[
+                    { id: "Regular", name: "Regular Fares", sub: "Standard pricing" },
+                    { id: "Student", name: "Student", sub: "Flat 10% off base" },
+                    { id: "Armed Forces", name: "Armed Forces", sub: "Flat 15% off base" },
+                    { id: "Senior Citizen", name: "Senior Citizen", sub: "Flat 12% off base" },
+                    { id: "Doctor & Nurses", name: "Doctor & Nurses", sub: "Flat 10% off base" },
+                    { id: "GST", name: "Have a GST number?", sub: "Enter corporate details" },
+                  ].map((fare) => (
+                    <button
+                      key={fare.id}
+                      type="button"
+                      onClick={() => {
+                        setFareType(fare.id);
+                        if (fare.id !== "GST") {
+                          setGstNumber("");
+                          setGstCompanyName("");
+                        }
+                      }}
+                      className={`px-4 py-3 rounded-xl border text-left transition-all cursor-pointer min-w-[130px] flex flex-col justify-between ${
+                        fareType === fare.id
+                          ? "bg-blue-50/70 border-blue-600 shadow-md ring-2 ring-blue-500/10 text-slate-900"
+                          : "bg-white border-slate-200 hover:border-slate-300 text-slate-600"
+                      }`}
+                    >
+                      <span className="text-xs font-bold block">{fare.name}</span>
+                      <span className="text-[10px] text-slate-400 block mt-0.5">{fare.sub}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* GST input fields when selected */}
+                {fareType === "GST" && (
+                  <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-wrap gap-4 items-end animate-fadeIn max-w-2xl">
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase">GSTIN (15-Digit)</span>
+                      <input
+                        type="text"
+                        maxLength={15}
+                        required
+                        placeholder="e.g. 07AAAAA1111A1Z1"
+                        value={gstNumber}
+                        onChange={(e) => setGstNumber(e.target.value.toUpperCase())}
+                        className="px-3.5 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold w-64 bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase">Company Name</span>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Roman Luxury Corp"
+                        value={gstCompanyName}
+                        onChange={(e) => setGstCompanyName(e.target.value)}
+                        className="px-3.5 py-2 border border-slate-200 rounded-xl text-xs font-bold w-64 bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                      />
+                    </div>
+                    <span className="text-[11px] text-emerald-600 font-bold mb-2.5">
+                      ✔ Tax Invoice Active
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* MakeMyTrip Centered Floating Search Button */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-40">
                 <button
                   type="submit"
-                  className="px-12 py-3.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] hover:to-[#C57A2D] text-black font-space font-bold text-sm uppercase tracking-widest rounded-full shadow-xl hover:shadow-2xl transition-all flex items-center gap-3 cursor-pointer transform hover:-translate-y-0.5"
+                  className="px-20 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-space font-bold text-sm uppercase tracking-wider rounded-full shadow-2xl hover:shadow-blue-500/20 transition-all flex items-center gap-3 cursor-pointer transform hover:-translate-y-0.5"
                 >
-                  <Plane className="h-5 w-5" />
-                  <span>SEARCH FLIGHT CHARTERS</span>
+                  <Plane className="h-5 w-5 fill-white" />
+                  <span>SEARCH</span>
                 </button>
               </div>
             </form>

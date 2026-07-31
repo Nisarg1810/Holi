@@ -38,9 +38,22 @@ export default function PaymentPage() {
   const calculateTotal = () => {
     if (!item) return 0;
     const base = Number(item.price);
+    
+    let fareDiscount = 0;
+    if (item.fare_type === "Student") {
+      fareDiscount = base * 0.10;
+    } else if (item.fare_type === "Armed Forces") {
+      fareDiscount = base * 0.15;
+    } else if (item.fare_type === "Senior Citizen") {
+      fareDiscount = base * 0.12;
+    } else if (item.fare_type === "Doctor & Nurses") {
+      fareDiscount = base * 0.10;
+    }
+
+    const discountedBase = base - fareDiscount;
     const addOnsCost = selectedAddOns.reduce((acc, curr) => acc + curr.price, 0);
     const insuranceCost = insuranceEnabled ? 5000 * item.passengers : 0;
-    const subtotal = base + addOnsCost + insuranceCost;
+    const subtotal = discountedBase + addOnsCost + insuranceCost;
     
     let discount = 0;
     if (appliedPromo) {
@@ -83,6 +96,8 @@ export default function PaymentPage() {
         passenger_manifest: passengers,
         addons: selectedAddOns,
         price: finalAmount,
+        fare_type: item.fare_type || "Regular",
+        gst_number: item.gst_number || "",
       });
 
       // 2. Initialize Payment Order
@@ -129,6 +144,8 @@ export default function PaymentPage() {
                 passengers: item.passengers,
                 price: finalAmount,
                 status: "Confirmed",
+                fare_type: item.fare_type || "Regular",
+                gst_number: item.gst_number || "",
               });
               setTimeout(() => {
                 clearCart();
@@ -181,6 +198,8 @@ export default function PaymentPage() {
               passengers: item.passengers,
               price: finalAmount,
               status: "Confirmed",
+              fare_type: item.fare_type || "Regular",
+              gst_number: item.gst_number || "",
             });
             setTimeout(() => {
               clearCart();
@@ -427,6 +446,18 @@ export default function PaymentPage() {
                     <span>Base Fare</span>
                     <span>₹{Number(item.price).toLocaleString("en-IN")}</span>
                   </div>
+                  {item.fare_type && item.fare_type !== "Regular" && (
+                    <div className="flex justify-between text-emerald-600 font-bold">
+                      <span>{item.fare_type} Discount</span>
+                      <span>-₹{(Number(item.price) * (item.fare_type === "Student" ? 0.10 : item.fare_type === "Armed Forces" ? 0.15 : item.fare_type === "Senior Citizen" ? 0.12 : item.fare_type === "Doctor & Nurses" ? 0.10 : 0)).toLocaleString("en-IN")}</span>
+                    </div>
+                  )}
+                  {item.gst_number && (
+                    <div className="flex justify-between text-slate-600 font-medium">
+                      <span>GSTIN</span>
+                      <span className="font-mono text-[11px]">{item.gst_number}</span>
+                    </div>
+                  )}
                   {selectedAddOns.length > 0 && (
                     <div className="flex justify-between text-slate-500">
                       <span>Add-ons Subtotal</span>

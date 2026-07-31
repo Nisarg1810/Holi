@@ -98,11 +98,24 @@ export default function CheckoutPage() {
   };
 
   const calculateTotal = () => {
-    if (!item) return { subtotal: 0, discount: 0, taxes: 0, total: 0 };
+    if (!item) return { subtotal: 0, discount: 0, taxes: 0, total: 0, fareDiscount: 0 };
     const base = Number(item.price);
+    
+    let fareDiscount = 0;
+    if (item.fare_type === "Student") {
+      fareDiscount = base * 0.10;
+    } else if (item.fare_type === "Armed Forces") {
+      fareDiscount = base * 0.15;
+    } else if (item.fare_type === "Senior Citizen") {
+      fareDiscount = base * 0.12;
+    } else if (item.fare_type === "Doctor & Nurses") {
+      fareDiscount = base * 0.10;
+    }
+
+    const discountedBase = base - fareDiscount;
     const addOnsCost = selectedAddOns.reduce((acc, curr) => acc + curr.price, 0);
     const insuranceCost = insuranceEnabled ? 5000 * item.passengers : 0;
-    const subtotal = base + addOnsCost + insuranceCost;
+    const subtotal = discountedBase + addOnsCost + insuranceCost;
     
     let discount = 0;
     if (appliedPromo) {
@@ -117,6 +130,7 @@ export default function CheckoutPage() {
     return {
       subtotal,
       discount,
+      fareDiscount,
       taxes,
       total: subtotal - discount + taxes,
     };
@@ -475,6 +489,18 @@ export default function CheckoutPage() {
                       <span>Base Rate</span>
                       <span>₹{Number(item.price).toLocaleString("en-IN")}</span>
                     </div>
+                    {item.fare_type && item.fare_type !== "Regular" && priceSummary.fareDiscount > 0 && (
+                      <div className="flex justify-between text-emerald-600 font-bold">
+                        <span>{item.fare_type} Discount</span>
+                        <span>-₹{priceSummary.fareDiscount.toLocaleString("en-IN")}</span>
+                      </div>
+                    )}
+                    {item.gst_number && (
+                      <div className="flex justify-between text-slate-600 font-medium">
+                        <span>GSTIN ID</span>
+                        <span className="font-mono text-[11px]">{item.gst_number}</span>
+                      </div>
+                    )}
                     {selectedAddOns.length > 0 && (
                       <div className="flex justify-between text-slate-500">
                         <span>VIP Add-ons</span>
