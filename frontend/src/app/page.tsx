@@ -29,7 +29,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
-  const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [dbPackages, setDbPackages] = useState<any[]>([]);
 
   React.useEffect(() => {
@@ -158,44 +157,7 @@ export default function Home() {
     }
   ];
 
-  const faqs = [
-    {
-      q: "What is your emergency safety protocol?",
-      a: "All flights are operated by DGCA-certified operators utilizing multi-engine helicopters with dual-pilot instrument flight rating (IFR). We work in close alignment with state disaster boards, regional command controls, and maintain immediate emergency evacuation readiness.",
-    },
-    {
-      q: "How does Roman Aviation handle weather cancellations?",
-      a: "In VIP aviation, safety takes absolute priority. If regional weather conditions fall below instrument standards, we offer immediate complimentary rescheduling, helicopter model upgrades, or a complete transparent refund calculation.",
-    },
-    {
-      q: "Are there any hidden booking fees or taxes?",
-      a: "No. All our pricing options are transparent. A standard 18% GST (Goods and Services Tax) is applicable on air passenger transits and will be detailed clearly at checkout with no hidden surcharges.",
-    },
-    {
-      q: "What is the cancellation and rescheduling policy?",
-      a: "Bookings cancelled 72 hours prior to departure receive a full refund minus a 5% handling charge. Cancellations within 24-72 hours incur a 50% retention charge. Rescheduling is complimentary up to 48 hours before flight staging, subject to slot availability.",
-    },
-    {
-      q: "What identity documents are mandatory for boarding?",
-      a: "As per DGCA mandates for flight manifests, all passengers must carry a valid physical government-issued photo ID (Aadhaar Card, Passport, or Voter ID). PAN cards are not accepted as valid identity proof for boarding manifest logs.",
-    },
-    {
-      q: "What is the luggage weight limit per passenger?",
-      a: "Due to strict helicopter weight capacity limits and high-altitude flight safety regulations, passenger luggage is strictly limited to 10 kg per passenger. Soft duffel bags are highly recommended; large hard-shell suitcases will not fit in the baggage compartments.",
-    },
-    {
-      q: "Do you accommodate group bookings and corporate charters?",
-      a: "Yes. We offer fully customizable private helicopter charter flights for corporate board members, weddings, VIP families, and emergency medical flyouts. Contact our 24/7 Concierge Desk to coordinate aircraft staging.",
-    },
-    {
-      q: "What is the policy for infant and elderly passengers?",
-      a: "Infants under 2 years of age (under 10 kg) travel free of charge when seated on an adult's lap. Passengers with specific high-altitude cardiac or respiratory conditions are advised to consult a medical practitioner before booking Himalayan routes.",
-    }
-  ];
 
-  const toggleFaq = (index: number) => {
-    setActiveFaq(activeFaq === index ? null : index);
-  };
 
   return (
     <div className="relative min-h-screen bg-[#020B1E] text-white">
@@ -612,75 +574,7 @@ export default function Home() {
 
 
 
-      {/* 8. FAQs Section (Expandable Accordion + 8 items) */}
-      <section className="py-20 px-6 max-w-4xl mx-auto relative z-10 border-t border-white/5">
-        <div className="flex flex-col gap-3 text-center mb-12">
-          <span className="font-space text-xs uppercase tracking-widest text-[#C5A880] font-bold">Support Chronicle</span>
-          <h2 className="font-serif text-3xl font-bold text-white">Frequently Asked Questions</h2>
-          <div className="h-[1px] w-12 bg-gold mx-auto mt-2" />
-        </div>
 
-        <div className="flex flex-col gap-4">
-          {faqs.map((faq, idx) => {
-            const isOpen = activeFaq === idx;
-            return (
-              <div
-                key={idx}
-                className="border border-white/10 rounded-lg overflow-hidden bg-white/2 transition-colors duration-300"
-              >
-                <button
-                  onClick={() => toggleFaq(idx)}
-                  className="w-full text-left p-5 font-space text-xs md:text-sm font-semibold flex items-center justify-between gap-4 hover:text-gold transition-colors text-white cursor-pointer"
-                >
-                  <span className="flex items-center gap-2.5">
-                    <HelpCircle className="h-4.5 w-4.5 text-gold shrink-0" />
-                    {faq.q}
-                  </span>
-                  {isOpen ? (
-                    <ChevronUp className="h-4 w-4 text-gold shrink-0" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-slate-400 shrink-0" />
-                  )}
-                </button>
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden border-t border-white/5 bg-[#020B1E]/40 text-left"
-                    >
-                      <div className="p-5 text-[11px] md:text-xs font-sans text-slate-300 leading-relaxed">
-                        {faq.a}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* JSON-LD Structured Data Schema */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": faqs.map(faq => ({
-              "@type": "Question",
-              "name": faq.q,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": faq.a
-              }
-            }))
-          })
-        }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
