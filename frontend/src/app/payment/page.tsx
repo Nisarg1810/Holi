@@ -30,7 +30,8 @@ const loadRazorpay = () => {
 export default function PaymentPage() {
   const router = useRouter();
   const { item, passengers, selectedSeats, selectedAddOns, insuranceEnabled, appliedPromo, clearCart } = useCartStore();
-  const { addBooking, user } = useAuthStore();
+  const { addBooking, user, isLoggedIn } = useAuthStore();
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "stripe" | "phonepe">("razorpay");
   const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "success" | "failure">("idle");
@@ -70,6 +71,11 @@ export default function PaymentPage() {
 
   const handlePayment = async () => {
     if (!item) return;
+
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
     setPaymentStatus("processing");
 
     const bookingId = `BK-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -539,6 +545,44 @@ export default function PaymentPage() {
           </div>
         )}
 
+        {/* Compulsory Login Validation Modal */}
+        <AnimatePresence>
+          {showLoginModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-[#051433] border border-amber-400/40 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl relative overflow-hidden"
+              >
+                <div className="h-16 w-16 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 mx-auto mb-5 shadow-xl">
+                  <Lock className="h-8 w-8" />
+                </div>
+                <h3 className="font-space text-2xl font-bold text-white mb-2">Login Required to Book</h3>
+                <p className="font-sans text-xs text-slate-300 mb-6 leading-relaxed">
+                  Your booking details and passenger manifest are saved. Log in to authorize your payment and generate your ticket.
+                </p>
+                <div className="flex flex-col gap-3">
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/auth?mode=login&redirect=${encodeURIComponent('/payment')}`)}
+                    className="w-full py-3.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] text-black font-space font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <span>Log In to Authorize Payment</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginModal(false)}
+                    className="w-full py-3 bg-white/5 hover:bg-white/10 text-slate-400 font-space text-xs font-semibold rounded-xl transition-all border border-white/10 cursor-pointer"
+                  >
+                    Close
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

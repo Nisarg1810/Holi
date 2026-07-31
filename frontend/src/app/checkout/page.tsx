@@ -6,11 +6,12 @@ import BookingProgressTracker from "@/components/booking/BookingProgressTracker"
 import { useCartStore, Passenger, AddOn } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { User, ShieldCheck, Ticket, Trash2, CheckCircle2, ChevronRight, Armchair, Award, Mail, Phone, Lock, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, isLoggedIn } = useAuthStore();
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const {
     item,
     selectedSeats,
@@ -150,6 +151,11 @@ export default function CheckoutPage() {
   const handleProceedToPayment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!item) return;
+
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
 
     if (!emailId || !emailId.includes("@")) {
       alert("Please enter a valid email address for receiving your ticket & confirmation.");
@@ -590,6 +596,45 @@ export default function CheckoutPage() {
 
         </form>
       </div>
+
+      {/* Compulsory Login Validation Modal */}
+      <AnimatePresence>
+        {showLoginModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-[#051433] border border-amber-400/40 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl relative overflow-hidden"
+            >
+              <div className="h-16 w-16 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 mx-auto mb-5 shadow-xl">
+                <Lock className="h-8 w-8" />
+              </div>
+              <h3 className="font-space text-2xl font-bold text-white mb-2">Login Required to Book</h3>
+              <p className="font-sans text-xs text-slate-300 mb-6 leading-relaxed">
+                All your flight & passenger details are preserved. To issue your official DGCA ticket & confirm payment, sign in to your account.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push(`/auth?mode=login&redirect=${encodeURIComponent('/checkout')}`)}
+                  className="w-full py-3.5 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] text-black font-space font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>Sign In / Create Account to Book</span>
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowLoginModal(false)}
+                  className="w-full py-3 bg-white/5 hover:bg-white/10 text-slate-400 font-space text-xs font-semibold rounded-xl transition-all border border-white/10 cursor-pointer"
+                >
+                  Back to Review Details
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
