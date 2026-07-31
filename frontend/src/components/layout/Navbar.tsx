@@ -6,13 +6,14 @@ import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
-import { Compass, Menu, X, User, ShoppingCart, Phone, ChevronDown, Heart, Briefcase } from "lucide-react";
+import { Compass, Menu, X, User, ShoppingCart, Phone, ChevronDown, Heart, Briefcase, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [servicesHovered, setServicesHovered] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const pathname = usePathname();
   const { isLoggedIn, user, logout } = useAuthStore();
@@ -165,70 +166,121 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Dashboard / Login or Create Account */}
-            {isLoggedIn ? (
-              <div className="relative group">
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2.5 px-3.5 py-2 bg-gradient-to-r from-[#051433] to-[#092254] hover:from-[#092254] hover:to-[#0D2D6C] text-white rounded-xl border border-gold/30 shadow-md font-space text-[10px] uppercase font-bold tracking-wider transition-all"
-                >
-                  <div className="h-6 w-6 rounded-full bg-gold/20 flex items-center justify-center text-gold border border-gold/40">
-                    <User className="h-3.5 w-3.5" />
-                  </div>
-                  <div className="flex flex-col text-left">
-                    <span className="text-[8px] text-slate-400 font-sans leading-none uppercase">Hi {user?.name.split(" ")[0]}</span>
-                    <span className="text-gold font-bold text-[10px]">My Account</span>
-                  </div>
-                  <ChevronDown className="h-3 w-3 text-gold ml-1" />
-                </Link>
-
-                {/* Account Dropdown */}
-                <div className="absolute right-0 top-full mt-1.5 w-48 bg-white border border-slate-200 rounded-xl p-1.5 shadow-2xl hidden group-hover:flex flex-col gap-1 z-50 text-slate-800 font-sans">
-                  <Link
-                    href="/dashboard"
-                    className="px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#051433] rounded-lg transition-colors flex items-center gap-2"
-                  >
-                    <User className="h-3.5 w-3.5 text-blue-600" />
-                    <span>My Account & Bookings</span>
-                  </Link>
-                  <Link
-                    href="/my-trips"
-                    className="px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#051433] rounded-lg transition-colors flex items-center gap-2"
-                  >
-                    <Briefcase className="h-3.5 w-3.5 text-amber-600" />
-                    <span>My Trips</span>
-                  </Link>
-                  <Link
-                    href="/wishlist"
-                    className="px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#051433] rounded-lg transition-colors flex items-center gap-2"
-                  >
-                    <Heart className="h-3.5 w-3.5 text-red-500" />
-                    <span>Saved Wishlist</span>
-                  </Link>
-                  <button
-                    onClick={() => logout()}
-                    className="px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 text-left w-full cursor-pointer border-t border-slate-100 mt-1"
-                  >
-                    <span>Sign Out</span>
-                  </button>
+            {/* My Account / Login or Create Account Dropdown Trigger */}
+            <div 
+              className="relative"
+              onMouseEnter={() => setAccountOpen(true)}
+              onMouseLeave={() => setAccountOpen(false)}
+            >
+              <button
+                onClick={() => setAccountOpen(!accountOpen)}
+                className="flex items-center gap-2.5 px-3.5 py-2 bg-gradient-to-r from-[#051433] via-[#092254] to-[#051433] hover:from-[#092254] hover:to-[#0D2D6C] text-white rounded-xl border border-gold/40 shadow-md font-space text-[10px] uppercase font-bold tracking-wider transition-all cursor-pointer"
+              >
+                <div className="h-6 w-6 rounded-full bg-gold/20 flex items-center justify-center text-gold border border-gold/40">
+                  <User className="h-3.5 w-3.5" />
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/auth?mode=login"
-                  className="flex items-center gap-2.5 px-4 py-2 bg-gradient-to-r from-[#051433] via-[#092254] to-[#051433] hover:from-[#092254] hover:to-[#0D2D6C] text-white font-space text-[10px] uppercase font-bold tracking-wider rounded-xl border border-gold/40 shadow-md transition-all duration-300 group cursor-pointer"
-                >
-                  <div className="h-6 w-6 rounded-full bg-gold/20 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-black transition-colors">
-                    <User className="h-3.5 w-3.5" />
-                  </div>
-                  <div className="flex flex-col text-left">
-                    <span className="text-[8px] text-amber-400 font-sans uppercase font-bold leading-none">Login or</span>
-                    <span className="text-white font-bold text-[10px]">Create Account</span>
-                  </div>
-                </Link>
-              </div>
-            )}
+                <div className="flex flex-col text-left">
+                  {isLoggedIn ? (
+                    <>
+                      <span className="text-[8px] text-slate-400 font-sans leading-none uppercase">Hi {user?.name.split(" ")[0]}</span>
+                      <span className="text-gold font-bold text-[10px]">My Account</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[8px] text-amber-400 font-sans uppercase font-bold leading-none">Login or</span>
+                      <span className="text-white font-bold text-[10px]">Create Account</span>
+                    </>
+                  )}
+                </div>
+                <ChevronDown className={`h-3 w-3 text-gold ml-1 transition-transform duration-300 ${accountOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {/* Animated Account Dropdown */}
+              <AnimatePresence>
+                {accountOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-xl p-1.5 shadow-2xl flex flex-col gap-1 z-50 text-slate-800 font-sans"
+                  >
+                    {isLoggedIn ? (
+                      <>
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setAccountOpen(false)}
+                          className="px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#051433] rounded-lg transition-colors flex items-center gap-2.5"
+                        >
+                          <User className="h-4 w-4 text-blue-600" />
+                          <span>My Account & Profile</span>
+                        </Link>
+                        <Link
+                          href="/my-trips"
+                          onClick={() => setAccountOpen(false)}
+                          className="px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#051433] rounded-lg transition-colors flex items-center gap-2.5"
+                        >
+                          <Briefcase className="h-4 w-4 text-amber-600" />
+                          <span>My Trips & Bookings</span>
+                        </Link>
+                        <Link
+                          href="/wishlist"
+                          onClick={() => setAccountOpen(false)}
+                          className="px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#051433] rounded-lg transition-colors flex items-center gap-2.5"
+                        >
+                          <Heart className="h-4 w-4 text-red-500" />
+                          <span>Saved Wishlist ({wishlistItems.length})</span>
+                        </Link>
+                        <button
+                          onClick={() => {
+                            logout();
+                            setAccountOpen(false);
+                          }}
+                          className="px-3.5 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2.5 text-left w-full cursor-pointer border-t border-slate-100 mt-1"
+                        >
+                          <span>Sign Out</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/auth?mode=login"
+                          onClick={() => setAccountOpen(false)}
+                          className="px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#051433] rounded-lg transition-colors flex items-center gap-2.5"
+                        >
+                          <User className="h-4 w-4 text-amber-600" />
+                          <span>Login to Account</span>
+                        </Link>
+                        <Link
+                          href="/auth?mode=signup"
+                          onClick={() => setAccountOpen(false)}
+                          className="px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#051433] rounded-lg transition-colors flex items-center gap-2.5"
+                        >
+                          <Sparkles className="h-4 w-4 text-gold" />
+                          <span>Create New Account</span>
+                        </Link>
+                        <Link
+                          href="/my-trips"
+                          onClick={() => setAccountOpen(false)}
+                          className="px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#051433] rounded-lg transition-colors flex items-center gap-2.5 border-t border-slate-100 mt-1"
+                        >
+                          <Briefcase className="h-4 w-4 text-blue-600" />
+                          <span>My Trips & Bookings</span>
+                        </Link>
+                        <Link
+                          href="/wishlist"
+                          onClick={() => setAccountOpen(false)}
+                          className="px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#051433] rounded-lg transition-colors flex items-center gap-2.5"
+                        >
+                          <Heart className="h-4 w-4 text-red-500" />
+                          <span>Saved Wishlist ({wishlistItems.length})</span>
+                        </Link>
+                      </>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Book Now Primary CTA Button */}
             <Link
