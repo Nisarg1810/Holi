@@ -31,7 +31,7 @@ export default function Footer() {
     ],
     company: [
       { name: "Brand Philosophy", href: "/contact" },
-      { name: "Guides & Chronicles", href: "/blog" },
+      { name: "Travel Blog", href: "/blog" },
       { name: "Frequently Asked Questions", href: "/faq" },
       { name: "Contact & Support", href: "/contact" },
     ],

@@ -19,7 +19,7 @@ export default function RefundsPage() {
       {/* Immersive Header Banner */}
       <div className="relative max-w-6xl mx-auto px-6 mb-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl h-[220px]">
         <img
-          src="/aviation_legal_banner.png"
+          src="/refunds_banner.png"
           alt="AURA Refunds Header"
           className="w-full h-full object-cover brightness-[0.4] contrast-125"
         />

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Roman Travel Chronicles | High-Altitude Pilgrimage Guides",
-  description: "Read safety guidelines, slot booking calendars, and cost breakdowns written by aviation veterans for Kedarnath, Char Dham, and Vaishno Devi.",
-  keywords: "Kedarnath helicopter guide 2026, Char Dham yatra cost, Vaishno Devi weather delays, high altitude flight safety",
+  title: "Travel Blog | Roman Aviation & Travel Chronicles",
+  description: "Read travel logs, high-altitude pilgrimage guides, and helicopter safety details on our official travel blog.",
+  keywords: "Kedarnath helicopter booking 2026, Char Dham yatra cost breakdown, Vaishno Devi helicopter guide, private helicopter charters",
 };
 
 export default function BlogLayout({ children }: { children: React.ReactNode }) {

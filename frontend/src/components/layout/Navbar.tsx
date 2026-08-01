@@ -45,7 +45,7 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { name: "Guides", href: "/blog" },
+    { name: "Blog", href: "/blog" },
     { name: "Careers", href: "/careers" },
     { name: "Contact Us", href: "/contact" },
   ];
