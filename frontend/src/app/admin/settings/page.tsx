@@ -91,7 +91,7 @@ export default function AdminSettings() {
                   >
                     <option value="AURA Elite Simulator">AURA Elite Gateway Simulator</option>
                     <option value="Stripe Business">Stripe Business Checkout</option>
-                    <option value="Razorpay VIP">Razorpay Professional Routing</option>
+                    <option value="Razorpay Premium">Razorpay Professional Routing</option>
                   </select>
                 </div>
 

@@ -80,33 +80,6 @@ export default function AmbientEffects() {
         }}
       />
 
-      {/* Luxury Glowing Custom Cursor */}
-      <motion.div
-        className="pointer-events-none fixed top-0 left-0 z-50 mix-blend-screen hidden md:block"
-        style={{
-          x: cursorX,
-          y: cursorY,
-        }}
-      >
-        <motion.div
-          className="relative flex items-center justify-center -translate-x-1/2 -translate-y-1/2 rounded-full"
-          animate={{
-            width: hovered ? 44 : 20,
-            height: hovered ? 44 : 20,
-            backgroundColor: hovered ? "rgba(212,175,55,0.15)" : "rgba(212,175,55,0)",
-            border: hovered ? "1px solid #D4AF37" : "1.5px solid rgba(255,255,255,0.5)",
-          }}
-          transition={{ type: "spring", stiffness: 350, damping: 25 }}
-        >
-          {/* Inner core dot */}
-          <motion.div
-            className="h-1.5 w-1.5 rounded-full bg-gold glow-gold"
-            animate={{
-              scale: hovered ? 1.5 : 1,
-            }}
-          />
-        </motion.div>
-      </motion.div>
     </>
   );
 }

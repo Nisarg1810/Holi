@@ -87,13 +87,13 @@ export default function MyTripsPage() {
     if (!confirm("Are you sure you want to request cancellation for this booking?")) return;
     setCancellingId(bookingId);
     try {
-      await API.post(`/bookings/${bookingId}/request-cancel/`, {
+      await API.post(`/bookings/${bookingId}/request-cancel`, {
         cancellation_data: { reason: "Requested by passenger from My Trips page." }
       });
       alert("Cancellation request submitted successfully.");
       fetchMyBookings();
     } catch (err) {
-      alert("Failed to submit cancellation request. Please contact VIP Support.");
+      alert("Failed to submit cancellation request. Please contact Support.");
     } finally {
       setCancellingId(null);
     }
@@ -130,7 +130,7 @@ export default function MyTripsPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/10 pb-6 mb-8 gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono text-gold mb-2">
-              <Plane className="h-4 w-4" /> VIP Passenger Portal
+              <Plane className="h-4 w-4" /> Passenger Portal
             </div>
             <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight text-white">
               My Trips &amp; Bookings
@@ -274,7 +274,7 @@ export default function MyTripsPage() {
             <div className="h-16 w-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center text-gold mx-auto mb-4">
               <Compass className="h-8 w-8" />
             </div>
-            <h3 className="font-serif text-xl font-bold text-white mb-2">No Trips Found</h3>
+            <h3 className="font-serif text-xl font-bold text-white mb-2">No bookings found.</h3>
             <p className="text-xs text-slate-400 font-sans max-w-md mx-auto mb-6">
               You haven't booked any trips in this category yet. Explore our luxury helicopter flights, hotel stays, or tour packages!
             </p>

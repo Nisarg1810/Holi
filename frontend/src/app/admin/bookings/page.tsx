@@ -89,7 +89,7 @@ export default function AdminBookings() {
   const handleApproveRefund = async (id: string) => {
     if (confirm(`Authorize return/refund and cancel reservation for booking ${id}?`)) {
       try {
-        await API.post(`/bookings/approve-refund/${id}`);
+        await API.post(`/bookings/${id}/approve-refund`);
         fetchBookings();
         if (selectedBooking && selectedBooking.id === id) {
           setSelectedBooking((prev: any) => ({ ...prev, status: "Refunded" }));
@@ -104,7 +104,7 @@ export default function AdminBookings() {
   const handleRejectCancel = async (id: string) => {
     if (confirm(`Reject cancellation and reinstate booking ${id} as Confirmed?`)) {
       try {
-        await API.post(`/bookings/reject-cancel/${id}`);
+        await API.post(`/bookings/${id}/reject-cancel`);
         fetchBookings();
         if (selectedBooking && selectedBooking.id === id) {
           setSelectedBooking((prev: any) => ({ ...prev, status: "Confirmed" }));

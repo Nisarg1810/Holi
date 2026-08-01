@@ -62,9 +62,9 @@ export default function AdminTours() {
     duration: "2 Nights / 3 Days",
     price: 180000,
     rating: "4.8",
-    tag: "VIP Expedition",
+    tag: "Premium Expedition",
     image: "",
-    inclusions: ["VIP Priority Access", "Bespoke high-altitude catering"],
+    inclusions: ["Priority Access", "Bespoke high-altitude catering"],
     exclusions: ["Personal offerings at temple"],
   });
   const [days, setDays] = useState<DayEntry[]>([{ ...BLANK_DAY() }]);
@@ -103,9 +103,9 @@ export default function AdminTours() {
       duration: "2 Nights / 3 Days",
       price: 180000,
       rating: "4.8",
-      tag: "VIP Expedition",
+      tag: "Premium Expedition",
       image: "",
-      inclusions: ["VIP Priority Access", "Bespoke high-altitude catering"],
+      inclusions: ["Priority Access", "Bespoke high-altitude catering"],
       exclusions: ["Personal offerings at temple"],
     });
     setDays([{ day: 1, title: "", desc: "", stay: "Luxury Lodge", transport: "Airbus H145" }]);
@@ -123,11 +123,11 @@ export default function AdminTours() {
       duration: tour.duration,
       price: tour.price,
       rating: tour.rating || "4.8",
-      tag: tour.tag || "VIP Expedition",
+      tag: tour.tag || "Premium Expedition",
       image: tour.image || "",
       inclusions: Array.isArray(tour.inclusions) && tour.inclusions.length > 0 
         ? tour.inclusions 
-        : ["VIP Priority Access", "Bespoke high-altitude catering"],
+        : ["Priority Access", "Bespoke high-altitude catering"],
       exclusions: Array.isArray(tour.exclusions) && tour.exclusions.length > 0 
         ? tour.exclusions 
         : ["Personal offerings at temple"],
@@ -418,7 +418,7 @@ export default function AdminTours() {
                         onChange={(e) => setForm({ ...form, tag: e.target.value })}
                         className={INPUT_CLS + " cursor-pointer"}
                       >
-                        {["VIP Expedition", "Spiritual Journey", "Beach Escape", "Heli Safari", "Corporate Retreat", "Honeymoon Special"].map((t) => (
+                        {["Premium Expedition", "Spiritual Journey", "Beach Escape", "Heli Safari", "Corporate Retreat", "Honeymoon Special"].map((t) => (
                           <option key={t} value={t} className="bg-[#030712]">{t}</option>
                         ))}
                       </select>

@@ -121,7 +121,7 @@ function ToursListingContent() {
             <div>
               <h1 className="font-space text-3xl font-bold tracking-tight text-white">Tour Packages</h1>
               <p className="text-xs text-slate-300 mt-1 font-sans">
-                Curated pilgrimages & holiday retreats combining VIP helicopter flights, hotels, and road transfers
+                Curated pilgrimages & holiday retreats combining Luxury helicopter flights, hotels, and road transfers
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-mono text-gold px-3.5 py-1.5 rounded-full border border-gold/30 bg-gold/10 font-bold">
@@ -238,7 +238,7 @@ function ToursListingContent() {
                 const ratingStr = pkg.rating ? String(pkg.rating) : "5.0";
                 const inclusionsList = Array.isArray(pkg.inclusions) && pkg.inclusions.length > 0 
                   ? pkg.inclusions 
-                  : ["VIP Priority Access", "Bespoke high-altitude catering"];
+                  : ["Priority Access", "Bespoke high-altitude catering"];
 
                 return (
                   <motion.div
@@ -361,7 +361,7 @@ function ToursListingContent() {
                     <span className="text-slate-600">{pkg.duration}</span>
                     <span className="font-bold text-emerald-700">₹{Number(pkg.price).toLocaleString("en-IN")}</span>
                     <span className="text-slate-500 line-clamp-2">
-                      {Array.isArray(pkg.inclusions) ? pkg.inclusions.join(", ") : "VIP inclusions"}
+                      {Array.isArray(pkg.inclusions) ? pkg.inclusions.join(", ") : "Premium inclusions"}
                     </span>
                   </div>
                 ))}

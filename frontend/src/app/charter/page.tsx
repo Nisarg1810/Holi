@@ -31,7 +31,7 @@ const MAP_COORDINATES: Record<string, { x: number; y: number; label: string }> =
 const STAGING_LOCATIONS = Object.keys(MAP_COORDINATES);
 
 const HELI_MODELS = [
-  { id: "h-1", name: "Airbus H145", capacity: 900, ratePerLeg: 220000, desc: "Twin-engine VIP cabin · Max 900 kg payload" },
+  { id: "h-1", name: "Airbus H145", capacity: 900, ratePerLeg: 220000, desc: "Twin-engine Executive cabin · Max 900 kg payload" },
   { id: "h-2", name: "Bell 429", capacity: 750, ratePerLeg: 180000, desc: "High-altitude power · Max 750 kg payload" },
   { id: "h-3", name: "AgustaWestland AW109", capacity: 600, ratePerLeg: 150000, desc: "Executive shuttle · Max 600 kg payload" }
 ];
@@ -165,7 +165,7 @@ function CharterContent() {
                 Bespoke Flight Charters
               </h1>
               <p className="text-xs text-slate-300 mt-1 font-sans">
-                Build custom multi-leg flight corridors, verify real-time payload safety, and charter VIP helicopters
+                Build custom multi-leg flight corridors, verify real-time payload safety, and charter Luxury helicopters
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-mono text-[#F5A623] px-3.5 py-1.5 rounded-full border border-[#F5A623]/30 bg-[#F5A623]/10 font-bold">

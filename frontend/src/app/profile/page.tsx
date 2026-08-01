@@ -20,6 +20,7 @@ export default function UserProfilePage() {
   const [city, setCity] = useState(user?.city_of_residence || "Ahmedabad");
   const [state, setState] = useState(user?.state || "");
   const [phone, setPhone] = useState(user?.phone || "");
+  const [profileImage, setProfileImage] = useState(user?.profileImage || "");
   const [saved, setSaved] = useState(false);
   const [showPhoneInput, setShowPhoneInput] = useState(false);
 
@@ -35,6 +36,7 @@ export default function UserProfilePage() {
       setCity(user.city_of_residence || "Ahmedabad");
       setState(user.state || "");
       setPhone(user.phone || "");
+      setProfileImage(user.profileImage || "");
     }
   }, [user]);
 
@@ -51,6 +53,7 @@ export default function UserProfilePage() {
       city_of_residence: city,
       state,
       phone,
+      profileImage,
     });
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -82,6 +85,41 @@ export default function UserProfilePage() {
           
           {/* LEFT SIDEBAR NAVIGATION */}
           <div className="md:col-span-3 space-y-6">
+            {/* User Details Summary Card */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col items-center text-center">
+              <div className="w-20 h-20 mb-3 relative group">
+                <img
+                  src={user?.profileImage || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80"}
+                  alt="Profile Photo"
+                  className="w-20 h-20 rounded-full object-cover border-2 border-emerald-500 shadow-md"
+                />
+              </div>
+              <h3 className="font-bold text-slate-800 text-base leading-snug">
+                {user?.name} {user?.last_name || ""}
+              </h3>
+              <p className="text-slate-400 text-xs truncate max-w-full mb-3">
+                {user?.email}
+              </p>
+              <div className="w-full border-t border-slate-100 pt-3 text-left text-xs text-slate-600 space-y-2">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Mobile Number</span>
+                  <span className="font-medium text-slate-700">{user?.phone || "Not Set"}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Date Joined</span>
+                  <span className="font-medium text-slate-700">
+                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "Recently"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Account Status</span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 mt-1">
+                    Active
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-3 mb-4">
                 My Account
@@ -201,6 +239,20 @@ export default function UserProfilePage() {
                   <h3 className="text-base font-bold text-slate-800 mb-5">General Information</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     
+                    {/* Profile Photo URL (Stacked) */}
+                    <div className="bg-[#F3F4F6] border border-slate-200/60 rounded-xl px-4 py-2 flex flex-col">
+                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                        Profile Photo URL
+                      </label>
+                      <input
+                        type="text"
+                        value={profileImage}
+                        onChange={(e) => setProfileImage(e.target.value)}
+                        placeholder="https://images.unsplash.com/..."
+                        className="bg-transparent border-none text-slate-800 text-sm font-semibold focus:outline-none mt-0.5"
+                      />
+                    </div>
+
                     {/* First & Middle Name (Stacked) */}
                     <div className="bg-[#F3F4F6] border border-slate-200/60 rounded-xl px-4 py-2 flex flex-col">
                       <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">

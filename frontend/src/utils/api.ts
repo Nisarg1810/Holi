@@ -30,4 +30,31 @@ API.interceptors.request.use(
   }
 );
 
+API.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      if (typeof window !== "undefined") {
+        try {
+          // Dynamic require to prevent circular dependency at load time
+          const { useAuthStore } = require("@/store/useAuthStore");
+          useAuthStore.getState().logout();
+          
+          // Force redirect to login page if not already there
+          if (!window.location.pathname.startsWith("/auth")) {
+            window.location.href = `/auth?mode=login&redirect=${encodeURIComponent(
+              window.location.pathname + window.location.search
+            )}`;
+          }
+        } catch (e) {
+          console.error("Error during auto-logout on 401:", e);
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default API;

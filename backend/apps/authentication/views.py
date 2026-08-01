@@ -599,19 +599,15 @@ def login_user(request):
 
 
 @api_view(['GET', 'POST', 'PUT'])
+@permission_classes([IsAuthenticated])
 def update_profile(request):
     """GET/POST/PUT /api/auth/profile — Retrieve or update user profile fields."""
     email = request.data.get('email') or request.query_params.get('email')
-    if not email and request.user.is_authenticated:
-        email = request.user.email
-    if not email:
-        return Response({"error": "Email is required to verify identity."}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        user = User.objects.get(email=email)
-    except User.DoesNotExist:
-        return Response({"error": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
-
+    user = request.user
+    
+    if email and email.strip().lower() != user.email.strip().lower():
+        return Response({"error": "Unauthorized access to this user profile."}, status=status.HTTP_403_FORBIDDEN)
+        
     if request.method == 'GET':
         return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
 
@@ -620,6 +616,48 @@ def update_profile(request):
         user = serializer.save()
         return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'POST', 'PUT'])
+@permission_classes([IsAuthenticated])
+def get_user_profile(request):
+    """GET/POST/PUT /api/profile — Retrieve or update the authenticated user's profile."""
+    user = request.user
+    if request.method == 'GET':
+        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+        
+    serializer = ProfileSerializer(user, data=request.data, partial=True)
+    if serializer.is_valid():
+        user = serializer.save()
+        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_profile_stats(request):
+    """GET /api/profile/stats — Return calculated booking stats for the authenticated user."""
+    from apps.bookings.models import Booking
+    from django.utils import timezone
+    
+    user = request.user
+    user_bookings = Booking.objects.filter(user=user)
+    
+    total_bookings = user_bookings.count()
+    active_bookings = user_bookings.filter(status__in=['Active', 'Confirmed', 'In Flight', 'Pending']).count()
+    completed_trips = user_bookings.filter(status='Completed').count()
+    cancelled_bookings = user_bookings.filter(status__in=['Cancelled', 'Refunded']).count()
+    
+    today = timezone.localdate()
+    upcoming_trips = user_bookings.filter(travel_date__gt=today).count()
+    
+    return Response({
+        "totalBookings": total_bookings,
+        "activeBookings": active_bookings,
+        "completedTrips": completed_trips,
+        "cancelledBookings": cancelled_bookings,
+        "upcomingTrips": upcoming_trips
+    }, status=status.HTTP_200_OK)
 
 
 from .models import UserKYCDocument

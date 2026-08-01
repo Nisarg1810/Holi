@@ -17,6 +17,7 @@ class Booking(models.Model):
     )
 
     id = models.CharField(max_length=50, primary_key=True)
+    user = models.ForeignKey('authentication.User', on_delete=models.CASCADE, related_name='user_bookings', null=True, blank=True)
     user_email = models.CharField(max_length=100)
     contact_email = models.CharField(max_length=100, blank=True, null=True)
     contact_phone = models.CharField(max_length=20, blank=True, null=True)
@@ -39,7 +40,17 @@ class Booking(models.Model):
     cancellation_data = models.JSONField(default=dict, blank=True)
     fare_type = models.CharField(max_length=50, default='Regular')
     gst_number = models.CharField(max_length=50, blank=True, null=True)
+    
+    # Required ticket booking database fields
+    ticket_id = models.CharField(max_length=100, blank=True, null=True)
+    trip_id = models.CharField(max_length=100, blank=True, null=True)
+    booking_date = models.DateField(auto_now_add=True, null=True, blank=True)
+    travel_date = models.DateField(blank=True, null=True)
+    payment_status = models.CharField(max_length=50, default='Paid')
+    amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'bookings'

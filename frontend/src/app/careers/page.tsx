@@ -7,6 +7,7 @@ import {
   Trash2, Plus, Info, GraduationCap, Briefcase, FileCheck, Check, Building, MapPin, BriefcaseIcon, DollarSign
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import PageHeroBanner from "@/components/ui/PageHeroBanner";
 
 interface EducationEntry {
   school: string;
@@ -289,27 +290,19 @@ export default function CareersPage() {
   return (
     <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
       
-      {/* MakeMyTrip Style Hero Header */}
-      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-12 pb-20 px-4 md:px-8 text-white relative shadow-lg">
-        <div className="max-w-5xl mx-auto flex flex-col items-center text-center">
-          <div className="flex items-center gap-2 px-3 py-1 bg-amber-400/10 border border-amber-400/30 rounded-full mb-3">
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-            <span className="font-space text-[10px] uppercase font-bold text-amber-400 tracking-widest">
-              Roman Aviation Careers
-            </span>
-          </div>
-          
-          <h1 className="font-space text-3xl md:text-5xl font-bold tracking-tight text-white uppercase">
-            Join Our Elite Cabin Crew
-          </h1>
-          <p className="text-xs md:text-sm text-slate-300 max-w-xl mt-2 font-sans">
-            Serve premium clients onboard our bespoke chartered flights and luxury private corridors.
-          </p>
-        </div>
-      </div>
+      {/* Hero Banner */}
+      <PageHeroBanner
+        imageSrc="/banners/careers-banner.jpg"
+        imageAlt="Roman Aviation Careers - Cockpit & Flight Crew"
+        label="Roman Aviation Careers"
+        title="Join Our Elite Cabin Crew"
+        subtitle="Serve premium clients onboard our bespoke chartered flights and luxury private corridors."
+        height={500}
+        paperColor="#F2F5F8"
+      />
 
       {/* Main Content Area */}
-      <div className="max-w-5xl mx-auto px-4 md:px-8 -mt-8 relative z-20">
+      <div className="max-w-5xl mx-auto px-4 md:px-8 mt-8 relative z-20">
         
         <AnimatePresence mode="wait">
           {!isApplying ? (

@@ -4,12 +4,17 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
+    profileImage = serializers.CharField(source='profile_image', required=False, allow_null=True, allow_blank=True)
+    createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+    updatedAt = serializers.DateTimeField(source='updated_at', read_only=True)
+
     class Meta:
         model = User
         fields = (
             'id', 'name', 'last_name', 'email', 'phone', 'role', 
             'gender', 'date_of_birth', 'city_of_residence', 'state', 
-            'nationality', 'marital_status', 'anniversary', 'created_at'
+            'nationality', 'marital_status', 'anniversary', 'created_at',
+            'profileImage', 'createdAt', 'updatedAt'
         )
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -50,11 +55,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class ProfileSerializer(serializers.ModelSerializer):
+    profileImage = serializers.CharField(source='profile_image', required=False, allow_null=True, allow_blank=True)
+
     class Meta:
         model = User
         fields = (
             'name', 'last_name', 'phone', 'gender', 'date_of_birth', 
-            'city_of_residence', 'state', 'nationality', 'marital_status', 'anniversary'
+            'city_of_residence', 'state', 'nationality', 'marital_status', 'anniversary',
+            'profileImage'
         )
         extra_kwargs = {
             'name': {'required': True},

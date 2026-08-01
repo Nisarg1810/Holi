@@ -174,6 +174,7 @@ export default function Navbar() {
             >
               <button
                 onClick={() => setAccountOpen(!accountOpen)}
+                suppressHydrationWarning={true}
                 className="flex items-center gap-2.5 px-3.5 py-2 bg-gradient-to-r from-[#051433] via-[#092254] to-[#051433] hover:from-[#092254] hover:to-[#0D2D6C] text-white rounded-xl border border-gold/40 shadow-md font-space text-[10px] uppercase font-bold tracking-wider transition-all cursor-pointer"
               >
                 <div className="h-6 w-6 rounded-full bg-gold/20 flex items-center justify-center text-gold border border-gold/40">

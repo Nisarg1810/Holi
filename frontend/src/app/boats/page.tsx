@@ -24,7 +24,7 @@ const DESTINATIONS = [
 
 const CHARTER_TYPES = [
   "Motor Yacht", "Luxury Houseboat", "Executive Catamaran",
-  "VIP Speedboat", "Premium Schooner", "Traditional Shikara", "Motor Cruiser"
+  "Speedboat", "Premium Schooner", "Traditional Shikara", "Motor Cruiser"
 ];
 
 function BoatsListingContent() {

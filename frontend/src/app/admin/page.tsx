@@ -54,7 +54,7 @@ function AdminDashboardContent() {
     { month: "May", amount: 15.6 }, { month: "Jun", amount: 18.4 },
   ];
   const trafficSources = [
-    { source: "Direct VIPs",       percentage: 55, color: "bg-gold" },
+    { source: "Direct Guests",       percentage: 55, color: "bg-gold" },
     { source: "Elite Concierge",   percentage: 30, color: "bg-teal" },
     { source: "Corporate Channels", percentage: 15, color: "bg-grey-text" },
   ];
@@ -310,7 +310,7 @@ export function BoatFleetManager() {
     }
   };
 
-  const charterTypes = ["Motor Yacht", "Luxury Houseboat", "Executive Catamaran", "VIP Speedboat", "Premium Schooner", "Traditional Shikara", "Motor Cruiser"];
+  const charterTypes = ["Motor Yacht", "Luxury Houseboat", "Executive Catamaran", "Speedboat", "Premium Schooner", "Traditional Shikara", "Motor Cruiser"];
 
   return (
     <div className="flex flex-col gap-6">

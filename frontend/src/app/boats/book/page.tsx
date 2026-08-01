@@ -40,19 +40,14 @@ export default function BoatCheckoutPage() {
     passengers,
     selectedAddOns,
     insuranceEnabled,
-    appliedPromo,
     setSelectedSeats,
     setPassengers,
     toggleAddOn,
     setInsuranceEnabled,
-    applyPromo,
-    removePromo,
   } = useCartStore();
 
   const [emailId, setEmailId] = useState("");
   const [mobileNo, setMobileNo] = useState("");
-  const [promoInput, setPromoInput] = useState("");
-  const [promoError, setPromoError] = useState("");
 
   // Redirect if wrong type or no item
   useEffect(() => {
@@ -92,14 +87,7 @@ export default function BoatCheckoutPage() {
     setPassengers(updated);
   };
 
-  const handleApplyPromo = (e: React.FormEvent) => {
-    e.preventDefault();
-    const code = promoInput.toUpperCase().trim();
-    if (code === "AURA10") { applyPromo("AURA10", 10); setPromoError(""); }
-    else if (code === "ROMANVIP") { applyPromo("ROMANVIP", 10); setPromoError(""); }
-    else if (code === "YACHT15") { applyPromo("YACHT15", 15); setPromoError(""); }
-    else { setPromoError("Invalid coupon code. Try YACHT15 for 15% off."); }
-  };
+
 
   const calculateTotal = () => {
     if (!item) return { subtotal: 0, discount: 0, taxes: 0, total: 0 };
@@ -108,7 +96,6 @@ export default function BoatCheckoutPage() {
     const insuranceCost = insuranceEnabled ? 3500 * item.passengers : 0;
     const subtotal = base + addOnsCost + insuranceCost;
     let discount = 0;
-    if (appliedPromo) discount = subtotal * (appliedPromo.discountPercent / 100);
     const taxes = (subtotal - discount) * 0.18;
     return { subtotal, discount, taxes, total: subtotal - discount + taxes };
   };
@@ -527,28 +514,7 @@ export default function BoatCheckoutPage() {
                   </p>
                 )}
 
-                {/* Promo Code */}
-                <div className="border-t border-slate-100 pt-3 flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Apply Promo Code</span>
-                  <div className="flex gap-2">
-                    <input
-                      type="text" placeholder="e.g. YACHT15"
-                      value={promoInput} onChange={(e) => setPromoInput(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold uppercase text-slate-900 focus:outline-none"
-                    />
-                    <button type="button" onClick={handleApplyPromo}
-                      className="px-3 py-1.5 bg-[#051433] text-white text-xs font-bold uppercase rounded-lg hover:bg-[#092254]">
-                      Apply
-                    </button>
-                  </div>
-                  {appliedPromo && (
-                    <div className="flex justify-between text-[10px] text-emerald-600 font-bold mt-1">
-                      <span>Applied: {appliedPromo.code} (-{appliedPromo.discountPercent}%)</span>
-                      <button type="button" onClick={removePromo} className="text-red-500 hover:underline">Remove</button>
-                    </div>
-                  )}
-                  {promoError && <span className="text-[10px] text-red-500 font-bold">{promoError}</span>}
-                </div>
+
 
                 {/* Price Breakdown */}
                 <div className="border-t border-slate-100 pt-3 flex flex-col gap-2">
@@ -568,12 +534,7 @@ export default function BoatCheckoutPage() {
                       <span>+₹{(3500 * item.passengers).toLocaleString("en-IN")}</span>
                     </div>
                   )}
-                  {appliedPromo && (
-                    <div className="flex justify-between text-emerald-600 font-bold">
-                      <span>Promo Discount</span>
-                      <span>-₹{Math.round(priceSummary.discount).toLocaleString("en-IN")}</span>
-                    </div>
-                  )}
+
                   <div className="flex justify-between text-slate-500">
                     <span>GST (18%)</span>
                     <span>₹{Math.round(priceSummary.taxes).toLocaleString("en-IN")}</span>

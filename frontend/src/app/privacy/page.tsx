@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Shield, Lock, EyeOff, Server, HelpCircle } from "lucide-react";
+import { Shield, Lock, EyeOff, Server } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import PageHeroBanner from "@/components/ui/PageHeroBanner";
 
 export default function PrivacyPage() {
   const [activeTab, setActiveTab] = useState("collection");
@@ -14,36 +15,71 @@ export default function PrivacyPage() {
     { id: "cookies", label: "Cookies & Logs", icon: Server },
   ];
 
-  return (
-    <div className="min-h-screen bg-[#020B1E] text-slate-100 pb-20 pt-10">
-      
-      {/* Immersive Header Banner */}
-      <div className="relative max-w-6xl mx-auto px-6 mb-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl h-[220px]">
-        <img
-          src="/privacy_banner.png"
-          alt="AURA Privacy Header"
-          className="w-full h-full object-cover brightness-[0.4] contrast-125"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#020B1E] via-transparent to-transparent" />
-        <div className="absolute bottom-6 left-6 right-6 md:left-10 md:right-10 flex flex-col justify-end">
-          <span className="text-[10px] font-space text-gold uppercase tracking-widest font-bold">
-            Data Governance
-          </span>
-          <h1 className="font-space text-2xl md:text-4xl font-bold tracking-tight text-white uppercase mt-1">
-            Privacy &amp; Manifest Data Security
-          </h1>
-          <p className="text-xs text-slate-300 font-sans mt-2 max-w-xl">
-            Learn how we handle passenger identifiers, payment authorization tokens, and flight manifest security logs.
-          </p>
-        </div>
-      </div>
+  const content: Record<string, { heading: string; points: string[] }> = {
+    collection: {
+      heading: "Data We Collect",
+      points: [
+        "We collect personal identification data including full name, government ID number, date of birth, and passport details for flight manifest compliance.",
+        "Contact information such as email address, WhatsApp number, and emergency contact details are collected for booking communications.",
+        "Payment data including card last four digits, UPI VPA, and IMPS reference numbers are stored in encrypted form for reconciliation purposes.",
+        "Biometric weight data recorded at helipad check-in is used exclusively for aircraft weight-and-balance calculations and is not retained beyond the flight date.",
+        "Flight preference data (seat preference, meal requirements, accessibility needs) is collected to personalize your charter experience.",
+      ],
+    },
+    sharing: {
+      heading: "Third-Party Data Sharing",
+      points: [
+        "We share passenger manifest data with DGCA and the Airports Authority of India (AAI) as required under Indian aviation law.",
+        "Payment gateway providers (Razorpay, PayU) receive transaction tokens but never receive full card data, which is processed on PCI-DSS certified servers.",
+        "Hotel and resort partners receive name and contact data solely for room pre-assignment and concierge preparation upon guest request.",
+        "We never sell, rent, or trade personal data to marketing companies, data brokers, or unaffiliated third parties.",
+        "In the event of a regulatory investigation, we may be legally required to disclose information to law enforcement under court order.",
+      ],
+    },
+    security: {
+      heading: "Security Protocols",
+      points: [
+        "All data in transit is encrypted using TLS 1.3 with AES-256 cipher suites.",
+        "Our databases are hosted on ISO 27001 certified cloud infrastructure with geo-redundant backups.",
+        "Access to passenger data is restricted to authorized Roman Aviation flight operations and concierge personnel on a need-to-know basis.",
+        "We conduct quarterly penetration testing and annual security audits by CERT-IN empaneled firms.",
+        "In the event of a data breach, affected passengers will be notified within 72 hours as required under the Indian Data Protection Act.",
+      ],
+    },
+    cookies: {
+      heading: "Cookies & Access Logs",
+      points: [
+        "We use essential cookies to maintain your booking session state across page navigations on our platform.",
+        "Analytics cookies (Google Analytics 4) help us understand which pages are most useful to our passengers. These can be opted out via your browser settings.",
+        "Server access logs recording IP address, browser type, and page requested are retained for 90 days for security auditing purposes.",
+        "We do not use tracking pixels, cross-site trackers, or fingerprinting technologies.",
+        "You may request deletion of your cookies and session data at any time by contacting privacy@romanaviation.in.",
+      ],
+    },
+  };
 
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+  const currentContent = content[activeTab];
+
+  return (
+    <div className="min-h-screen bg-[#020B1E] text-slate-100 pb-20">
+      
+      {/* Full-Width Hero Banner */}
+      <PageHeroBanner
+        imageSrc="/banners/privacy-banner.jpg"
+        imageAlt="Roman Aviation Privacy Policy - Data Security"
+        label="Data Governance"
+        title="Privacy & Manifest Data Security"
+        subtitle="Learn how we handle passenger identifiers, payment authorization tokens, and flight manifest security logs."
+        height={360}
+        paperColor="#020B1E"
+      />
+
+      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mt-10">
         
         {/* Left Side Tab Navigation */}
         <div className="lg:col-span-4 flex flex-col gap-2.5 bg-[#051433] p-4 rounded-xl border border-white/5 shadow-xl">
           <span className="text-[9px] font-space uppercase tracking-widest text-slate-400 font-bold block px-2 mb-2">
-            Policy Sections
+            Privacy Sections
           </span>
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -52,120 +88,48 @@ export default function PrivacyPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-space text-xs font-bold uppercase tracking-wider text-left transition-all cursor-pointer ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-left text-sm font-space font-semibold transition-all ${
                   isActive
-                    ? "bg-gold text-black shadow-lg shadow-gold/20"
-                    : "bg-[#020B1E]/40 text-slate-300 hover:text-white border border-white/5 hover:border-white/10"
+                    ? "bg-[#C5A880]/20 text-[#C5A880] border border-[#C5A880]/30"
+                    : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent"
                 }`}
               >
-                <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-black" : "text-gold"}`} />
+                <Icon className="h-4 w-4 shrink-0" />
                 {tab.label}
               </button>
             );
           })}
         </div>
 
-        {/* Right Side Content Panel */}
-        <div className="lg:col-span-8 bg-[#051433] rounded-xl p-6 md:p-8 border border-white/5 shadow-xl min-h-[380px]">
+        {/* Right Side Content */}
+        <div className="lg:col-span-8">
           <AnimatePresence mode="wait">
-            {activeTab === "collection" && (
-              <motion.div
-                key="collection"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col gap-6 text-slate-300 font-sans text-xs md:text-sm leading-relaxed"
-              >
-                <h2 className="font-space text-base font-bold text-white uppercase border-b border-white/5 pb-2 mb-2">
-                  1. Information We Collect
-                </h2>
-                <p>
-                  At Roman Aviation &amp; Tourism, we collect passenger information that is essential to authorize flights, coordinate regional clearances, and secure aircraft bookings.
-                </p>
-                <p>
-                  This personal data includes:
-                  <br />
-                  • **Identity Identifiers:** Government-issued identification credentials (Aadhaar Cards, passports, or visa certificates) and precise body weights for manifest telemetry.
-                  <br />
-                  • **Account Profiles:** Profile information, passwords, travel history, wishlist registries, and flight preferences.
-                  <br />
-                  • **Payment Logs:** Transaction tokens generated by certified gateways (Razorpay/Stripe) to secure your payment without storing credit details on our local databases.
-                </p>
-              </motion.div>
-            )}
-
-            {activeTab === "sharing" && (
-              <motion.div
-                key="sharing"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col gap-6 text-slate-300 font-sans text-xs md:text-sm leading-relaxed"
-              >
-                <h2 className="font-space text-base font-bold text-white uppercase border-b border-white/5 pb-2 mb-2">
-                  2. Third-Party Access &amp; Sharing Limits
-                </h2>
-                <p>
-                  We prioritize the confidentiality of our elite passengers. Roman Aviation does not sell, lease, or distribute guest profile databases to advertising networks or tracking entities.
-                </p>
-                <p>
-                  Manifest logs are shared exclusively with:
-                  <br />
-                  - **Aviation Operators:** The NSOP helicopter and aircraft operators who manage safety protocols.
-                  <br />
-                  - **Air Traffic Controllers:** Regional ATC departments, Airport Authority of India cells, and helipad terminal securities for flight path authorization.
-                  <br />
-                  - **Local Administrators:** District magistrates and emergency search and rescue teams during mountain transits.
-                </p>
-              </motion.div>
-            )}
-
-            {activeTab === "security" && (
-              <motion.div
-                key="security"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col gap-6 text-slate-300 font-sans text-xs md:text-sm leading-relaxed"
-              >
-                <h2 className="font-space text-base font-bold text-white uppercase border-b border-white/5 pb-2 mb-2">
-                  3. Manifest Data Encryption &amp; Security
-                </h2>
-                <p>
-                  To secure manifest records against unauthorized leakage or interception, Roman Aviation implements premium security measures:
-                </p>
-                <p>
-                  - **Database Encryption:** All government ID files and sensitive travel profile fields are encrypted at rest using AES-256 standard protocols.
-                  <br />
-                  - **API Security:** All data exchanges between frontend portals and Django endpoints are verified via secure JSON Web Tokens (JWT) and HTTPS.
-                  <br />
-                  - **Access Control:** Manifest logs are visible only to authorized dispatch desk staff holding checked corporate tokens.
-                </p>
-              </motion.div>
-            )}
-
-            {activeTab === "cookies" && (
-              <motion.div
-                key="cookies"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col gap-6 text-slate-300 font-sans text-xs md:text-sm leading-relaxed"
-              >
-                <h2 className="font-space text-base font-bold text-white uppercase border-b border-white/5 pb-2 mb-2">
-                  4. Cookies, Analytics &amp; Web Logs
-                </h2>
-                <p>
-                  We utilize lightweight functional cookies and server logs to record booking widget states, login sessions, and checkout progress.
-                </p>
-                <p>
-                  These logs capture standard browser telemetry (IP addresses, device metadata, navigation history) solely for performance diagnostics and DDoS monitoring. You can configure your browser to reject cookies, though this may disable standard flight staging selections.
-                </p>
-              </motion.div>
-            )}
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25 }}
+              className="bg-[#051433] rounded-xl border border-white/5 p-6 shadow-xl"
+            >
+              <h2 className="font-space text-lg font-bold text-white uppercase tracking-wide mb-5 flex items-center gap-2">
+                <span className="w-1 h-5 bg-[#C5A880] rounded-full inline-block" />
+                {currentContent.heading}
+              </h2>
+              <ul className="flex flex-col gap-3">
+                {currentContent.points.map((point, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-slate-300 font-sans leading-relaxed">
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#C5A880] shrink-0" />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[10px] text-slate-500 font-sans mt-6 pt-4 border-t border-white/5">
+                Last updated: 01 August 2026 · Roman Aviation Private Limited · privacy@romanaviation.in
+              </p>
+            </motion.div>
           </AnimatePresence>
         </div>
-
       </div>
     </div>
   );

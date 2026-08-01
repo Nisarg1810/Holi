@@ -6,6 +6,7 @@ import {
   ChevronDown, ChevronUp, MapPin, Award, Check, Calendar, Users, Target, ShieldCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import PageHeroBanner from "@/components/ui/PageHeroBanner";
 
 export default function ContactPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -53,21 +54,21 @@ export default function ContactPage() {
     {
       name: "Airbus H145",
       type: "Twin-Engine Utility",
-      specs: { Capacity: "4 VIPs", Speed: "240 km/h", Ceiling: "20,000 ft", Avionics: "Helionix Suite" },
+      specs: { Capacity: "4 Guests", Speed: "240 km/h", Ceiling: "20,000 ft", Avionics: "Helionix Suite" },
       desc: "The pinnacle of high-altitude luxury, complete with vibration containment and scenic panorama glass windows.",
       image: "https://images.unsplash.com/photo-1583244532610-2a234e7c3eca?q=80&w=600&auto=format&fit=crop"
     },
     {
       name: "Bell 429",
       type: "Light Twin Engine",
-      specs: { Capacity: "6 VIPs", Speed: "273 km/h", Ceiling: "18,700 ft", Avionics: "P&W Glass Cockpit" },
+      specs: { Capacity: "6 Guests", Speed: "273 km/h", Ceiling: "18,700 ft", Avionics: "P&W Glass Cockpit" },
       desc: "Twin-engine security combined with an elegant flat-floor cabin, perfect for coastal shoreline shuttle flights.",
       image: "https://images.unsplash.com/photo-1612459284970-e8f027596582?q=80&w=600&auto=format&fit=crop"
     },
     {
       name: "Augusta AW109",
       type: "High-Speed Executive",
-      specs: { Capacity: "5 VIPs", Speed: "285 km/h", Ceiling: "15,000 ft", Avionics: "3-Axis Autopilot" },
+      specs: { Capacity: "5 Guests", Speed: "285 km/h", Ceiling: "15,000 ft", Avionics: "3-Axis Autopilot" },
       desc: "Aerodynamic corporate transport featuring fully retractable landing gear for rapid city shuttle lanes.",
       image: "https://images.unsplash.com/photo-1540962351504-03099e0a754b?q=80&w=600&auto=format&fit=crop"
     }
@@ -99,39 +100,16 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
       
-      {/* ── Header & Helplines Strip ────────────────────────────── */}
-      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-12 pb-24 px-4 md:px-8 text-white relative shadow-lg">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="flex flex-col gap-2">
-            <span style={{ color: '#C5A880' }} className="font-space text-xs uppercase tracking-widest text-gold font-bold">
-              Flight Concierge &amp; Heritage
-            </span>
-            <h1 style={{ color: '#ffffff' }} className="font-space text-3xl md:text-5xl font-bold tracking-tight uppercase">
-              Contact &amp; Corporate Desk
-            </h1>
-            <p style={{ color: '#cbd5e1' }} className="font-sans text-xs sm:text-sm text-slate-300">
-              Establish flight routes, review our luxury fleet, or connect with our dispatch offices.
-            </p>
-          </div>
-          
-          <div className="flex flex-wrap gap-4 text-xs font-sans">
-            <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
-              <Phone className="h-4 w-4 text-amber-400 shrink-0" />
-              <div>
-                <span className="text-[8px] uppercase tracking-wider text-slate-400 block leading-none">24/7 Helpline</span>
-                <span className="font-semibold text-white">+91 70418 61886</span>
-              </div>
-            </div>
-            <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
-              <Mail className="h-4 w-4 text-amber-400 shrink-0" />
-              <div>
-                <span className="text-[8px] uppercase tracking-wider text-slate-400 block leading-none">Email Office</span>
-                <span className="font-semibold text-white">info@romanaviation.in</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ── Hero Banner ────────────────────────────────────────── */}
+      <PageHeroBanner
+        imageSrc="/banners/contact-banner.jpg"
+        imageAlt="Roman Aviation Contact - Helicopter Operations"
+        label="Flight Concierge & Heritage"
+        title="Contact & Corporate Desk"
+        subtitle="Establish flight routes, review our luxury fleet, or connect with our dispatch offices."
+        height={500}
+        paperColor="#F2F5F8"
+      />
 
       <div className="max-w-6xl mx-auto px-6 -mt-12 relative z-20 flex flex-col gap-20">
         

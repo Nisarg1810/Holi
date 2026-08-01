@@ -18,19 +18,14 @@ export default function CheckoutPage() {
     passengers,
     selectedAddOns,
     insuranceEnabled,
-    appliedPromo,
     setSelectedSeats,
     setPassengers,
     toggleAddOn,
     setInsuranceEnabled,
-    applyPromo,
-    removePromo,
   } = useCartStore();
 
   const [emailId, setEmailId] = useState("");
   const [mobileNo, setMobileNo] = useState("");
-  const [promoInput, setPromoInput] = useState("");
-  const [promoError, setPromoError] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -60,7 +55,7 @@ export default function CheckoutPage() {
     { id: "ao-b3", name: "Sunset Photography Session", price: 6500, description: "Professional photographer for 1 hour onboard" },
     { id: "ao-b4", name: "Private DJ & Sound System", price: 12000, description: "Live DJ with premium marine speaker setup" },
   ] : [
-    { id: "ao-1", name: "Gourmet Caviar & Champagne", price: 12500, description: "VIP cabin flight refreshments" },
+    { id: "ao-1", name: "Gourmet Caviar & Champagne", price: 12500, description: "Executive cabin flight refreshments" },
     { id: "ao-2", name: "Airport Limousine Pickup", price: 15000, description: "Audi A8 terminal transfer service" },
     { id: "ao-3", name: "Extended Heli Baggage (+15kg)", price: 8000, description: "Additional custom weight allowance" },
   ];
@@ -88,22 +83,7 @@ export default function CheckoutPage() {
     setPassengers(updated);
   };
 
-  const handleApplyPromo = (e: React.FormEvent) => {
-    e.preventDefault();
-    const code = promoInput.toUpperCase().trim();
-    if (code === "AURA10") {
-      applyPromo("AURA10", 10);
-      setPromoError("");
-    } else if (code === "ROMANVIP") {
-      applyPromo("ROMANVIP", 10);
-      setPromoError("");
-    } else if (code === "CHARDHAM2026") {
-      applyPromo("CHARDHAM2026", 0);
-      setPromoError("");
-    } else {
-      setPromoError("Invalid coupon code.");
-    }
-  };
+
 
   const calculateTotal = () => {
     if (!item) return { subtotal: 0, discount: 0, taxes: 0, total: 0, fareDiscount: 0 };
@@ -126,13 +106,6 @@ export default function CheckoutPage() {
     const subtotal = discountedBase + addOnsCost + insuranceCost;
     
     let discount = 0;
-    if (appliedPromo) {
-      if (appliedPromo.code === "CHARDHAM2026") {
-        discount = 15000;
-      } else {
-        discount = subtotal * (appliedPromo.discountPercent / 100);
-      }
-    }
     
     // Boats use 5% marine GST; others use 18% aviation GST
     const taxRate = item.type === "boat" ? 0.05 : 0.18;
@@ -168,7 +141,7 @@ export default function CheckoutPage() {
 
     // Save contact info to passenger #1
     const sanitized = passengers.map((p, idx) => ({
-      fullName: p.fullName.trim() !== "" ? p.fullName : (idx === 0 && user?.name ? user.name : `VIP Guest #${idx + 1}`),
+      fullName: p.fullName.trim() !== "" ? p.fullName : (idx === 0 && user?.name ? user.name : `Guest #${idx + 1}`),
       age: Number(p.age) > 0 ? Number(p.age) : 30,
       gender: p.gender || "Male",
       idProof: p.idProof.trim() !== "" ? p.idProof : "AADHAAR-VERIFIED",
@@ -488,7 +461,7 @@ export default function CheckoutPage() {
                 <div className="border-t border-slate-100 pt-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                    <span className="text-xs font-bold text-slate-700">VIP Flight Insurance</span>
+                    <span className="text-xs font-bold text-slate-700">Flight Insurance</span>
                   </div>
                   <input
                     type="checkbox"
@@ -498,33 +471,7 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                {/* Promo Code Form */}
-                <div className="border-t border-slate-100 pt-3 flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Apply Promo Code</span>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="e.g. AURA10"
-                      value={promoInput}
-                      onChange={(e) => setPromoInput(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold uppercase text-slate-900 focus:outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleApplyPromo}
-                      className="px-3 py-1.5 bg-[#051433] text-white text-xs font-bold uppercase rounded-lg hover:bg-[#092254]"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                  {appliedPromo && (
-                    <div className="flex justify-between text-[10px] text-emerald-600 font-bold mt-1">
-                      <span>Applied: {appliedPromo.code}</span>
-                      <button type="button" onClick={removePromo} className="text-red-500 hover:underline">Remove</button>
-                    </div>
-                  )}
-                  {promoError && <span className="text-[10px] text-red-500 font-bold">{promoError}</span>}
-                </div>
+
 
                 {/* Final Price Breakdown */}
                 {priceSummary && (
@@ -547,7 +494,7 @@ export default function CheckoutPage() {
                     )}
                     {selectedAddOns.length > 0 && (
                       <div className="flex justify-between text-slate-500">
-                        <span>VIP Add-ons</span>
+                        <span>Premium Add-ons</span>
                         <span>+₹{selectedAddOns.reduce((acc, curr) => acc + curr.price, 0).toLocaleString("en-IN")}</span>
                       </div>
                     )}
@@ -557,12 +504,7 @@ export default function CheckoutPage() {
                         <span>+₹{(5000 * item.passengers).toLocaleString("en-IN")}</span>
                       </div>
                     )}
-                    {appliedPromo && (
-                      <div className="flex justify-between text-emerald-600 font-bold">
-                        <span>Promo Discount</span>
-                        <span>-₹{priceSummary.discount.toLocaleString("en-IN")}</span>
-                      </div>
-                    )}
+
                     <div className="flex justify-between text-slate-500">
                         <span>{item.type === "boat" ? "Marine Service Tax (5%)" : "GST Aviation Tax (18%)"}</span>
                         <span>₹{priceSummary.taxes.toLocaleString("en-IN")}</span>

@@ -445,7 +445,7 @@ export default function SearchBox() {
                     <span className="font-space text-sm font-bold text-slate-800">Guest{totalPassengers > 1 ? "s" : ""}</span>
                   </div>
                   <span className="text-xs text-slate-500 block truncate mt-0.5">
-                    {activeTab === "hotel" ? "Standard Room Class" : "Executive VIP Class"}
+                    {activeTab === "hotel" ? "Standard Room Class" : "Executive Premium Class"}
                   </span>
                 </button>
 

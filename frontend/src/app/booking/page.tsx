@@ -57,7 +57,7 @@ function BookingSearchContent() {
 
   const sourceOptions = [
     { code: "DED", name: "Dehradun", desc: "Jolly Grant Heliport" },
-    { code: "DEL", name: "New Delhi", desc: "IGI VIP Terminal Hub" },
+    { code: "DEL", name: "New Delhi", desc: "IGI Executive Terminal Hub" },
     { code: "SXR", name: "Srinagar", desc: "Aerodrome Terminal" },
     { code: "GOI", name: "Goa Shore", desc: "Beachfront Heliport" },
     { code: "BOM", name: "Mumbai", desc: "Juhu Helipad Hub" },
@@ -370,7 +370,7 @@ function BookingSearchContent() {
                         ))}
                       </select>
                       <span className="text-xs text-slate-500 block truncate mt-1">
-                        {sourceOptions.find(o => localSource.includes(o.name))?.desc || "VIP Departure Heliport"}
+                        {sourceOptions.find(o => localSource.includes(o.name))?.desc || "Premium Departure Heliport"}
                       </span>
                     </div>
 
@@ -849,7 +849,7 @@ function BookingSearchContent() {
                 <h4 className="font-space text-xs uppercase font-bold tracking-wider">AURA Safety Assured</h4>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed font-sans">
-                100% DGCA-certified multi-engine helicopters with dual pilot command, real-time satellite radar tracking, and VIP lounge boarding.
+                100% DGCA-certified multi-engine helicopters with dual pilot command, real-time satellite radar tracking, and Executive lounge boarding.
               </p>
             </div>
 

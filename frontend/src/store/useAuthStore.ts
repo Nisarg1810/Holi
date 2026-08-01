@@ -59,6 +59,9 @@ export interface AuthState {
     nationality?: string;
     marital_status?: string;
     anniversary?: string;
+    profileImage?: string;
+    createdAt?: string;
+    updatedAt?: string;
   } | null;
   token: string | null;       // JWT access token
   refresh: string | null;     // JWT refresh token
@@ -105,6 +108,8 @@ export const useAuthStore = create<AuthState>()(
           token,
           refresh: refresh ?? null,
           isLoggedIn: true,
+          bookings: [],
+          tickets: [],
         }),
       logout: () =>
         set({
@@ -116,18 +121,17 @@ export const useAuthStore = create<AuthState>()(
           tickets: [],
         }),
       fetchBookings: async () => {
-        const user = get().user;
-        if (!user?.email) return;
         try {
-          const res = await API.get(`/bookings?email=${encodeURIComponent(user.email)}`);
-          set({ bookings: res.data });
+          const res = await API.get("/bookings");
+          const data = Array.isArray(res.data) ? res.data : res.data.results || [];
+          set({ bookings: data });
         } catch (err) {
           console.error("Error fetching bookings:", err);
         }
       },
       addBooking: async (booking) => {
         const user = get().user;
-        const bookingId = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
+        const bookingId = booking.id || `BK-${Math.floor(1000 + Math.random() * 9000)}`;
         try {
           const payload = {
             ...booking,
@@ -164,7 +168,7 @@ export const useAuthStore = create<AuthState>()(
       },
       requestCancelBooking: async (id, cancellationData) => {
         try {
-          await API.post(`/bookings/request-cancel/${id}`, { cancellation_data: cancellationData });
+          await API.post(`/bookings/${id}/request-cancel`, { cancellation_data: cancellationData });
           await get().fetchBookings();
         } catch (err) {
           console.error("Error requesting cancellation:", err);
@@ -172,7 +176,7 @@ export const useAuthStore = create<AuthState>()(
       },
       approveRefundBooking: async (id) => {
         try {
-          await API.post(`/bookings/approve-refund/${id}`);
+          await API.post(`/bookings/${id}/approve-refund`);
           await get().fetchBookings();
         } catch (err) {
           console.error("Error approving refund:", err);
@@ -180,7 +184,7 @@ export const useAuthStore = create<AuthState>()(
       },
       rejectCancelBooking: async (id) => {
         try {
-          await API.post(`/bookings/reject-cancel/${id}`);
+          await API.post(`/bookings/${id}/reject-cancel`);
           await get().fetchBookings();
         } catch (err) {
           console.error("Error rejecting cancellation:", err);
@@ -224,8 +228,6 @@ export const useAuthStore = create<AuthState>()(
         }
       },
       updateProfile: async (profileDataOrName, phone) => {
-        const user = get().user;
-        if (!user?.email) return;
         try {
           let payload: Record<string, any> = {};
           if (typeof profileDataOrName === "string") {
@@ -233,17 +235,15 @@ export const useAuthStore = create<AuthState>()(
           } else {
             payload = { ...profileDataOrName };
           }
-          const res = await API.post("/auth/profile", { ...payload, email: user.email });
+          const res = await API.put("/profile", payload);
           set({ user: res.data });
         } catch (err) {
           console.error("Error updating profile:", err);
         }
       },
       fetchProfile: async () => {
-        const user = get().user;
-        if (!user?.email) return;
         try {
-          const res = await API.get(`/auth/profile?email=${encodeURIComponent(user.email)}`);
+          const res = await API.get("/profile");
           if (res.data) {
             set({ user: res.data });
           }

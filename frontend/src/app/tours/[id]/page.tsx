@@ -72,7 +72,7 @@ function TourDetailContent() {
 
   const handleBookTour = () => {
     const activeAddonsList = [];
-    if (addonLimo) activeAddonsList.push("VIP Limousine");
+    if (addonLimo) activeAddonsList.push("Limousine");
     if (addonGuide) activeAddonsList.push("Priority Guide");
     if (addonCatering) activeAddonsList.push("Gourmet Catering");
 
@@ -322,7 +322,7 @@ function TourDetailContent() {
                     </label>
                     <div className="flex flex-col gap-2">
                       {[
-                        { id: "h-1", name: "Airbus H145", desc: "Twin-engine VIP luxury cabin, standard fare", offset: "Included" },
+                        { id: "h-1", name: "Airbus H145", desc: "Twin-engine Luxury cabin, standard fare", offset: "Included" },
                         { id: "h-2", name: "Bell 429", desc: "Premium agility, high-altitude support", offset: "-₹30,000 / guest" },
                         { id: "h-3", name: "Augusta AW109", desc: "High-speed executive transport", offset: "-₹50,000 / guest" },
                       ].map((heli) => (
@@ -411,7 +411,7 @@ function TourDetailContent() {
                         <span className="font-space font-bold text-white">Audi A8 Limousine Tarmac Pickups</span>
                         <span className="font-mono text-[9px] text-[#C5A880] font-semibold">+₹15,000 Flat</span>
                       </div>
-                      <p className="font-luxury text-[9px] text-slate-400 leading-snug">Private VIP vehicle directly greeting you on the airfield landing strip.</p>
+                      <p className="font-luxury text-[9px] text-slate-400 leading-snug">Private Private vehicle directly greeting you on the airfield landing strip.</p>
                     </button>
 
                     {/* Add-on 2 */}
@@ -424,7 +424,7 @@ function TourDetailContent() {
                       }`}
                     >
                       <div className="flex justify-between items-center w-full">
-                        <span className="font-space font-bold text-white">Priority VIP Spiritual Guide</span>
+                        <span className="font-space font-bold text-white">Priority Premium Spiritual Guide</span>
                         <span className="font-mono text-[9px] text-[#C5A880] font-semibold">+₹10,000 / guest</span>
                       </div>
                       <p className="font-luxury text-[9px] text-slate-400 leading-snug">Avoid queues with express entry lanes and private guide assistance.</p>
@@ -479,7 +479,7 @@ function TourDetailContent() {
                       <span className="text-white font-semibold">{roomName}</span>
                     </div>
                     <div className="flex flex-col border-t border-white/5 pt-2 gap-1.5">
-                      <span className="text-slate-500">Selected VIP Amenities:</span>
+                      <span className="text-slate-500">Selected Premium Amenities:</span>
                       <div className="flex flex-wrap gap-1 mt-0.5">
                         {addonLimo && <span className="bg-white/5 px-2 py-0.5 rounded text-[9px] text-teal border border-teal/20">Audi A8 Limo</span>}
                         {addonGuide && <span className="bg-white/5 px-2 py-0.5 rounded text-[9px] text-teal border border-teal/20">Spiritual Guide</span>}
@@ -491,7 +491,7 @@ function TourDetailContent() {
 
                   <div className="bg-teal-500/5 border border-teal-500/10 p-3 rounded flex items-center gap-2 text-[10px] text-teal-400">
                     <ShieldCheck className="h-4.5 w-4.5 shrink-0" />
-                    <span>Includes 256-Bit SSL Protected VIP Checkout and Ground manifest priority logs.</span>
+                    <span>Includes 256-Bit SSL Protected Secure Checkout and Ground manifest priority logs.</span>
                   </div>
 
                   <button

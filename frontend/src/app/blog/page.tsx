@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Clock, User, Calendar, Search, Helicopter, ArrowRight, Sparkles, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import PageHeroBanner from "@/components/ui/PageHeroBanner";
 
 interface Article {
   id: string;
@@ -27,11 +28,11 @@ const ARTICLES: Article[] = [
     date: "August 01, 2026",
     author: "Capt. A. Singh (Retd. IAF)",
     readTime: "9 min read",
-    image: "https://images.unsplash.com/featured/?helicopter",
+    image: "/blog-images/helicopter.jpg",
     content: [
       "When booking private high-altitude charter flights in Uttarakhand and Himachal Pradesh, selecting the appropriate aircraft is critical to both comfort and load margins. The Airbus H145 and the Bell 429 represent the pinnacle of twin-engine luxury helicopter aviation in India.",
-      "The Airbus H145 is widely regarded as the ultimate multi-mission helicopter. Equipped with Airbus's signature Fenestron shrouded tail rotor, it offers an extremely quiet cabin experience, making in-flight conversations seamless. Its cabin boasts a spacious layout that comfortably seats up to 6 VIP passengers in club seating configuration.",
-      "The Bell 429, on the other hand, excels in raw altitude speed and power-to-weight ratios. It features a wide, flat-floor cabin with exceptional legroom and oversized windows, offering panoramic views of the Himalayan peaks. It is a preferred model for swift VIP transport from Dehradun to Badrinath and Kedarnath.",
+      "The Airbus H145 is widely regarded as the ultimate multi-mission helicopter. Equipped with Airbus's signature Fenestron shrouded tail rotor, it offers an extremely quiet cabin experience, making in-flight conversations seamless. Its cabin boasts a spacious layout that comfortably seats up to 6 Premium passengers in club seating configuration.",
+      "The Bell 429, on the other hand, excels in raw altitude speed and power-to-weight ratios. It features a wide, flat-floor cabin with exceptional legroom and oversized windows, offering panoramic views of the Himalayan peaks. It is a preferred model for swift Premium transport from Dehradun to Badrinath and Kedarnath.",
       "In summary, while the Airbus H145 offers unmatched cabin quietness and state-of-the-art rotor safety, the Bell 429 stands out for its high-cruising speed and spacious vertical clearance. Roman Aviation maintains fully inspected models of both helicopters in our Sahastradhara fleet to suit your group's preferences."
     ]
   },
@@ -43,7 +44,7 @@ const ARTICLES: Article[] = [
     date: "July 28, 2026",
     author: "Capt. A. Singh (Retd. IAF)",
     readTime: "8 min read",
-    image: "https://images.unsplash.com/featured/?kedarnath",
+    image: "/blog-images/kedarnath.jpg",
     content: [
       "Securing a helicopter slot for Kedarnath is one of the most crucial aspects of planning your Himalayan pilgrimage. For the 2026 season, the Directorate General of Civil Aviation (DGCA) and Uttarakhand Civil Aviation Development Authority (UCADA) have announced synchronized booking schedules aligned with the temple opening dates.",
       "Safety takes absolute priority at high altitudes. All operations are conducted under strict visual flight rules (VFR). Luggage limits are non-negotiable at 10 kg per seat. It is strongly advised to carry soft duffel bags rather than hard trolleys, which cannot be accommodated in the helicopter cargo holds.",
@@ -53,15 +54,15 @@ const ARTICLES: Article[] = [
   {
     id: "badrinath-guide",
     category: "Char Dham",
-    title: "Badrinath VIP Darshan & Staging Guide",
+    title: "Badrinath Priority Darshan & Staging Guide",
     desc: "Coordinate luxury twin-engine helipad landings, premium resort bookings near the Alaknanda river, and special evening pooja clearances.",
     date: "July 25, 2026",
     author: "Devi Shastry",
     readTime: "6 min read",
-    image: "https://images.unsplash.com/featured/?badrinath",
+    image: "/blog-images/badrinath.jpg",
     content: [
-      "Badrinath Dham, situated in the Garhwal hill tracks of Uttarakhand along the Alaknanda River, is easily accessible via private VIP helicopter transfers landing at the Badrinath helipad, just a 5-minute drive from the shrine.",
-      "A typical helicopter itinerary allows passengers to land in the morning, proceed directly to the VIP queue for quick gate entry, and complete their prayers within two hours. We also arrange overnight premium temple stays for pilgrims wishing to witness the Maha Abhishek Puja at dawn.",
+      "Badrinath Dham, situated in the Garhwal hill tracks of Uttarakhand along the Alaknanda River, is easily accessible via private Luxury helicopter transfers landing at the Badrinath helipad, just a 5-minute drive from the shrine.",
+      "A typical helicopter itinerary allows passengers to land in the morning, proceed directly to the Premium queue for quick gate entry, and complete their prayers within two hours. We also arrange overnight premium temple stays for pilgrims wishing to witness the Maha Abhishek Puja at dawn.",
       "Baggage constraints remain at 10 kg per passenger, and ground coordinates are managed by our local hospitality desks. During the autumn months, early morning snow flurries can occur, so dress in heavy woolen layers."
     ]
   },
@@ -69,14 +70,14 @@ const ARTICLES: Article[] = [
     id: "mahakaleshwar-ujjain",
     category: "Jyotirlinga",
     title: "Mahakaleshwar Jyotirlinga: Bhasma Aarti Booking Guide",
-    desc: "Learn how to secure priority slots for the sacred early morning Bhasma Aarti, VIP entry gates, and local transport in Ujjain.",
+    desc: "Learn how to secure priority slots for the sacred early morning Bhasma Aarti, Premium entry gates, and local transport in Ujjain.",
     date: "July 20, 2026",
     author: "Pandit R. Chaturvedi",
     readTime: "7 min read",
-    image: "https://images.unsplash.com/featured/?mahakaleshwar",
+    image: "/blog-images/mahakaleshwar.jpg",
     content: [
       "The Mahakaleshwar Temple in Ujjain is one of the most revered Jyotirlingas, famous for its unique dakshinmukhi (south-facing) deity structure and the legendary Bhasma Aarti performed daily at 4:00 AM.",
-      "Securing a Bhasma Aarti slot requires registration on the official temple portal at least 30 days in advance, matching your photo identification. We offer customized travel packages including VIP fast-track queue tokens and premium stays near the Shipra river.",
+      "Securing a Bhasma Aarti slot requires registration on the official temple portal at least 30 days in advance, matching your photo identification. We offer customized travel packages including Premium fast-track queue tokens and premium stays near the Shipra river.",
       "The dress code is strictly traditional: dhotis for men and sarees for women are mandatory to enter the inner sanctum area. Plan your visit during the winter months (October to March) for pleasant weather conditions."
     ]
   },
@@ -88,7 +89,7 @@ const ARTICLES: Article[] = [
     date: "July 18, 2026",
     author: "Dr. Priya Nair",
     readTime: "6 min read",
-    image: "https://images.unsplash.com/featured/?dwarka",
+    image: "/blog-images/dwarka.jpg",
     content: [
       "Dwarka, situated on the western tip of the Kathiawar peninsula in Gujarat, is the legendary capital of Lord Krishna's ancient kingdom. The majestic five-storied Dwarkadhish Temple is a magnificent spiritual destination.",
       "We arrange express airport transfers from Jamnagar or Rajkot airports directly to Dwarka, followed by private boat excursions to Bet Dwarka temple and the newly developed Sudama Setu suspension bridge.",
@@ -103,7 +104,7 @@ const ARTICLES: Article[] = [
     date: "July 15, 2026",
     author: "Devi Shastry",
     readTime: "5 min read",
-    image: "https://images.unsplash.com/featured/?somnath",
+    image: "/blog-images/somnath.jpg",
     content: [
       "The Somnath Temple in Gujarat stands as the first of the twelve holy Jyotirlingas. Built on the shores of the Arabian Sea, this temple has been reconstructed multiple times, symbolizing resilience and devotion.",
       "The evening Sound and Light Show (Jay Somnath) projected onto the temple walls is a majestic historical chronicle that should not be missed. We coordinate airport transfers from Diu or Keshod to Somnath.",
@@ -118,11 +119,11 @@ const ARTICLES: Article[] = [
     date: "July 10, 2026",
     author: "Pandit R. Chaturvedi",
     readTime: "9 min read",
-    image: "https://images.unsplash.com/featured/?varanasi",
+    image: "/blog-images/varanasi.jpg",
     content: [
       "Varanasi, or Kashi, is one of the oldest continuously inhabited cities in the world. The holy Kashi Vishwanath Temple, dedicated to Lord Shiva, sits at the heart of the city's labyrinth of spiritual ghats.",
       "The newly constructed Kashi Vishwanath Corridor connects the temple directly to the banks of the River Ganges, making it easy for pilgrims to bathe in the holy river and walk directly to the temple gates.",
-      "We arrange private morning boat rides (Subah-e-Banaras) and evening VIP seatings for the grand Ganga Aarti at Dashashwamedh Ghat. The winter season offers the most comfortable temperature window for exploration."
+      "We arrange private morning boat rides (Subah-e-Banaras) and evening Premium seatings for the grand Ganga Aarti at Dashashwamedh Ghat. The winter season offers the most comfortable temperature window for exploration."
     ]
   },
   {
@@ -133,10 +134,10 @@ const ARTICLES: Article[] = [
     date: "July 05, 2026",
     author: "Dr. Priya Nair",
     readTime: "7 min read",
-    image: "https://images.unsplash.com/featured/?vaishnodevi",
+    image: "/blog-images/vaishno-devi.jpg",
     content: [
       "The holy cave shrine of Mata Vaishno Devi, nestled in the Trikuta Mountains of Jammu & Kashmir, is a premier spiritual destination. The helicopter service from Katra to Sanjichhat reduces the 12 km steep trek to an 8-minute scenic flight.",
-      "All helicopter tickets automatically include an express VIP Darshan pass (Special Slip) at the Bhawan. Passengers must complete physical biometrics at the Katra boarding desk before staging.",
+      "All helicopter tickets automatically include an express Priority Darshan pass (Special Slip) at the Bhawan. Passengers must complete physical biometrics at the Katra boarding desk before staging.",
       "The weather at Sanjichhat can change rapidly, leading to sudden wind delays. Keeping a buffer day in your itinerary is strongly recommended, especially during the monsoon months."
     ]
   },
@@ -148,7 +149,7 @@ const ARTICLES: Article[] = [
     date: "July 01, 2026",
     author: "Capt. A. Singh (Retd. IAF)",
     readTime: "8 min read",
-    image: "https://images.unsplash.com/featured/?amarnath",
+    image: "/blog-images/amarnath.jpg",
     content: [
       "The Amarnath Cave temple, located at an altitude of 3,888 meters in Jammu & Kashmir, houses the naturally forming ice Shiva Lingam. Accessible only during a short summer window, helicopter transits are the safest option.",
       "Flights operate from two primary bases: Baltal (shorter route, landing at Panchtarni) and Pahalgam (scenic route). From Panchtarni helipad, pilgrims must walk or hire ponies to complete the final 6 km stretch to the cave.",
@@ -163,7 +164,7 @@ const ARTICLES: Article[] = [
     date: "June 25, 2026",
     author: "Capt. A. Singh (Retd. IAF)",
     readTime: "6 min read",
-    image: "https://images.unsplash.com/featured/?golden-temple",
+    image: "/blog-images/golden-temple.jpg",
     content: [
       "The Harmandir Sahib, popularly known as the Golden Temple in Amritsar, is the spiritual capital of Sikhism. Built around a beautiful pool, the gold-leaf covered temple is a symbol of absolute peace and equality.",
       "The community kitchen (Langar) serves free vegetarian meals to over 100,000 visitors daily, run entirely by volunteers. We arrange premium hotel stays and local transfers to the temple complex.",
@@ -173,12 +174,12 @@ const ARTICLES: Article[] = [
   {
     id: "tirupati-balaji-guide",
     category: "Spiritual Centers",
-    title: "Tirupati Balaji VIP Darshan Booking and TTD Rules",
+    title: "Tirupati Balaji Priority Darshan Booking and TTD Rules",
     desc: "Navigate Tirumala temple reservations, dynamic queue tokens, and dress codes for the richest temple in India.",
     date: "June 20, 2026",
     author: "Dr. Priya Nair",
     readTime: "7 min read",
-    image: "https://images.unsplash.com/featured/?tirupati-balaji",
+    image: "/blog-images/tirupati.jpg",
     content: [
       "The Venkateswara Swamy Temple on the Tirumala hills in Andhra Pradesh is one of the most visited pilgrimage destinations globally. Managing the crowd dynamics requires structured bookings through the Tirumala Tirupati Devasthanams (TTD) portal.",
       "We secure Special Entry Darshan tokens (₹300) and premium accommodation cottages at the hills. Traditional wear is strictly enforced: dhotis or pyjamas for men, and sarees or churidars with dupattas for women.",
@@ -193,7 +194,7 @@ const ARTICLES: Article[] = [
     date: "June 15, 2026",
     author: "Devi Shastry",
     readTime: "5 min read",
-    image: "https://images.unsplash.com/featured/?yamunotri",
+    image: "/blog-images/yamunotri.jpg",
     content: [
       "Yamunotri is the first stop in the traditional Char Dham pilgrimage. The helicopter ride from Dehradun lands at the Kharsali helipad, from which the final 6 km trek to the Yamuna temple begins.",
       "Ponies and palanquins (dandis) can be booked at Kharsali to help complete the high-altitude trek. The hot springs at Yamunotri (Surya Kund) are a major highlight, where pilgrims cook rice as Prasad.",
@@ -208,7 +209,7 @@ const ARTICLES: Article[] = [
     date: "June 10, 2026",
     author: "Capt. A. Singh (Retd. IAF)",
     readTime: "6 min read",
-    image: "https://images.unsplash.com/featured/?gangotri",
+    image: "/blog-images/gangotri.jpg",
     content: [
       "Gangotri Dham, situated in the Uttarkashi district of Uttarakhand, is dedicated to Goddess Ganga. The temple sits amidst beautiful cedar pine forests in the Bhagirathi river valley.",
       "Private helicopters land at the Harsil helipad, a valley known as the 'Switzerland of India'. From Harsil, a scenic 25 km drive takes pilgrims directly to the Gangotri temple complex.",
@@ -223,7 +224,7 @@ const ARTICLES: Article[] = [
     date: "June 05, 2026",
     author: "Dr. Priya Nair",
     readTime: "6 min read",
-    image: "https://images.unsplash.com/featured/?rameshwaram",
+    image: "/blog-images/rameshwaram.jpg",
     content: [
       "Rameshwaram Temple, located on Pamban Island in Tamil Nadu, is one of the holy Char Dham sites. It is renowned for having the longest temple corridor in the world, with spectacular sculpted pillars.",
       "Before offering prayers to the Shiva Lingam, pilgrims bathe in the 22 holy water wells (tirthas) located within the temple complex, believed to have healing properties.",
@@ -238,7 +239,7 @@ const ARTICLES: Article[] = [
     date: "June 01, 2026",
     author: "Devi Shastry",
     readTime: "7 min read",
-    image: "https://images.unsplash.com/featured/?meenakshi-temple",
+    image: "/blog-images/meenakshi.jpg",
     content: [
       "The Meenakshi Amman Temple in Madurai is a masterpiece of Dravidian architecture. It features 14 majestic gopurams (gateway towers) covered in thousands of colorful stone figures of deities and mythical animals.",
       "The Hall of Thousand Pillars is a spectacular sculpture gallery where each pillar produces a unique musical note when struck. The temple pool (Golden Lotus Tank) is a sacred gathering spot.",
@@ -253,7 +254,7 @@ const ARTICLES: Article[] = [
     date: "May 25, 2026",
     author: "Dr. Priya Nair",
     readTime: "8 min read",
-    image: "https://images.unsplash.com/featured/?hampi",
+    image: "/blog-images/hampi.jpg",
     content: [
       "Hampi, a UNESCO World Heritage Site in Karnataka, is an open-air museum of the ruins of the grand Vijayanagara Empire. The landscape is dominated by giant granite boulders and ancient monuments.",
       "Key sites include the Virupaksha Temple, the Vittala Temple with its famous stone chariot, and the royal Lotus Mahal. We coordinate boutique resort stays and guided walks with local historians.",
@@ -268,7 +269,7 @@ const ARTICLES: Article[] = [
     date: "May 20, 2026",
     author: "Devi Shastry",
     readTime: "6 min read",
-    image: "https://images.unsplash.com/featured/?konark-temple",
+    image: "/blog-images/konark.jpg",
     content: [
       "The Konark Sun Temple in Odisha is built in the shape of a colossal chariot dedicated to the Sun God, Surya. It features 24 beautifully carved stone wheels pulled by seven horses.",
       "The wheels of the temple act as precise sundials, capable of calculating time to the accuracy of a few minutes. We arrange complete day tours from Bhubaneswar or Puri beach resorts.",
@@ -283,7 +284,7 @@ const ARTICLES: Article[] = [
     date: "May 15, 2026",
     author: "Capt. A. Singh (Retd. IAF)",
     readTime: "8 min read",
-    image: "https://images.unsplash.com/featured/?ellora-caves",
+    image: "/blog-images/ellora.jpg",
     content: [
       "The Ajanta and Ellora Caves in Maharashtra are monuments carved directly out of solid basalt cliffs. Ajanta features beautiful Buddhist frescoes, while Ellora represents Hindu, Buddhist, and Jain rock-cut architecture.",
       "The highlight of Ellora is the Kailash Temple, a colossal structure carved from a single rock from the top down, a marvel of ancient engineering. We arrange private guided transfers from Aurangabad airport.",
@@ -291,17 +292,17 @@ const ARTICLES: Article[] = [
     ]
   },
   {
-    id: "taj-mahal-vip",
+    id: "taj-mahal-premium",
     category: "Heritage Sites",
-    title: "Taj Mahal VIP Day Tour & Staging Guidelines",
+    title: "Taj Mahal Premium Day Tour & Staging Guidelines",
     desc: "How to beat the crowds, purchase express entry passes, and schedule sunrise photography visits in Agra.",
     date: "May 10, 2026",
     author: "Devi Shastry",
     readTime: "6 min read",
-    image: "https://images.unsplash.com/featured/?taj-mahal",
+    image: "/blog-images/taj-mahal.jpg",
     content: [
       "The Taj Mahal in Agra, a symbol of eternal love and a UNESCO World Heritage Site, is one of the most famous buildings globally. Viewing the white marble structure at sunrise offers a magical experience.",
-      "We arrange private Audi transfers from Delhi via the Yamuna Expressway, express entry VIP tickets to skip the long queues, and local guides for your group.",
+      "We arrange private Audi transfers from Delhi via the Yamuna Expressway, express entry Priority tickets to skip the long queues, and local guides for your group.",
       "Strict security guidelines apply: large backpacks, tripods, and food items are prohibited inside the main gate. The monument is closed to the public on Fridays."
     ]
   },
@@ -313,7 +314,7 @@ const ARTICLES: Article[] = [
     date: "May 05, 2026",
     author: "Devi Shastry",
     readTime: "7 min read",
-    image: "https://images.unsplash.com/featured/?valley-of-flowers",
+    image: "/blog-images/valley-flowers.jpg",
     content: [
       "The Valley of Flowers National Park in Uttarakhand is famous for its meadows of endemic alpine flowers and diverse flora. Reaching this remote valley via ground transport requires a long drive followed by a 13 km steep trek.",
       "Roman Aviation coordinates express helicopter transfers from Govindghat to Ghangaria, reducing travel time to a swift 4-minute flight over scenic alpine gorges. This allows pilgrims and leisure travelers to save energy for the final gentle walk into the national park core area.",
@@ -329,7 +330,7 @@ const ARTICLES: Article[] = [
     date: "May 01, 2026",
     author: "Capt. A. Singh (Retd. IAF)",
     readTime: "7 min read",
-    image: "https://images.unsplash.com/featured/?hemkund-sahib",
+    image: "/blog-images/hemkund.jpg",
     content: [
       "Gurudwara Hemkund Sahib, situated at an altitude of 4,329 meters in Uttarakhand, is the highest place of worship for Sikhs, built next to a pristine glacial lake surrounded by seven mountain peaks.",
       "We arrange helicopter transits from Govindghat base to Ghangaria, followed by pony or trek arrangements for the final steep 6 km climb to the lake.",
@@ -358,27 +359,19 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-[#F4F6F9] text-slate-800 pb-20">
       
-      {/* Blog Page Hero Header */}
-      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-16 pb-24 px-4 md:px-8 text-white relative shadow-lg">
-        <div className="max-w-6xl mx-auto flex flex-col items-center text-center">
-          <div className="flex items-center gap-2 px-3 py-1 bg-amber-400/10 border border-amber-400/30 rounded-full mb-4">
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-            <span className="font-space text-[10px] uppercase font-bold text-amber-400 tracking-widest">
-              Spiritual &amp; Cultural Chronicles
-            </span>
-          </div>
-          
-          <h1 className="font-space text-3xl md:text-5xl font-bold tracking-tight text-white uppercase">
-            Travel Blog
-          </h1>
-          <p className="text-xs md:text-sm text-slate-300 max-w-2xl mt-3 font-sans leading-relaxed">
-            Explore 20 of the most sacred temples, architectural marvels, and natural heritage sites across India. Read expert logs, staging coordinates, and helipad guidelines.
-          </p>
-        </div>
-      </div>
+      {/* Blog Page Hero Banner */}
+      <PageHeroBanner
+        imageSrc="/banners/blog-banner.jpg"
+        imageAlt="Roman Aviation Travel Blog - India Sacred Sites"
+        label="Spiritual & Cultural Chronicles"
+        title="Travel Blog"
+        subtitle="Explore 20 of the most sacred temples, architectural marvels, and natural heritage sites across India."
+        height={500}
+        paperColor="#F4F6F9"
+      />
 
       {/* Main Content Layout */}
-      <div className="max-w-6xl mx-auto px-4 md:px-8 -mt-10 relative z-20">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 mt-8 relative z-20">
         
         <AnimatePresence mode="wait">
           {!selectedArticleId ? (

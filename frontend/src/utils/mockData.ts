@@ -68,9 +68,9 @@ export const HELICOPTERS: HelicopterListing[] = [
     speed: "240 km/h",
     range: "650 km",
     safetyRating: "5.0/5.0",
-    description: "The Airbus H145 is the pinnacle of luxury aviation engineering. Featuring a spacious, vibration-isolated executive cabin, club-seating configurations, and large panoramic windows, it is the premier choice for VIP transfers to holy sanctuaries and high-altitude mountain locations.",
+    description: "The Airbus H145 is the pinnacle of luxury aviation engineering. Featuring a spacious, vibration-isolated executive cabin, club-seating configurations, and large panoramic windows, it is the premier choice for Executive transfers to holy sanctuaries and high-altitude mountain locations.",
     image: "https://images.unsplash.com/photo-1583244532610-2a234e7c3eca?q=80&w=600&auto=format&fit=crop",
-    features: ["Noise Cancellation Cabin", "Climate Control", "Panoramic Glass Windows", "Refreshment Bar", "VIP Lounge Boarding"],
+    features: ["Noise Cancellation Cabin", "Climate Control", "Panoramic Glass Windows", "Refreshment Bar", "Executive Lounge Boarding"],
     specs: {
       "Engine Type": "Dual Safran Arriel 2E",
       "Max Takeoff Weight": "3,700 kg",
@@ -111,7 +111,7 @@ export const HELICOPTERS: HelicopterListing[] = [
   },
   {
     id: "h-3",
-    name: "Urban VIP shuttle",
+    name: "Urban Premium shuttle",
     model: "AugustaWestland AW109",
     tagline: "Swift, aerodynamic executive transport for business and transit",
     price: 160000,
@@ -146,7 +146,7 @@ export const TOUR_PACKAGES: TourPackage[] = [
     rating: 4.9,
     image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=600&auto=format&fit=crop",
     inclusions: [
-      "VIP Priority Darshan slots",
+      "Priority Darshan slots",
       "Private Airbus H145 helicopter charter",
       "5-Star accommodation at luxury mountain lodges",
       "Bespoke premium high-altitude catering",
@@ -161,7 +161,7 @@ export const TOUR_PACKAGES: TourPackage[] = [
       {
         day: 1,
         title: "Departure Dehradun to Kedarnath Sanctuary",
-        desc: "Morning takeoff from Sahastradhara helipad. Soar over snow-capped ridges of the Garhwal range, landing directly at Kedarnath base. Escorted VIP Darshan, followed by gourmet sunset dinner at the Himalayan Retreat.",
+        desc: "Morning takeoff from Sahastradhara helipad. Soar over snow-capped ridges of the Garhwal range, landing directly at Kedarnath base. Escorted Priority Darshan, followed by gourmet sunset dinner at the Himalayan Retreat.",
         stay: "Himalayan Sanctuary Retreat, Kedarnath",
         transport: "Airbus H145 helicopter & private Audi SUV transfer",
       },
@@ -204,7 +204,7 @@ export const TOUR_PACKAGES: TourPackage[] = [
       {
         day: 1,
         title: "Coastal Sky Tour & Villa Check-in",
-        desc: "VIP airport pickup via Mercedes S-Class. Takeoff for a 2-hour helicopter flight along Goa's golden shoreline, tracking historic Portuguese forts. Relax in your private villa pool.",
+        desc: "Premium airport pickup via Mercedes S-Class. Takeoff for a 2-hour helicopter flight along Goa's golden shoreline, tracking historic Portuguese forts. Relax in your private villa pool.",
         stay: "Taj Exotica beachfront villa, Goa",
         transport: "Bell 429 helicopter & Limousine",
       },
@@ -284,7 +284,7 @@ export const TOUR_PACKAGES: TourPackage[] = [
       "Free Wi-Fi (Subject to Availability)"
     ],
     exclusions: [
-      "VIP Darshan Tickets",
+      "Priority Darshan Tickets",
       "Entry Tickets (If Applicable)",
       "Personal Expenses",
       "Lunch",
@@ -378,7 +378,7 @@ export const BOATS: BoatListing[] = [
     capacity: 6,
     duration: "Per Charter",
     image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=600&auto=format&fit=crop",
-    type: "VIP Speedboat",
+    type: "Speedboat",
     features: ["Twin Yamaha Engines", "Cushioned Seating", "Life Jackets", "Cooler Box", "GoPro Mount Points", "Bluetooth Speaker"],
     reviews: [
       { author: "Rahul M.", rating: 5, text: "What a rush! Best speedboat experience I have had in Goa.", date: "2026-07-01" }

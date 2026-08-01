@@ -27,9 +27,9 @@ def seed_helicopters():
             speed="240 km/h",
             range="650 km",
             safety_rating="5.0/5.0",
-            description="The Airbus H145 is the pinnacle of luxury aviation engineering. Featuring a spacious, vibration-isolated executive cabin, club-seating configurations, and large panoramic windows, it is the premier choice for VIP transfers to holy sanctuaries and high-altitude mountain locations.",
+            description="The Airbus H145 is the pinnacle of luxury aviation engineering. Featuring a spacious, vibration-isolated executive cabin, club-seating configurations, and large panoramic windows, it is the premier choice for Executive transfers to holy sanctuaries and high-altitude mountain locations.",
             image="https://images.unsplash.com/photo-1681281896815-bfa3b9b47e2b?q=80&w=600&auto=format&fit=crop",
-            features=["Noise Cancellation Cabin", "Climate Control", "Panoramic Glass Windows", "Refreshment Bar", "VIP Lounge Boarding"],
+            features=["Noise Cancellation Cabin", "Climate Control", "Panoramic Glass Windows", "Refreshment Bar", "Executive Lounge Boarding"],
             specs={
                 "Engine Type": "Dual Safran Arriel 2E (Twin-Engine)",
                 "Max Takeoff Weight": "3,700 kg",
@@ -63,7 +63,7 @@ def seed_helicopters():
         ),
         Helicopter(
             id="h-3",
-            name="Urban VIP Shuttle",
+            name="Urban Premium Shuttle",
             model="AgustaWestland AW109",
             tagline="Swift, aerodynamic executive transport for business and transit",
             price=160000,
@@ -93,17 +93,17 @@ def seed_tours():
         Tour(
             id="p-1",
             name="Himalayan Sacred Peaks Pilgrimage",
-            tagline="VIP Char Dham Helicopter Circuit | 5 Days / 4 Nights",
+            tagline="Premium Char Dham Helicopter Circuit | 5 Days / 4 Nights",
             price=195000,
             duration="5 Days / 4 Nights",
             rating=5.0,
             image="https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=600&auto=format&fit=crop",
-            inclusions=["Private Helicopter Transfers", "Luxury 5★ Resort Stays", "VIP Temple Darshan Passes", "Personalized Butler & Escort", "All Gourmet Meals"],
+            inclusions=["Private Helicopter Transfers", "Luxury 5★ Resort Stays", "Premium Temple Darshan Passes", "Personalized Butler & Escort", "All Gourmet Meals"],
             exclusions=["Personal Gratuitous Tips", "Extra Heavy Luggage (>5kg)", "Unscheduled Extra Stays"],
             itinerary=[
                 {"day": 1, "title": "Arrival in Dehradun", "desc": "Welcome dinner at JW Marriott Mussoorie with briefing.", "stay": "JW Marriott Mussoorie", "transport": "Luxury SUV"},
-                {"day": 2, "title": "Dehradun ➔ Yamunotri ➔ Gangotri", "desc": "Morning charter flight to Kharsali helipad and VIP darshan.", "stay": "Himalayan Sanctuary Resort", "transport": "Airbus H145"},
-                {"day": 3, "title": "Kedarnath Sanctuary VIP Visit", "desc": "Fly to Phata helipad and direct shuttle to Kedarnath temple doorstep.", "stay": "Kedarnath Eco Suites", "transport": "Airbus H145"},
+                {"day": 2, "title": "Dehradun ➔ Yamunotri ➔ Gangotri", "desc": "Morning charter flight to Kharsali helipad and Priority darshan.", "stay": "Himalayan Sanctuary Resort", "transport": "Airbus H145"},
+                {"day": 3, "title": "Kedarnath Sanctuary Premium Visit", "desc": "Fly to Phata helipad and direct shuttle to Kedarnath temple doorstep.", "stay": "Kedarnath Eco Suites", "transport": "Airbus H145"},
                 {"day": 4, "title": "Badrinath Shrine & Mana Village", "desc": "Morning flight to Badrinath. Special Maha Aarti darshan.", "stay": "Sarovar Portico Badrinath", "transport": "Airbus H145"},
                 {"day": 5, "title": "Return Departure to Dehradun", "desc": "Scenic morning return flyover with souvenir photo gift.", "stay": "N/A", "transport": "Airbus H145"}
             ]
@@ -259,7 +259,7 @@ def seed_boats():
         Boat(
             id="b-2",
             name="Mandovi Royal Speedboat",
-            type="VIP Speedboat",
+            type="Speedboat",
             capacity=6,
             price=18000,
             image="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=600&auto=format&fit=crop",

@@ -164,7 +164,7 @@ export default function PaymentPage() {
             }
           },
           prefill: {
-            name: passengers[0]?.fullName || user?.name || "VIP Guest",
+            name: passengers[0]?.fullName || user?.name || "Guest",
             email: userEmail,
             contact: userPhone,
           },
@@ -418,7 +418,7 @@ export default function PaymentPage() {
                   {/* Add-ons List */}
                   {selectedAddOns.length > 0 && (
                     <div className="flex flex-col gap-1 border-t border-slate-100 pt-2">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">VIP Add-ons</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Premium Add-ons</span>
                       {selectedAddOns.map((ao) => (
                         <div key={ao.id} className="flex justify-between text-[11px] text-slate-700">
                           <span>• {ao.name}</span>
@@ -474,16 +474,11 @@ export default function PaymentPage() {
                   )}
                   {insuranceEnabled && (
                     <div className="flex justify-between text-slate-500">
-                      <span>VIP Flight Insurance</span>
+                      <span>Flight Insurance</span>
                       <span>+₹{(5000 * item.passengers).toLocaleString("en-IN")}</span>
                     </div>
                   )}
-                  {appliedPromo && (
-                    <div className="flex justify-between text-emerald-600 font-bold">
-                      <span>Discount ({appliedPromo.code})</span>
-                      <span>-₹{((Number(item.price) + selectedAddOns.reduce((a, c) => a + c.price, 0)) * (appliedPromo.discountPercent / 100)).toLocaleString("en-IN")}</span>
-                    </div>
-                  )}
+
                   <div className="flex justify-between text-slate-500">
                     <span>{item.type === "boat" ? "Marine Service Tax (5%)" : "GST Tax (18%)"}</span>
                     <span>₹{((Number(item.price) + selectedAddOns.reduce((a, c) => a + c.price, 0)) * (item.type === "boat" ? 0.05 : 0.18)).toLocaleString("en-IN")}</span>

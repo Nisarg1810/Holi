@@ -355,7 +355,7 @@ export default function AdminHelicopters() {
                     </div>
                     <div className="flex flex-col">
                       <label className={LABEL_CLS}>
-                        <Users className="h-2.5 w-2.5 inline mr-1" />VIP Capacity
+                        <Users className="h-2.5 w-2.5 inline mr-1" />Premium Capacity
                       </label>
                       <input type="number" required min={1} max={20} value={form.capacity}
                         onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })}
@@ -597,7 +597,7 @@ export default function AdminHelicopters() {
                   </div>
                   <div>
                     <span className="uppercase text-[8px] opacity-50 block">Seats</span>
-                    <span className="text-white font-bold text-[10px]">{heli.capacity} VIP</span>
+                    <span className="text-white font-bold text-[10px]">{heli.capacity} Premium</span>
                   </div>
                 </div>
 

@@ -10,7 +10,7 @@ from hotels.views import HotelViewSet
 from boats.views import BoatViewSet
 from notifications.views import TicketViewSet
 from careers.views import CareerApplicationViewSet
-from authentication.views import UserViewSet, register_user, login_user, verify_otp, update_profile, send_otp, resend_otp, direct_login, password_login, password_register, send_register_otp, direct_register, verify_signup_otp, send_reset_otp, reset_password_with_otp, kyc_documents_view, change_password
+from authentication.views import UserViewSet, register_user, login_user, verify_otp, update_profile, send_otp, resend_otp, direct_login, password_login, password_register, send_register_otp, direct_register, verify_signup_otp, send_reset_otp, reset_password_with_otp, kyc_documents_view, change_password, get_user_profile, get_profile_stats
 from payments.views import create_payment, verify_payment
 from invoices.views import generate_invoice
 from reports.views import export_table_csv, upload_file
@@ -57,6 +57,8 @@ urlpatterns = [
     path('api/v1/auth/send-reset-otp', send_reset_otp),
     path('api/v1/auth/reset-password', reset_password_with_otp),
     path('api/v1/auth/profile', update_profile),
+    path('api/v1/profile', get_user_profile),
+    path('api/v1/profile/stats', get_profile_stats),
     path('api/v1/auth/kyc-documents', kyc_documents_view),
     path('api/v1/auth/change-password', change_password),
     path('api/v1/payments/create', create_payment),
@@ -81,12 +83,16 @@ urlpatterns = [
     path('api/auth/send-reset-otp', send_reset_otp),
     path('api/auth/reset-password', reset_password_with_otp),
     path('api/auth/profile', update_profile),
+    path('api/profile', get_user_profile),
+    path('api/profile/stats', get_profile_stats),
     path('api/auth/kyc-documents', kyc_documents_view),
     path('api/auth/change-password', change_password),
     path('api/payments/create', create_payment),
     path('api/payments/verify', verify_payment),
     path('api/bookings/invoice/<str:id>', generate_invoice),
-    path('api/bookings/cancel/<str:pk>', BookingViewSet.as_view({'post': 'cancel'})),
+    path('api/bookings/cancel/<str:pk>', BookingViewSet.as_view({'post': 'cancel', 'patch': 'cancel'})),
+    path('api/bookings/<str:pk>/cancel', BookingViewSet.as_view({'post': 'cancel', 'patch': 'cancel'})),
+    path('api/bookings/<str:pk>/complete', BookingViewSet.as_view({'patch': 'complete'})),
     path('api/tickets/reply/<str:pk>', TicketViewSet.as_view({'post': 'reply'})),
     path('api/admin/export/<str:table>', export_table_csv),
     path('api/storage/upload', upload_file),

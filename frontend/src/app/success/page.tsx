@@ -133,7 +133,7 @@ function SuccessPageContent() {
                 ISSUED TO (LEAD PASSENGER / GUEST)
               </span>
               <span className="font-space text-sm font-bold text-slate-900">
-                {booking.user_email || "VIP Guest"}
+                {booking.user_email || "Guest"}
               </span>
               <div className="flex items-center gap-4 text-xs text-slate-600 mt-1">
                 {booking.contact_email && (
@@ -221,7 +221,7 @@ function SuccessPageContent() {
                     {booking.passenger_manifest.map((p: any, idx: number) => (
                       <tr key={idx} className="hover:bg-slate-50 font-medium text-slate-800">
                         <td className="p-3 text-slate-400 font-mono">0{idx + 1}</td>
-                        <td className="p-3 font-bold text-slate-900">{p.fullName || `VIP Guest #${idx + 1}`}</td>
+                        <td className="p-3 font-bold text-slate-900">{p.fullName || `Guest #${idx + 1}`}</td>
                         <td className="p-3 text-slate-600">{p.age ? `${p.age} Yrs` : "Adult"} / {p.gender || "Male"}</td>
                         <td className="p-3 font-mono text-slate-600">{p.idProof || "VERIFIED-ID"}</td>
                         <td className="p-3 text-right font-mono font-bold text-[#051433]">

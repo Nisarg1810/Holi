@@ -40,7 +40,7 @@ export default function Home() {
     { title: "DGCA Approved Fleet", desc: "Multi-engine IFR certified aircraft", icon: Helicopter },
     { title: "Best Rate Guarantee", desc: "Transparent luxury pricing", icon: Award },
     { title: "Instant Confirmation", desc: "Direct slot reservation", icon: Lock },
-    { title: "24/7 VIP Concierge", desc: "Dedicated flight coordinator", icon: Headphones },
+    { title: "24/7 Flight Concierge", desc: "Dedicated flight coordinator", icon: Headphones },
   ];
 
   const pillars = [
@@ -91,7 +91,7 @@ export default function Home() {
               <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-gold/30 bg-gold/10 self-start mb-2 inline-flex">
                 <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
                 <span className="font-space text-[10px] uppercase tracking-widest text-gold font-bold">
-                  India's Premier VIP Travel Platform
+                  India's Premier Travel Platform
                 </span>
               </div>
               <h1 className="font-serif text-3xl md:text-5xl font-bold tracking-tight text-white leading-tight">
@@ -137,31 +137,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────── */}
-      {/* 2. Offers & Special Fares Banner             */}
-      {/* ─────────────────────────────────────────── */}
-      <section className="py-12 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
-        <div className="bg-gradient-to-r from-[#051433] via-[#092254] to-[#051433] border border-amber-400/30 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-amber-400/10 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0">
-              <Sparkles className="h-6 w-6" />
-            </div>
-            <div>
-              <span className="font-space text-[10px] font-bold uppercase tracking-widest text-amber-400 block">EXCLUSIVE SEASON OFFERS</span>
-              <h3 className="font-space text-base md:text-lg font-bold text-white">Save Up to ₹15,000 Extra on Char Dham &amp; Bespoke Charters</h3>
-              <p className="text-xs text-slate-300 font-sans mt-0.5">Use promo code <strong className="text-amber-400 font-mono">CHARDHAM2026</strong> or <strong className="text-amber-400 font-mono">AURA10</strong> at checkout</p>
-            </div>
-          </div>
 
-          <Link
-            href="/booking"
-            className="px-6 py-3 bg-gradient-to-r from-[#F5A623] to-[#D68B3E] hover:from-[#E49512] text-black font-space text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shrink-0 transition-all flex items-center gap-2 cursor-pointer"
-          >
-            <span>Claim Offer</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
 
       {/* ─────────────────────────────────────────── */}
       {/* 3. Luxury Services Category Cards Grid        */}
@@ -296,50 +272,6 @@ export default function Home() {
               );
             })}
           </div>
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────── */}
-      {/* 5. Verified Guest Reviews                    */}
-      {/* ─────────────────────────────────────────── */}
-      <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-12 flex flex-col items-center">
-          <span className="font-space text-xs uppercase tracking-widest text-[#C5A880] font-bold">
-            Guest Testimonials
-          </span>
-          <h2 className="font-serif text-3xl font-bold tracking-tight text-white mt-2">
-            Trusted by Leaders &amp; Travellers
-          </h2>
-          <div className="h-[1px] w-12 bg-gold mt-4" />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((t, idx) => (
-            <div key={idx} className="bg-[#051433]/60 p-6 rounded-2xl border border-white/10 flex flex-col justify-between text-left shadow-lg">
-              <div>
-                <div className="flex items-center gap-1 text-gold mb-4">
-                  {[...Array(t.rating)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-gold" />
-                  ))}
-                </div>
-                <p className="font-sans text-xs text-slate-300 leading-relaxed italic mb-6">
-                  "{t.quote}"
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 border-t border-white/10 pt-4">
-                <img
-                  src={t.photo}
-                  alt={t.name}
-                  className="h-10 w-10 rounded-full object-cover border border-gold/40"
-                />
-                <div>
-                  <h4 className="font-space text-xs font-bold text-white">{t.name}</h4>
-                  <span className="font-sans text-[10px] text-slate-400 block">{t.role}</span>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 

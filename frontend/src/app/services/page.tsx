@@ -17,6 +17,7 @@ import {
   Check
 } from "lucide-react";
 import { motion } from "framer-motion";
+import PageHeroBanner from "@/components/ui/PageHeroBanner";
 
 export default function ServicesPage() {
   const servicesList = [
@@ -28,7 +29,7 @@ export default function ServicesPage() {
       href: "/booking",
       icon: Helicopter,
       image: "https://images.unsplash.com/photo-1540962351504-03099e0a754b?q=80&w=800&auto=format&fit=crop",
-      features: ["DGCA Certified Multi-Engine Fleets", "Dual-Pilot IFR Operations", "Bespoke Ramp VIP Pickups", "Retractable Landing Gear Stays"]
+      features: ["DGCA Certified Multi-Engine Fleets", "Dual-Pilot IFR Operations", "Bespoke Ramp Premium Pickups", "Retractable Landing Gear Stays"]
     },
     {
       name: "Bespoke Private Charters",
@@ -38,7 +39,7 @@ export default function ServicesPage() {
       href: "/charter",
       icon: Plane,
       image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=800&auto=format&fit=crop",
-      features: ["Custom Flight Corridor Staging", "Dedicated Flight Concierge", "Gourmet Caviar & Catering", "VIP Terminal Ramp Access"]
+      features: ["Custom Flight Corridor Staging", "Dedicated Flight Concierge", "Gourmet Caviar & Catering", "Executive Terminal Ramp Access"]
     },
     {
       name: "Tour Packages",
@@ -48,7 +49,7 @@ export default function ServicesPage() {
       href: "/tours",
       icon: Compass,
       image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=800&auto=format&fit=crop",
-      features: ["VIP Priority Darshan Entries", "Taj & Sarovar Stays Included", "Private Gourmet Catering", "Personal Tour Historian Guides"]
+      features: ["Priority Darshan Entries", "Taj & Sarovar Stays Included", "Private Gourmet Catering", "Personal Tour Historian Guides"]
     },
     {
       name: "Hotel & Resort Stays",
@@ -75,27 +76,19 @@ export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-[#F2F5F8] text-slate-800 pb-20">
       
-      {/* MakeMyTrip Style Hero Header */}
-      <div className="bg-gradient-to-b from-[#051433] via-[#092254] to-[#0D2D6C] pt-12 pb-20 px-4 md:px-8 text-white relative shadow-lg">
-        <div className="max-w-5xl mx-auto flex flex-col items-center text-center">
-          <div className="flex items-center gap-2 px-3 py-1 bg-amber-400/10 border border-amber-400/30 rounded-full mb-3">
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-            <span className="font-space text-[10px] uppercase font-bold text-amber-400 tracking-widest">
-              Roman Aviation &amp; Tourism Services
-            </span>
-          </div>
-          
-          <h1 className="font-space text-3xl md:text-5xl font-bold tracking-tight text-white uppercase">
-            Luxury Travel &amp; Aviation Offerings
-          </h1>
-          <p className="text-xs md:text-sm text-slate-300 max-w-xl mt-2 font-sans">
-            Instantly search and book helicopters, bespoke charters, tour packages, luxury hotels, and private yachts.
-          </p>
-        </div>
-      </div>
+      {/* Hero Banner */}
+      <PageHeroBanner
+        imageSrc="/banners/services-banner.jpg"
+        imageAlt="Roman Aviation Services - Luxury Helicopter Charter"
+        label="Roman Aviation & Tourism Services"
+        title="Luxury Travel & Aviation Offerings"
+        subtitle="Book helicopters, bespoke charters, tour packages, luxury hotels, and private yachts."
+        height={500}
+        paperColor="#F2F5F8"
+      />
 
       {/* Embedded Instant SearchBox Widget */}
-      <div className="max-w-5xl mx-auto px-4 md:px-8 -mt-10 relative z-30 mb-12">
+      <div className="max-w-5xl mx-auto px-4 md:px-8 mt-8 relative z-30 mb-12">
         <SearchBox />
       </div>
 
