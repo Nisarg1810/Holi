@@ -69,3 +69,11 @@ class ProfileSerializer(serializers.ModelSerializer):
             'anniversary': {'required': False, 'allow_null': True},
         }
 
+from .models import UserKYCDocument
+
+class UserKYCDocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserKYCDocument
+        fields = ('id', 'document_type', 'file_name', 'file_size', 'status', 'uploaded_at')
+
+

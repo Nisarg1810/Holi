@@ -4,7 +4,7 @@ class Boat(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
     name = models.CharField(max_length=150)
     type = models.CharField(max_length=100, blank=True, null=True)
-    capacity = models.IntegerField(default=6)
+    capacity = models.CharField(max_length=50, default="6 Guests")
     price = models.DecimalField(max_digits=12, decimal_places=2)
     image = models.CharField(max_length=512, blank=True, null=True)
     location = models.CharField(max_length=200, blank=True, null=True)

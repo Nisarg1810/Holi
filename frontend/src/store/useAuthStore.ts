@@ -6,13 +6,19 @@ import API from "@/utils/api";
 
 export interface Booking {
   id: string;
-  type: "helicopter" | "package" | "hotel" | "boat";
-  name: string;
-  details: string;
-  date: string;
+  type?: "helicopter" | "package" | "hotel" | "boat" | string;
+  name?: string;
+  details?: string;
+  date?: string;
+  reference_number?: string;
+  service_type?: string;
+  route?: string;
+  departure_date?: string;
+  passengers_count?: number;
+  total_fare?: number;
   return_date?: string;
-  trip_type?: "One Way" | "Round Trip" | "Multi-City";
-  passengers: number;
+  trip_type?: "One Way" | "Round Trip" | "Multi-City" | string;
+  passengers?: number;
   adults?: number;
   children?: number;
   infants?: number;
@@ -23,8 +29,8 @@ export interface Booking {
   selected_seats?: string[];
   passenger_manifest?: any[];
   addons?: any[];
-  price: number;
-  status: "Confirmed" | "Pending" | "Cancellation Requested" | "Cancelled" | "Refunded" | "In Flight";
+  price?: number;
+  status?: "Confirmed" | "Pending" | "Cancellation Requested" | "Cancelled" | "Refunded" | "In Flight" | string;
   invoiceUrl?: string;
   fare_type?: string;
   gst_number?: string;
@@ -34,13 +40,14 @@ export interface SupportTicket {
   id: string;
   subject: string;
   category: string;
-  status: "Open" | "Resolved";
+  status: "Open" | "Resolved" | string;
   date: string;
-  messages: { sender: "user" | "support"; text: string; date: string }[];
+  messages: { sender: "user" | "support" | string; text: string; date: string }[];
 }
 
 export interface AuthState {
   user: {
+    id?: string | number;
     name: string;
     last_name?: string;
     email: string;
@@ -71,6 +78,7 @@ export interface AuthState {
   addTicket: (subject: string, category: string, initialMsg: string) => Promise<void>;
   addReplyToTicket: (ticketId: string, text: string) => Promise<void>;
   updateProfile: (profileDataOrName: string | Record<string, any>, phone?: string) => Promise<void>;
+  fetchProfile: () => Promise<void>;
   markNotificationsAsRead: () => void;
 }
 
@@ -229,6 +237,18 @@ export const useAuthStore = create<AuthState>()(
           set({ user: res.data });
         } catch (err) {
           console.error("Error updating profile:", err);
+        }
+      },
+      fetchProfile: async () => {
+        const user = get().user;
+        if (!user?.email) return;
+        try {
+          const res = await API.get(`/auth/profile?email=${encodeURIComponent(user.email)}`);
+          if (res.data) {
+            set({ user: res.data });
+          }
+        } catch (err) {
+          console.error("Error auto-fetching user profile from DB:", err);
         }
       },
       markNotificationsAsRead: () =>

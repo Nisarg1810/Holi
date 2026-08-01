@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='boat',
             name='capacity',
-            field=models.IntegerField(default=6),
+            field=models.CharField(default='6 Guests', max_length=50),
         ),
         migrations.AlterField(
             model_name='boat',

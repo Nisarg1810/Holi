@@ -96,8 +96,8 @@ function OtpBoxes({ value, onChange, disabled }: OtpBoxesProps) {
   );
 }
 
-const INPUT_CLS = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-gold/50 transition-colors placeholder-white/25 font-luxury";
-const LABEL_CLS = "text-[10px] font-space uppercase tracking-widest text-gold/70 font-bold mb-1.5 block";
+const INPUT_CLS = "w-full bg-[#051433] border border-white/20 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition-all placeholder-slate-400 font-sans shadow-inner";
+const LABEL_CLS = "text-[10px] font-space uppercase tracking-widest text-amber-400 font-bold mb-1.5 block";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -135,6 +135,18 @@ export default function AuthPage() {
   const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
   const [showNewPass, setShowNewPass] = useState(false);
 
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const mode = params.get("mode");
+      if (mode === "signup" || mode === "register") {
+        setStep("signup_profile");
+      } else if (mode === "login") {
+        setStep("login");
+      }
+    }
+  }, []);
+
   // ── Login ──────────────────────────────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,8 +164,8 @@ export default function AuthPage() {
       const redirectParam = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("redirect") : null;
       const targetRoute = res.data.user?.role === "admin" 
         ? "/admin" 
-        : (redirectParam ? decodeURIComponent(redirectParam) : "/dashboard");
-      setTimeout(() => router.push(targetRoute), 1500);
+        : (redirectParam ? decodeURIComponent(redirectParam) : "/#booking-section");
+      setTimeout(() => router.push(targetRoute), 1200);
     } catch (err: any) {
       setError(err.response?.data?.error || "Login failed. Please check your credentials.");
     } finally {
@@ -219,8 +231,8 @@ export default function AuthPage() {
       login(res.data.user, res.data.token);
       setStep("success");
       const redirectParam = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("redirect") : null;
-      const targetRoute = redirectParam ? decodeURIComponent(redirectParam) : "/dashboard";
-      setTimeout(() => router.push(targetRoute), 1500);
+      const targetRoute = redirectParam ? decodeURIComponent(redirectParam) : "/#booking-section";
+      setTimeout(() => router.push(targetRoute), 1200);
     } catch (err: any) {
       setError(err.response?.data?.error || "Registration failed. Please try again.");
     } finally {

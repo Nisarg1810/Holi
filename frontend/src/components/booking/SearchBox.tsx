@@ -25,12 +25,14 @@ import {
   ChevronDown
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuthStore } from "@/store/useAuthStore";
 
 type BookingType = "helicopter" | "package" | "hotel" | "boat" | "charter";
 
 export default function SearchBox() {
   const router = useRouter();
   const pathname = usePathname();
+  const { isLoggedIn, user, bookings } = useAuthStore();
   
   const [activeTab, setActiveTab] = useState<BookingType>("helicopter");
 
@@ -155,6 +157,16 @@ export default function SearchBox() {
 
   return (
     <div className="w-full relative z-30">
+      {isLoggedIn && user && (
+        <div className="flex justify-center mb-4">
+          <div className="bg-amber-400/10 border border-amber-400/30 rounded-full px-5 py-1.5 flex items-center gap-2.5 shadow-lg backdrop-blur-md">
+            <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+            <span className="font-space text-xs font-bold text-amber-300">
+              Welcome back, <span className="text-white underline">{user.name}</span>! Your saved profile ({user.email}) & {bookings.length} past booking(s) are active.
+            </span>
+          </div>
+        </div>
+      )}
       {/* MakeMyTrip Centered Top Navigation Tabs - Overlapping the Hero Grid */}
       <div className="flex justify-center -mb-8 relative z-30">
         <div className="bg-white rounded-xl shadow-xl border border-slate-200/80 px-6 py-3 flex items-center justify-start gap-8 overflow-x-auto max-w-full no-scrollbar">
