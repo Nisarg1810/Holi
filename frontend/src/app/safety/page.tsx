@@ -1,17 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Shield, Lock, EyeOff, Server, HelpCircle } from "lucide-react";
+import { Activity, ShieldAlert, Award, Plane } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
-export default function PrivacyPage() {
-  const [activeTab, setActiveTab] = useState("collection");
+export default function SafetyPage() {
+  const [activeTab, setActiveTab] = useState("protocol");
 
   const tabs = [
-    { id: "collection", label: "Data Collection", icon: Shield },
-    { id: "sharing", label: "Third-Party Sharing", icon: EyeOff },
-    { id: "security", label: "Security Protocols", icon: Lock },
-    { id: "cookies", label: "Cookies & Logs", icon: Server },
+    { id: "protocol", label: "Flight Protocol", icon: Plane },
+    { id: "dgca", label: "DGCA Regulations", icon: Award },
+    { id: "emergency", label: "Emergency Procedures", icon: ShieldAlert },
   ];
 
   return (
@@ -21,19 +20,19 @@ export default function PrivacyPage() {
       <div className="relative max-w-6xl mx-auto px-6 mb-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl h-[220px]">
         <img
           src="/aviation_legal_banner.png"
-          alt="AURA Privacy Header"
+          alt="AURA Safety Header"
           className="w-full h-full object-cover brightness-[0.4] contrast-125"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#020B1E] via-transparent to-transparent" />
         <div className="absolute bottom-6 left-6 right-6 md:left-10 md:right-10 flex flex-col justify-end">
           <span className="text-[10px] font-space text-gold uppercase tracking-widest font-bold">
-            Data Governance
+            Safety Commitment
           </span>
           <h1 className="font-space text-2xl md:text-4xl font-bold tracking-tight text-white uppercase mt-1">
-            Privacy &amp; Manifest Data Security
+            Safety Guidelines &amp; Air Protocols
           </h1>
           <p className="text-xs text-slate-300 font-sans mt-2 max-w-xl">
-            Learn how we handle passenger identifiers, payment authorization tokens, and flight manifest security logs.
+            Review guidelines concerning helipad security checkpoints, dual-pilot procedures, and weather thresholds.
           </p>
         </div>
       </div>
@@ -43,7 +42,7 @@ export default function PrivacyPage() {
         {/* Left Side Tab Navigation */}
         <div className="lg:col-span-4 flex flex-col gap-2.5 bg-[#051433] p-4 rounded-xl border border-white/5 shadow-xl">
           <span className="text-[9px] font-space uppercase tracking-widest text-slate-400 font-bold block px-2 mb-2">
-            Policy Sections
+            Safety Pillars
           </span>
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -68,98 +67,70 @@ export default function PrivacyPage() {
         {/* Right Side Content Panel */}
         <div className="lg:col-span-8 bg-[#051433] rounded-xl p-6 md:p-8 border border-white/5 shadow-xl min-h-[380px]">
           <AnimatePresence mode="wait">
-            {activeTab === "collection" && (
+            {activeTab === "protocol" && (
               <motion.div
-                key="collection"
+                key="protocol"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 className="flex flex-col gap-6 text-slate-300 font-sans text-xs md:text-sm leading-relaxed"
               >
                 <h2 className="font-space text-base font-bold text-white uppercase border-b border-white/5 pb-2 mb-2">
-                  1. Information We Collect
+                  1. Pre-Flight passenger protocols
                 </h2>
                 <p>
-                  At Roman Aviation &amp; Tourism, we collect passenger information that is essential to authorize flights, coordinate regional clearances, and secure aircraft bookings.
+                  To maintain helicopter balance margins, all passengers must comply with pre-boarding instructions:
                 </p>
                 <p>
-                  This personal data includes:
+                  • **Weight Declaration:** Precise body weights are audited at the helipad manifest desk prior to staging. 
                   <br />
-                  • **Identity Identifiers:** Government-issued identification credentials (Aadhaar Cards, passports, or visa certificates) and precise body weights for manifest telemetry.
+                  • **Baggage Restrictions:** Heavy hard-shell suitcase models are not allowed in the helicopter storage bays. Bags must be soft duffel style.
                   <br />
-                  • **Account Profiles:** Profile information, passwords, travel history, wishlist registries, and flight preferences.
-                  <br />
-                  • **Payment Logs:** Transaction tokens generated by certified gateways (Razorpay/Stripe) to secure your payment without storing credit details on our local databases.
+                  • **Electronic Devices:** Cell phones and tablets must be switched to Flight Mode prior to takeoff to prevent interference with cockpit telemetry instruments.
                 </p>
               </motion.div>
             )}
 
-            {activeTab === "sharing" && (
+            {activeTab === "dgca" && (
               <motion.div
-                key="sharing"
+                key="dgca"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 className="flex flex-col gap-6 text-slate-300 font-sans text-xs md:text-sm leading-relaxed"
               >
                 <h2 className="font-space text-base font-bold text-white uppercase border-b border-white/5 pb-2 mb-2">
-                  2. Third-Party Access &amp; Sharing Limits
+                  2. Civil Aviation (DGCA) Standards
                 </h2>
                 <p>
-                  We prioritize the confidentiality of our elite passengers. Roman Aviation does not sell, lease, or distribute guest profile databases to advertising networks or tracking entities.
+                  Roman Aviation operates in strict compliance with the Directorate General of Civil Aviation (DGCA) civil air safety guidelines:
                 </p>
                 <p>
-                  Manifest logs are shared exclusively with:
+                  - **Dual-Pilot cockpit crew:** All regional flights and passenger transfers are stage-guided by two fully licensed commercial helicopter pilots holding high-altitude training credentials.
                   <br />
-                  - **Aviation Operators:** The NSOP helicopter and aircraft operators who manage safety protocols.
-                  <br />
-                  - **Air Traffic Controllers:** Regional ATC departments, Airport Authority of India cells, and helipad terminal securities for flight path authorization.
-                  <br />
-                  - **Local Administrators:** District magistrates and emergency search and rescue teams during mountain transits.
+                  - **Pre-flight Telemetry inspections:** Telemetry logs and mechanical tolerances are reviewed and signed off by certified B1.3 Aviation Maintenance Engineers (AME) before daily flight releases.
                 </p>
               </motion.div>
             )}
 
-            {activeTab === "security" && (
+            {activeTab === "emergency" && (
               <motion.div
-                key="security"
+                key="emergency"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 className="flex flex-col gap-6 text-slate-300 font-sans text-xs md:text-sm leading-relaxed"
               >
                 <h2 className="font-space text-base font-bold text-white uppercase border-b border-white/5 pb-2 mb-2">
-                  3. Manifest Data Encryption &amp; Security
+                  3. Emergency procedures &amp; weather guidelines
                 </h2>
                 <p>
-                  To secure manifest records against unauthorized leakage or interception, Roman Aviation implements premium security measures:
+                  High-altitude corridors are subject to rapid weather shifts:
                 </p>
                 <p>
-                  - **Database Encryption:** All government ID files and sensitive travel profile fields are encrypted at rest using AES-256 standard protocols.
+                  • **Standby Status:** In the event of high winds or visibility limitations below safety margins, pilots will put the flight on standby or divert to the nearest designated secondary landing pad.
                   <br />
-                  - **API Security:** All data exchanges between frontend portals and Django endpoints are verified via secure JSON Web Tokens (JWT) and HTTPS.
-                  <br />
-                  - **Access Control:** Manifest logs are visible only to authorized dispatch desk staff holding checked corporate tokens.
-                </p>
-              </motion.div>
-            )}
-
-            {activeTab === "cookies" && (
-              <motion.div
-                key="cookies"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col gap-6 text-slate-300 font-sans text-xs md:text-sm leading-relaxed"
-              >
-                <h2 className="font-space text-base font-bold text-white uppercase border-b border-white/5 pb-2 mb-2">
-                  4. Cookies, Analytics &amp; Web Logs
-                </h2>
-                <p>
-                  We utilize lightweight functional cookies and server logs to record booking widget states, login sessions, and checkout progress.
-                </p>
-                <p>
-                  These logs capture standard browser telemetry (IP addresses, device metadata, navigation history) solely for performance diagnostics and DDoS monitoring. You can configure your browser to reject cookies, though this may disable standard flight staging selections.
+                  • **Satellite Flight Telemetry Tracking:** All aircraft maintain constant satellite communication channels with the Sahastradhara central dispatch desk, uploading real-time telemetry coordinates.
                 </p>
               </motion.div>
             )}
