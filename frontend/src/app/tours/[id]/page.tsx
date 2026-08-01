@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,6 +8,7 @@ import { TOUR_PACKAGES, TourPackage } from "@/utils/mockData";
 import { useCartStore } from "@/store/useCartStore";
 import { Check, X, Calendar, Users, Star, MapPin, ArrowLeft, Minus, Plus, Award, ShieldCheck, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import API from "@/utils/api";
 
 function TourDetailContent() {
   const params = useParams();
@@ -16,7 +17,25 @@ function TourDetailContent() {
   const setItem = useCartStore((state) => state.setItem);
 
   const pkgId = params.id as string;
-  const pkg = TOUR_PACKAGES.find((p) => p.id === pkgId) || TOUR_PACKAGES[0];
+  const [pkg, setPkg] = useState<any>(
+    TOUR_PACKAGES.find((p) => p.id === pkgId) || TOUR_PACKAGES[0]
+  );
+
+  useEffect(() => {
+    const fetchTourDetail = async () => {
+      try {
+        const res = await API.get(`/tours/${pkgId}`);
+        if (res.data) {
+          setPkg(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to query live tour package details:", err);
+      }
+    };
+    if (pkgId) {
+      fetchTourDetail();
+    }
+  }, [pkgId]);
 
   // ── Booking state (user-controlled) ─────────────────────────────────────────
   const today = new Date().toISOString().split("T")[0];
@@ -144,7 +163,7 @@ function TourDetailContent() {
               Day-by-Day Scheduled Itinerary
             </h3>
             <div className="flex flex-wrap gap-2 border-b border-white/5 pb-4">
-              {pkg.itinerary.map((day) => (
+              {Array.isArray(pkg.itinerary) && pkg.itinerary.map((day: any) => (
                 <button
                   key={day.day}
                   onClick={() => setActiveDay(day.day)}
@@ -160,7 +179,7 @@ function TourDetailContent() {
             </div>
 
             <div className="bg-white/2 p-6 rounded-lg border border-white/5 min-h-36">
-              {pkg.itinerary.map((day) => {
+              {Array.isArray(pkg.itinerary) && pkg.itinerary.map((day: any) => {
                 if (day.day !== activeDay) return null;
                 return (
                   <motion.div
@@ -201,7 +220,7 @@ function TourDetailContent() {
                 Executive Inclusions
               </h4>
               <div className="flex flex-col gap-3">
-                {pkg.inclusions.map((inc, i) => (
+                {Array.isArray(pkg.inclusions) && pkg.inclusions.map((inc: any, i: number) => (
                   <div key={i} className="flex gap-2.5 items-start text-xs font-luxury">
                     <Check className="h-4 w-4 text-teal shrink-0 mt-0.5" />
                     <span className="text-grey-text">{inc}</span>
@@ -215,7 +234,7 @@ function TourDetailContent() {
                 Exclusions &amp; Terms
               </h4>
               <div className="flex flex-col gap-3">
-                {pkg.exclusions.map((exc, i) => (
+                {Array.isArray(pkg.exclusions) && pkg.exclusions.map((exc: any, i: number) => (
                   <div key={i} className="flex gap-2.5 items-start text-xs font-luxury">
                     <X className="h-4 w-4 text-red-400/70 shrink-0 mt-0.5" />
                     <span className="text-grey-text">{exc}</span>

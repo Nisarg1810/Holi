@@ -55,20 +55,20 @@ function BookingSearchContent() {
   const router = useRouter();
   const setItem = useCartStore((state) => state.setItem);
 
-  const sourceOptions = [
+  const [sourceOptions, setSourceOptions] = useState<{ code: string; name: string; desc: string }[]>([
     { code: "DED", name: "Dehradun", desc: "Jolly Grant Heliport" },
     { code: "DEL", name: "New Delhi", desc: "IGI Executive Terminal Hub" },
     { code: "SXR", name: "Srinagar", desc: "Aerodrome Terminal" },
     { code: "GOI", name: "Goa Shore", desc: "Beachfront Heliport" },
     { code: "BOM", name: "Mumbai", desc: "Juhu Helipad Hub" },
-  ];
+  ]);
 
-  const destOptions = [
+  const [destOptions, setDestOptions] = useState<{ code: string; name: string; desc: string }[]>([
     { code: "KED", name: "Kedarnath Sanctuary", desc: "Phata / Sersi Helipad" },
     { code: "BAD", name: "Badrinath Valley", desc: "Govindghat Terminal" },
     { code: "VSD", name: "Vaishno Devi Shrine", desc: "Sanjichhat Helipad" },
     { code: "CDM", name: "Char Dham Circuit", desc: "Complete 4-Shrine Corridor" },
-  ];
+  ]);
 
   const paramTripType = (searchParams.get("trip_type") as "One Way" | "Round Trip" | "Multi-City") || "One Way";
   const paramSource = searchParams.get("source") || "Dehradun (DED)";
@@ -122,17 +122,28 @@ function BookingSearchContent() {
   }, [paramTripType, paramSource, paramDest, paramDate, paramReturnDate, paramAdults, paramChildren, paramInfants, paramFareType, paramGstNumber]);
 
   useEffect(() => {
-    const fetchFleet = async () => {
+    const fetchData = async () => {
       try {
-        const res = await API.get("/fleet");
-        if (res.data && res.data.length > 0) {
-          setHelicopters(res.data);
+        const [fleetRes, toursRes] = await Promise.all([
+          API.get("/fleet"),
+          API.get("/tours")
+        ]);
+        if (fleetRes.data && fleetRes.data.length > 0) {
+          setHelicopters(fleetRes.data);
+        }
+        if (toursRes.data && toursRes.data.length > 0) {
+          const dynamicDestList = toursRes.data.map((tour: any, idx: number) => ({
+            code: tour.id ? tour.id.toUpperCase() : `PKG${idx+1}`,
+            name: tour.name,
+            desc: tour.tagline || tour.duration || "Verified Tour Package"
+          }));
+          setDestOptions(dynamicDestList);
         }
       } catch (err) {
-        console.error("Failed to query live fleet database:", err);
+        console.error("Failed to query live database:", err);
       }
     };
-    fetchFleet();
+    fetchData();
   }, []);
 
   useEffect(() => {

@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "@/store/useAuthStore";
+import API from "@/utils/api";
 
 type BookingType = "helicopter" | "package" | "hotel" | "boat" | "charter";
 
@@ -68,7 +69,7 @@ export default function SearchBox() {
 
   const totalPassengers = adults + children;
 
-  const locations = {
+  const [locations, setLocations] = useState<Record<string, { sources: string[]; destinations: string[] }>>({
     helicopter: {
       sources: ["Dehradun (DED)", "New Delhi Hub", "Srinagar Terminal", "Goa Beachfront Heliport"],
       destinations: ["Kedarnath Sanctuary", "Badrinath Valley", "Srinagar Terminal", "Goa Shoreline", "Mumbai Heliport"],
@@ -79,7 +80,7 @@ export default function SearchBox() {
     },
     package: {
       sources: ["All Locations", "Dehradun (DED)", "Goa Harbor"],
-      destinations: ["Himalayan Sacred Peaks Pilgrimage", "Goan Coastline Yacht & Sky Odyssey", "Dwarka – Somnath – Diu Pilgrimage"],
+      destinations: ["Himalayan Sacred Peaks Pilgrimage", "Goa Coastal Sun & Azure Waves", "Dwarka – Somnath – Diu Pilgrimage", "Mahakaleshwar – Ujjain – Omkareshwar"],
     },
     hotel: {
       sources: ["India", "All Locations"],
@@ -89,7 +90,28 @@ export default function SearchBox() {
       sources: ["Harbors"],
       destinations: ["AURA Prestige 75 Yacht, Goa", "Mandovi Royal Speedboat, Goa"],
     },
-  } as const;
+  });
+
+  useEffect(() => {
+    const fetchDynamicLocations = async () => {
+      try {
+        const toursRes = await API.get("/tours");
+        if (toursRes.data && toursRes.data.length > 0) {
+          const dynamicPkgNames = toursRes.data.map((t: any) => t.name);
+          setLocations(prev => ({
+            ...prev,
+            package: {
+              ...prev.package,
+              destinations: dynamicPkgNames
+            }
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to load dynamic tours for SearchBox:", err);
+      }
+    };
+    fetchDynamicLocations();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
