@@ -43,6 +43,12 @@
 - [x] Fixed Celery URLs to read from `REDIS_URL` env var (Docker-compatible)
 - [x] Fixed `package.json` dev script — added `--hostname 0.0.0.0` for Docker binding
 - [x] All docs updated with Docker details (ARCHITECTURE, AI_CONTEXT, TASKS, DATABASE_SCHEMA, CHANGELOG)
+- [x] MakeMyTrip luxury UI redesign for Home Page, User Dashboard, Navbar, and Search Box
+- [x] End-to-end user authentication modal, separate Auth page, and guest navigation state
+- [x] Database integrations for User Dashboard, Profile, KYC Document Upload, Security Protocols, and Wishlist
+- [x] Dedicated searchable FAQs page migration and My Trips feature
+- [x] Database model & migration fixes for Boat capacity field and PostgreSQL compatibility
+
 
 ---
 
